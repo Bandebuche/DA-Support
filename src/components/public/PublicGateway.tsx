@@ -174,7 +174,7 @@ export const PublicGateway: React.FC = () => {
           <BrandLogo size="md" />
           <div className="hidden sm:block">
             <span className="font-mono text-sm md:text-base font-black tracking-wider uppercase text-text-pure block">
-              Digital Ajaibi Support
+              Digital Azadi Support
             </span>
             <p className="text-[11px] font-mono text-text-muted">
               Official Student & Franchise Resolution Desk
@@ -206,7 +206,7 @@ export const PublicGateway: React.FC = () => {
             <div className="text-center space-y-3">
               <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-surface-obsidian border border-neon-violet/30 text-xs font-mono shadow-nexus-sm backdrop-blur-xl">
                 <span className="text-amber-400">⚡</span>
-                <span className="text-text-pure font-bold">Digital Ajaibi Support Desk</span>
+                <span className="text-text-pure font-bold">Digital Azadi Support Desk</span>
                 <span className="text-text-faint">•</span>
                 <span className="text-emerald-400 font-semibold">Priority IST SLA Assistance</span>
               </div>
@@ -527,7 +527,7 @@ export const PublicGateway: React.FC = () => {
                 Ticket Submitted Successfully
               </h2>
               <p className="text-xs text-text-muted font-mono">
-                Your support request has been logged into Digital Ajaibi Support.
+                Your support request has been logged into Digital Azadi Support.
               </p>
             </div>
 
@@ -606,11 +606,11 @@ export const PublicGateway: React.FC = () => {
               <div className="bg-surface-elevated/80 p-5 border-t border-surface-border flex items-center justify-between gap-3">
                 <div className="flex items-center gap-2 text-xs font-mono text-text-muted">
                   <QrCode className="w-4 h-4 text-neon-electric" />
-                  <span>Digital Ajaibi Support</span>
+                  <span>Digital Azadi Support</span>
                 </div>
 
                 <a
-                  href={`https://wa.me/919823012345?text=${encodeURIComponent(`Hello Digital Ajaibi Support, I have submitted ticket ${createdTicket.ticketId} regarding "${createdTicket.subject}". Please assist.`)}`}
+                  href={`https://wa.me/919823012345?text=${encodeURIComponent(`Hello Digital Azadi Support, I have submitted ticket ${createdTicket.ticketId} regarding "${createdTicket.subject}". Please assist.`)}`}
                   target="_blank"
                   rel="noreferrer"
                   className="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-void font-mono font-bold text-xs flex items-center gap-1.5 shadow-[0_0_20px_-3px_rgba(16,185,129,0.5)] transition"
@@ -640,7 +640,7 @@ export const PublicGateway: React.FC = () => {
 
       {/* Footer */}
       <footer className="border-t border-surface-border py-6 px-4 text-center text-xs font-mono text-text-faint">
-        <p>Digital Ajaibi Support • Asia/Kolkata (IST)</p>
+        <p>Digital Azadi Support • Asia/Kolkata (IST)</p>
       </footer>
 
     </div>

@@ -33,7 +33,7 @@ export const PortalLinksModal: React.FC<PortalLinksModalProps> = ({
   const LINKS = [
     {
       id: 'submit',
-      title: 'Portal 1: Digital Ajaibi Support (Public)',
+      title: 'Portal 1: Digital Azadi Support (Public)',
       badge: 'Student & Franchise Facing',
       description: 'Clean public portal for students and franchise owners to submit support queries with IST timestamps and WhatsApp validation.',
       path: '/submit',
