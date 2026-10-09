@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Digital Azadi Support — SLA Command Dashboard</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap');
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #F1F5F9; color: #0F172A; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+    .glow-card { box-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 10px 30px -10px rgba(11, 37, 69, 0.07); }
+    .toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 100; display: flex; flex-direction: column; gap: 8px; }
+    .toast { background: #0A1128; color: #FFFFFF; border: 1px solid rgba(255,255,255,0.15); padding: 12px 18px; border-radius: 14px; font-size: 13px; font-weight: 600; box-shadow: 0 12px 30px rgba(0,0,0,0.25); display: flex; align-items: center; gap: 10px; }
+  </style>
+</head>
+<body class="bg-slate-100 min-h-screen text-slate-800 flex flex-col justify-between selection:bg-orange-500 selection:text-white">
+
+  <!-- AUTHENTICATION GATE MODAL -->
+  <div id="authModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0A1128]/80 backdrop-blur-md">
+    <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full p-8 border border-slate-200">
+      <div class="text-center mb-6">
+        <div class="w-16 h-16 rounded-2xl bg-[#0A1128] flex items-center justify-center mx-auto mb-3 text-white text-2xl">
+          <i class="fa-solid fa-shield-halved text-[#FF6B00]"></i>
+        </div>
+        <h2 class="text-2xl font-black text-[#0A1128]">Ops & SLA Command Center</h2>
+        <p class="text-xs text-slate-500 mt-1">Authorized Support Specialists Access Only</p>
+      </div>
+
+      <form id="authForm" class="space-y-4">
+        <div>
+          <label class="block text-xs font-extrabold text-slate-700 uppercase mb-2">Access Security PIN</label>
+          <input type="password" id="adminPinInput" placeholder="Enter PIN (Default: admin123)" required class="w-full p-3.5 bg-slate-50 border border-slate-300 rounded-2xl text-sm font-mono text-center tracking-widest outline-none focus:ring-2 focus:ring-[#FF6B00]">
+          <p id="authError" class="text-xs text-rose-500 mt-1.5 hidden font-semibold text-center"></p>
+        </div>
+        <button type="submit" class="w-full py-3.5 bg-[#FF6B00] hover:bg-orange-600 text-white font-extrabold text-sm rounded-2xl shadow-lg transition">Unlock Dashboard</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- DASHBOARD APPLICATION -->
+  <div id="dashboardApp" class="flex-grow flex flex-col hidden">
+
+    <!-- Header -->
+    <header class="bg-[#0A1128] text-white sticky top-0 z-30 border-b border-white/10 shadow-md">
+      <div class="max-w-7xl mx-auto px-4 py-3 sm:px-6 flex items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <a href="?page=home" class="flex items-center gap-2.5">
+            <div class="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center text-[#FF6B00] font-bold text-lg">
+              <i class="fa-solid fa-bolt"></i>
+            </div>
+            <div>
+              <span class="text-base font-black text-white">Digital Azadi</span>
+              <span class="text-[10px] font-bold uppercase bg-[#FF6B00] text-white px-2 py-0.5 rounded-md ml-1.5">Ops Deck</span>
+            </div>
+          </a>
+        </div>
+
+        <div class="flex items-center gap-3 ml-auto">
+          <!-- Live Clock -->
+          <div class="bg-white/5 border border-white/10 rounded-xl px-3 py-1 text-right hidden sm:block">
+            <span class="text-[9px] text-slate-400 uppercase font-bold block">Live IST</span>
+            <span id="liveIstClock" class="font-mono text-xs font-bold text-amber-400">--:--:--</span>
+          </div>
+
+          <button id="refreshBtn" class="px-3.5 py-2 bg-white/10 hover:bg-white/20 text-white text-xs font-bold rounded-xl border border-white/10 flex items-center gap-1.5">
+            <i id="refreshIcon" class="fa-solid fa-rotate"></i> <span>Sync</span>
+          </button>
+
+          <a href="?page=submit" target="_blank" class="px-3.5 py-2 bg-[#FF6B00] hover:bg-orange-600 text-white text-xs font-bold rounded-xl flex items-center gap-1.5">
+            <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i> <span class="hidden sm:inline">Public Portal</span>
+          </a>
+
+          <button id="logoutBtn" class="p-2 text-slate-300 hover:text-rose-400"><i class="fa-solid fa-power-off"></i></button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 py-6 sm:px-6 w-full space-y-6">
+
+      <!-- 5 KPI Cards -->
+      <section class="grid grid-cols-2 lg:grid-cols-5 gap-3.5 sm:gap-4">
+        <div class="bg-white rounded-2xl p-4 border border-slate-200 glow-card">
+          <span class="text-[10px] font-extrabold uppercase text-slate-400">Total Queries</span>
+          <h3 id="kpiTotal" class="text-2xl sm:text-3xl font-black text-[#0A1128] mt-1">0</h3>
+          <span class="text-[10px] font-semibold text-slate-500 mt-1 block">In Technical_Support_DB</span>
+        </div>
+
+        <div class="bg-white rounded-2xl p-4 border border-amber-200 glow-card bg-amber-50/30">
+          <span class="text-[10px] font-extrabold uppercase text-amber-800">Active Queue</span>
+          <h3 id="kpiInProgress" class="text-2xl sm:text-3xl font-black text-amber-600 mt-1">0</h3>
+          <span class="text-[10px] font-bold text-amber-800 mt-1 block">⏳ In Progress</span>
+        </div>
+
+        <div class="bg-white rounded-2xl p-4 border border-emerald-200 glow-card bg-emerald-50/30">
+          <span class="text-[10px] font-extrabold uppercase text-emerald-800">Resolved</span>
+          <h3 id="kpiDone" class="text-2xl sm:text-3xl font-black text-emerald-600 mt-1">0</h3>
+          <span id="kpiRate" class="text-[10px] font-bold text-emerald-800 mt-1 block">0% resolved</span>
+        </div>
+
+        <div class="bg-white rounded-2xl p-4 border border-slate-200 glow-card">
+          <span class="text-[10px] font-extrabold uppercase text-slate-400">Avg Resolution</span>
+          <h3 id="kpiAvg" class="text-2xl sm:text-3xl font-black text-[#0A1128] font-mono mt-1">--:--</h3>
+          <span id="kpiAvgText" class="text-[10px] font-medium text-slate-500 mt-1 block">duration per ticket</span>
+        </div>
+
+        <div class="bg-white rounded-2xl p-4 border border-purple-200 glow-card col-span-2 lg:col-span-1">
+          <span class="text-[10px] font-extrabold uppercase text-purple-800">Target SLA</span>
+          <h3 class="text-2xl sm:text-3xl font-black text-[#0A1128] mt-1">&lt; 45m</h3>
+          <span class="text-[10px] font-bold text-purple-700 mt-1 block">Standard Window</span>
+        </div>
+      </section>
+
+      <!-- Filter Command Bar -->
+      <section class="bg-white rounded-2xl p-4 border border-slate-200 glow-card space-y-3">
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div class="relative flex-grow w-full sm:max-w-md">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400"><i class="fa-solid fa-magnifying-glass text-xs"></i></span>
+            <input type="text" id="searchInput" placeholder="Search Ticket ID, Name, or Mobile Number..." class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium outline-none focus:ring-2 focus:ring-[#FF6B00]">
+          </div>
+
+          <div class="flex items-center gap-2 self-start sm:self-auto">
+            <div class="bg-slate-100 p-1 rounded-xl text-xs font-bold flex">
+              <button id="tabAll" class="px-3 py-1.5 rounded-lg bg-white shadow-sm text-[#0A1128]">All</button>
+              <button id="tabInProgress" class="px-3 py-1.5 rounded-lg text-slate-600">In Progress</button>
+              <button id="tabDone" class="px-3 py-1.5 rounded-lg text-slate-600">Done</button>
+            </div>
+            <button id="exportBtn" class="px-3 py-2 border border-slate-300 hover:bg-slate-50 text-slate-700 text-xs font-bold rounded-xl flex items-center gap-1.5"><i class="fa-solid fa-file-csv text-emerald-600"></i> Export</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Tickets Table View -->
+      <section class="bg-white rounded-2xl border border-slate-200 glow-card overflow-hidden">
+        <div id="loadingBox" class="py-16 text-center">
+          <i class="fa-solid fa-circle-notch fa-spin text-2xl text-[#FF6B00] mb-2"></i>
+          <p class="text-xs font-bold text-slate-600">Fetching records from Google Sheet...</p>
+        </div>
+
+        <div id="tableWrapper" class="overflow-x-auto hidden">
+          <table class="w-full text-left text-xs border-collapse">
+            <thead>
+              <tr class="bg-slate-100 text-slate-600 font-extrabold uppercase text-[10px] border-b border-slate-200">
+                <th class="py-3 px-4">Ticket ID</th>
+                <th class="py-3 px-4">Date / Time (IST)</th>
+                <th class="py-3 px-4">Requester</th>
+                <th class="py-3 px-4">Platform / Tier</th>
+                <th class="py-3 px-4 min-w-[200px]">Query</th>
+                <th class="py-3 px-4">Status</th>
+                <th class="py-3 px-4 min-w-[120px]">Duration</th>
+                <th class="py-3 px-4 text-right min-w-[180px]">Action Hub</th>
+              </tr>
+            </thead>
+            <tbody id="ticketsBody" class="divide-y divide-slate-200"></tbody>
+          </table>
+        </div>
+      </section>
+
+    </main>
+
+  </div>
+
+  <!-- Resolve Modal -->
+  <div id="resolveModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 hidden">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 space-y-4">
+      <div class="flex items-center justify-between pb-2 border-b border-slate-200">
+        <h4 class="font-extrabold text-sm text-[#0A1128]">Resolve Ticket <span id="resTicketId" class="text-[#FF6B00] font-mono"></span></h4>
+        <button onclick="closeResolveModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div>
+        <label class="block text-xs font-bold text-slate-700 mb-1">Resolution Remarks *</label>
+        <textarea id="resRemarks" rows="3" placeholder="Document the fix or answer provided..." class="w-full p-3 bg-slate-50 border border-slate-300 rounded-xl text-xs outline-none focus:ring-2 focus:ring-emerald-500"></textarea>
+      </div>
+      <div class="flex justify-end gap-2 pt-2">
+        <button onclick="closeResolveModal()" class="px-4 py-2 border border-slate-300 text-xs font-bold rounded-xl">Cancel</button>
+        <button onclick="submitResolve()" class="px-4 py-2 bg-emerald-600 text-white text-xs font-bold rounded-xl">Confirm Resolution</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let tickets = [];
+    let filterStatus = 'all';
+    let activeTicketId = null;
+
+    // Auth
+    document.getElementById('authForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const pin = document.getElementById('adminPinInput').value.trim();
+      if (pin === 'admin123') {
+        document.getElementById('authModal').classList.add('hidden');
+        document.getElementById('dashboardApp').classList.remove('hidden');
+        loadData();
+      } else {
+        document.getElementById('authError').textContent = 'Invalid PIN.';
+        document.getElementById('authError').classList.remove('hidden');
+      }
+    });
+
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      document.getElementById('authModal').classList.remove('hidden');
+      document.getElementById('dashboardApp').classList.add('hidden');
+    });
+
+    // Live Clock
+    function updateClock() {
+      const now = new Date();
+      const el = document.getElementById('liveIstClock');
+      if (el) el.textContent = now.toLocaleTimeString('en-GB', { timeZone: 'Asia/Kolkata' });
+    }
+    updateClock();
+    setInterval(updateClock, 1000);
+
+    // Toast
+    function showToast(msg) {
+      const c = document.getElementById('toastContainer');
+      if (!c) return;
+      const t = document.createElement('div');
+      t.className = 'toast';
+      t.innerHTML = `<i class="fa-solid fa-check text-emerald-400"></i><span>${msg}</span>`;
+      c.appendChild(t);
+      setTimeout(() => t.remove(), 3000);
+    }
+
+    // Data Load
+    function loadData() {
+      document.getElementById('loadingBox').classList.remove('hidden');
+      document.getElementById('tableWrapper').classList.add('hidden');
+
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run
+          .withSuccessHandler((data) => {
+            tickets = data;
+            render();
+          })
+          .getAdminDashboardData();
+      } else {
+        // Local preview fallback
+        setTimeout(() => {
+          tickets = [
+            { ticketId: "DA-2026-8941", subDate: "09/10/2026", subTime: "11:56:43", name: "Shivpoojan Maurya", mobile: "7889966942", category: "Student", membership: "Diamond", platform: "Chakravyuh", query: "GEN 2 MIGRATION AND FUNNEL SITE", status: "Done", startTime: "12:00:00", endTime: "12:30:00", duration: "00:30", remarks: "Resolved" },
+            { ticketId: "DA-2026-9014", subDate: "09/10/2026", subTime: "12:33:24", name: "Harsh Sandhu", mobile: "9478961561", category: "Franchise", membership: "Diamond", platform: "Chakravyuh", query: "WABA Migration handover", status: "In Progress", startTime: "12:35:00", endTime: "", duration: "", remarks: "" }
+          ];
+          render();
+        }, 500);
+      }
+    }
+
+    document.getElementById('refreshBtn').addEventListener('click', loadData);
+
+    // Render Table & KPIs
+    function render() {
+      document.getElementById('loadingBox').classList.add('hidden');
+      document.getElementById('tableWrapper').classList.remove('hidden');
+
+      // KPIs
+      const total = tickets.length;
+      const inProg = tickets.filter(t => t.status === 'In Progress').length;
+      const done = tickets.filter(t => t.status === 'Done').length;
+      const rate = total > 0 ? Math.round((done / total) * 100) : 0;
+
+      document.getElementById('kpiTotal').textContent = total;
+      document.getElementById('kpiInProgress').textContent = inProg;
+      document.getElementById('kpiDone').textContent = done;
+      document.getElementById('kpiRate').textContent = `${rate}% resolved`;
+
+      // Avg Duration
+      let sumMins = 0, count = 0;
+      tickets.forEach(t => {
+        if (t.duration && t.duration.includes(':')) {
+          const [h, m] = t.duration.split(':').map(Number);
+          sumMins += (h * 60) + m;
+          count++;
+        }
+      });
+      if (count > 0) {
+        const avg = Math.round(sumMins / count);
+        const hh = String(Math.floor(avg / 60)).padStart(2, '0');
+        const mm = String(avg % 60).padStart(2, '0');
+        document.getElementById('kpiAvg').textContent = `${hh}:${mm}`;
+        document.getElementById('kpiAvgText').textContent = `${avg} mins avg duration`;
+      }
+
+      // Filter
+      const search = document.getElementById('searchInput').value.toLowerCase();
+      const filtered = tickets.filter(t => {
+        if (filterStatus !== 'all' && t.status !== filterStatus) return false;
+        if (search) {
+          const str = (t.ticketId + ' ' + t.name + ' ' + t.mobile).toLowerCase();
+          if (!str.includes(search)) return false;
+        }
+        return true;
+      });
+
+      const tbody = document.getElementById('ticketsBody');
+      tbody.innerHTML = '';
+
+      filtered.forEach(t => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-50 transition border-b border-slate-200';
+        const isProg = t.status === 'In Progress';
+
+        tr.innerHTML = `
+          <td class="py-3 px-4 font-mono font-bold text-slate-900">${t.ticketId}</td>
+          <td class="py-3 px-4 text-slate-500 font-mono text-[11px]">${t.subDate} <br><strong>${t.subTime}</strong></td>
+          <td class="py-3 px-4 font-bold text-slate-800">${t.name} <br><span class="text-[11px] text-slate-500 font-mono">+91 ${t.mobile}</span></td>
+          <td class="py-3 px-4"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${t.platform === 'Chakravyuh' ? 'bg-orange-100 text-amber-900' : 'bg-blue-100 text-blue-900'}">${t.platform}</span> <br><span class="text-[10px] text-slate-500">${t.membership}</span></td>
+          <td class="py-3 px-4 text-slate-700 italic max-w-xs truncate" title="${t.query}">${t.query}</td>
+          <td class="py-3 px-4"><span class="px-2.5 py-1 rounded-full text-[10px] font-bold ${isProg ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'}">${t.status}</span></td>
+          <td class="py-3 px-4 font-mono font-bold">${t.duration ? `⏱ ${t.duration}` : (isProg && t.startTime ? '<span class="text-amber-600 animate-pulse">Running...</span>' : '--')}</td>
+          <td class="py-3 px-4 text-right space-x-1">
+            ${isProg && !t.startTime ? `<button onclick="startSupport('${t.ticketId}')" class="px-2.5 py-1 bg-[#FF6B00] text-white rounded-lg font-bold text-[11px]">Start</button>` : ''}
+            ${isProg ? `<button onclick="openResolve('${t.ticketId}')" class="px-2.5 py-1 bg-emerald-600 text-white rounded-lg font-bold text-[11px]">Done</button>` : ''}
+            <a href="https://wa.me/91${t.mobile}" target="_blank" class="p-1.5 text-emerald-600 hover:text-emerald-700 text-sm"><i class="fa-brands fa-whatsapp"></i></a>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    document.getElementById('searchInput').addEventListener('input', render);
+
+    // Tab Filters
+    document.getElementById('tabAll').addEventListener('click', () => { filterStatus = 'all'; render(); });
+    document.getElementById('tabInProgress').addEventListener('click', () => { filterStatus = 'In Progress'; render(); });
+    document.getElementById('tabDone').addEventListener('click', () => { filterStatus = 'Done'; render(); });
+
+    // Actions
+    window.startSupport = function(id) {
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run.withSuccessHandler((res) => {
+          showToast(`Support started for ${id} at ${res.startTime}`);
+          loadData();
+        }).startSupportSession(id);
+      } else {
+        showToast(`Support started for ${id}`);
+        const t = tickets.find(x => x.ticketId === id);
+        if (t) t.startTime = "15:00:00";
+        render();
+      }
+    };
+
+    window.openResolve = function(id) {
+      activeTicketId = id;
+      document.getElementById('resTicketId').textContent = id;
+      document.getElementById('resRemarks').value = '';
+      document.getElementById('resolveModal').classList.remove('hidden');
+    };
+
+    window.closeResolveModal = function() {
+      document.getElementById('resolveModal').classList.add('hidden');
+    };
+
+    window.submitResolve = function() {
+      const rem = document.getElementById('resRemarks').value.trim();
+      closeResolveModal();
+
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run.withSuccessHandler((res) => {
+          showToast(`Ticket ${res.ticketId} resolved in ${res.duration}!`);
+          loadData();
+        }).completeSupportSession(activeTicketId, rem);
+      } else {
+        showToast(`Ticket resolved in 00:25!`);
+        const t = tickets.find(x => x.ticketId === activeTicketId);
+        if (t) { t.status = 'Done'; t.duration = '00:25'; t.remarks = rem; }
+        render();
+      }
+    };
+
+    // CSV Export
+    document.getElementById('exportBtn').addEventListener('click', () => {
+      const csv = "data:text/csv;charset=utf-8," + ["Ticket ID,Date,Time,Name,Mobile,Platform,Status,Duration,Remarks"].concat(
+        tickets.map(t => `${t.ticketId},${t.subDate},${t.subTime},"${t.name}","${t.mobile}",${t.platform},${t.status},${t.duration},"${t.remarks || ''}"`)
+      ).join("\n");
+      const a = document.createElement('a');
+      a.href = encodeURI(csv);
+      a.download = `DA_Support_Export.csv`;
+      a.click();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Digital Azadi Support — Operations & SLA Command Dashboard</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            obsidian: '#0A1128',
+            obsidianElev: '#0F172A',
+            obsidianCard: '#1E293B',
+            amberBrand: '#FF6B00',
+            amberLight: '#FF8533',
+            emeraldBrand: '#10B981',
+            goldBrand: '#F59E0B'
+          }
+        }
+      }
+    }
+  </script>
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="bg-slate-100/70 min-h-screen text-slate-800 flex flex-col justify-between selection:bg-orange-500 selection:text-white">
+
+  <!-- AUTHENTICATION GATE MODAL (PIN Protected) -->
+  <div id="authModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 glass-modal hidden">
+    <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full p-8 border border-slate-200 animate-fadeIn relative overflow-hidden">
+      
+      <!-- Top Crest Accent -->
+      <div class="text-center mb-6">
+        <div class="w-16 h-16 rounded-2xl bg-obsidian flex items-center justify-center mx-auto mb-4 shadow-xl border border-white/10">
+          <svg class="w-10 h-10" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M14 24C14 18.4772 18.4772 14 24 14C29.5228 14 34 18.4772 34 24V28C34 29.6569 32.6569 31 31 31H30V23H34" stroke="#FF6B00" stroke-width="2.5" stroke-linecap="round"/>
+            <rect x="13" y="22" width="4" height="8" rx="2" fill="#FF6B00"/>
+            <rect x="31" y="22" width="4" height="8" rx="2" fill="#FF6B00"/>
+            <path d="M20 27L23 30L29 20" stroke="#10B981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M26 15L32 15L32 21" stroke="#FF8533" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <span class="inline-block px-3 py-1 rounded-full bg-orange-100 text-amberBrand text-[11px] font-black uppercase tracking-wider mb-1">
+          Authorized Access Only
+        </span>
+        <h2 class="text-2xl font-black text-obsidian tracking-tight">Ops & SLA Command Center</h2>
+        <p class="text-xs text-slate-500 mt-1">Please enter your team security PIN to unlock operations</p>
+      </div>
+
+      <form id="authForm" class="space-y-4">
+        <div>
+          <label for="adminPinInput" class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-2">
+            Access Security PIN / Key
+          </label>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-slate-400">
+              <i class="fa-solid fa-key text-sm"></i>
+            </span>
+            <input 
+              type="password" 
+              id="adminPinInput" 
+              placeholder="Enter PIN (Default: admin123)" 
+              required
+              class="w-full pl-11 pr-11 py-3.5 bg-slate-50 border border-slate-300 rounded-2xl text-sm font-mono tracking-widest focus:ring-2 focus:ring-amberBrand/20 focus:border-amberBrand outline-none transition"
+            >
+            <button 
+              type="button" 
+              id="togglePinVisibility" 
+              class="absolute inset-y-0 right-0 flex items-center pr-4 text-slate-400 hover:text-slate-600"
+            >
+              <i class="fa-regular fa-eye"></i>
+            </button>
+          </div>
+          <p id="authError" class="text-xs text-rose-500 mt-1.5 hidden font-semibold"></p>
+        </div>
+
+        <button 
+          type="submit" 
+          class="w-full py-4 px-4 btn-amber-cta text-white font-extrabold text-sm rounded-2xl transition flex items-center justify-center gap-2"
+        >
+          <span>Unlock Command Deck</span>
+          <i class="fa-solid fa-arrow-right text-xs"></i>
+        </button>
+
+        <div class="pt-2 text-center">
+          <p class="text-[11px] text-slate-400">
+            Initial setup key: <code class="font-mono bg-slate-100 px-2 py-0.5 rounded text-slate-700 font-bold">admin123</code>
+          </p>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- FLOATING TOAST NOTIFICATION CONTAINER -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- MAIN DASHBOARD APPLICATION -->
+  <div id="dashboardApp" class="flex-grow flex flex-col hidden">
+
+    <!-- Top Command Deck Header (Linear Obsidian Style) -->
+    <header class="glass-header text-white sticky top-0 z-30 shadow-md">
+      <div class="max-w-7xl mx-auto px-4 py-3 sm:px-6 flex flex-wrap items-center justify-between gap-4">
+        
+        <!-- Left: Brand Crest & Title -->
+        <div class="flex items-center gap-3">
+          <a href="index.html" class="flex items-center gap-3 group">
+            <svg class="w-9 h-9 shadow-md rounded-xl group-hover:scale-105 transition-transform" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect width="48" height="48" rx="14" fill="#0A1128"/>
+              <rect x="1" y="1" width="46" height="46" rx="13" stroke="rgba(255,255,255,0.12)" stroke-width="1.5"/>
+              <path d="M14 24C14 18.4772 18.4772 14 24 14C29.5228 14 34 18.4772 34 24V28C34 29.6569 32.6569 31 31 31H30V23H34" stroke="#FF6B00" stroke-width="2.5" stroke-linecap="round"/>
+              <rect x="13" y="22" width="4" height="8" rx="2" fill="#FF6B00"/>
+              <rect x="31" y="22" width="4" height="8" rx="2" fill="#FF6B00"/>
+              <path d="M20 27L23 30L29 20" stroke="#10B981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M26 15L32 15L32 21" stroke="#FF8533" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="text-sm sm:text-base font-black tracking-tight text-white">Digital Azadi</span>
+                <span class="text-[10px] font-extrabold uppercase tracking-widest bg-amberBrand text-white px-2 py-0.5 rounded-md shadow-sm">
+                  Ops Deck
+                </span>
+              </div>
+              <p class="text-[11px] text-slate-400 hidden sm:block">Live Support & SLA Resolution Engine</p>
+            </div>
+          </a>
+        </div>
+
+        <!-- Right Side: Live Clock, Auto-Sync, Settings, Logout -->
+        <div class="flex items-center gap-2 sm:gap-3 ml-auto">
+          
+          <!-- Live IST Clock -->
+          <div class="bg-white/5 border border-white/10 rounded-xl px-3 py-1.5 text-right hidden sm:block backdrop-blur-md">
+            <div class="text-[9px] text-slate-400 uppercase tracking-widest font-extrabold flex items-center gap-1.5 justify-end">
+              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span> Live IST
+            </div>
+            <div id="adminLiveClock" class="font-mono text-xs sm:text-sm font-bold text-amber-400">
+              --:--:--
+            </div>
+          </div>
+
+          <!-- Auto Refresh Selector -->
+          <div class="flex items-center bg-white/5 rounded-xl px-2.5 py-1.5 border border-white/10 text-xs">
+            <span class="text-slate-400 text-[10px] uppercase font-bold pr-1.5 hidden md:inline">Sync:</span>
+            <select id="autoSyncInterval" class="bg-transparent text-white text-xs font-semibold outline-none cursor-pointer pr-1">
+              <option value="15000" class="bg-obsidian text-white">15s</option>
+              <option value="30000" selected class="bg-obsidian text-white">30s</option>
+              <option value="60000" class="bg-obsidian text-white">60s</option>
+              <option value="0" class="bg-obsidian text-white">Manual</option>
+            </select>
+          </div>
+
+          <!-- Manual Sync Button -->
+          <button 
+            type="button" 
+            id="syncBtn" 
+            title="Fetch latest tickets"
+            class="px-3 py-2 bg-white/10 hover:bg-white/20 text-white text-xs font-bold rounded-xl border border-white/10 transition flex items-center gap-1.5 cursor-pointer"
+          >
+            <i id="syncIcon" class="fa-solid fa-rotate"></i>
+            <span class="hidden sm:inline">Refresh</span>
+          </button>
+
+          <!-- Cloud Settings Config -->
+          <button 
+            type="button" 
+            id="openSettingsBtn" 
+            title="Cloud Backend & Google Sheet Settings"
+            class="px-3 py-2 bg-white/10 hover:bg-white/20 text-slate-200 text-xs font-bold rounded-xl border border-white/10 transition flex items-center gap-1.5 cursor-pointer"
+          >
+            <i class="fa-solid fa-gear text-amberBrand"></i>
+            <span class="hidden md:inline">Cloud Config</span>
+          </button>
+
+          <!-- Launch Public Portal Link -->
+          <a 
+            href="submit.html" 
+            target="_blank" 
+            title="Open Student Submission Portal in new tab"
+            class="px-3 py-2 bg-amberBrand hover:bg-orange-600 text-white text-xs font-bold rounded-xl transition flex items-center gap-1.5 glow-amber-sm"
+          >
+            <i class="fa-solid fa-arrow-up-right-from-square text-[11px]"></i>
+            <span class="hidden lg:inline">Public Portal</span>
+          </a>
+
+          <!-- Logout Button -->
+          <button 
+            type="button" 
+            id="logoutBtn" 
+            title="Lock Dashboard Session"
+            class="p-2 text-slate-300 hover:text-rose-400 hover:bg-white/10 rounded-xl transition cursor-pointer"
+          >
+            <i class="fa-solid fa-power-off"></i>
+          </button>
+        </div>
+
+      </div>
+    </header>
+
+    <!-- Cloud Status Banner -->
+    <div id="cloudStatusBanner" class="bg-amber-500/10 border-b border-amber-500/20 px-4 py-2 text-xs text-amber-900">
+      <div class="max-w-7xl mx-auto w-full flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <i id="cloudStatusIcon" class="fa-solid fa-circle text-[9px] text-amber-500"></i>
+          <span id="cloudStatusText" class="font-medium">Connecting to Google Sheet & Cloud API...</span>
+        </div>
+        <button id="bannerConfigLink" class="text-amberBrand font-bold hover:underline cursor-pointer">
+          Configure Apps Script URL
+        </button>
+      </div>
+    </div>
+
+    <!-- Main Content Stream -->
+    <main class="max-w-7xl mx-auto px-4 py-6 sm:px-6 w-full space-y-6">
+
+      <!-- 1. TOP LIVE KPI STAT CARDS (Linear / Stripe Style) -->
+      <section class="grid grid-cols-2 lg:grid-cols-5 gap-3.5 sm:gap-4">
+        
+        <!-- KPI 1: Total Queries -->
+        <div class="bg-white rounded-2xl p-5 border border-slate-200/80 glow-card glow-card-hover relative overflow-hidden flex flex-col justify-between">
+          <div class="flex items-center justify-between">
+            <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-500">Total Queries</span>
+            <div class="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-sm font-bold">
+              <i class="fa-solid fa-layer-group"></i>
+            </div>
+          </div>
+          <div class="mt-2">
+            <h3 id="kpiTotalAll" class="text-2xl sm:text-3xl font-black text-obsidian tracking-tight">0</h3>
+            <div class="mt-2 flex items-center gap-1.5 text-[11px] text-slate-500 font-semibold">
+              <span id="kpiTotalTodayBadge" class="bg-blue-100 text-blue-800 font-bold px-2 py-0.5 rounded-md text-[10px]">
+                0 today
+              </span>
+              <span>logged in IST</span>
+            </div>
+          </div>
+          <div class="absolute bottom-0 left-0 right-0 h-1 bg-blue-500"></div>
+        </div>
+
+        <!-- KPI 2: Active In Progress (Pulsing Amber) -->
+        <div class="bg-white rounded-2xl p-5 border border-amber-200 glow-card glow-card-hover relative overflow-hidden flex flex-col justify-between bg-gradient-to-br from-white to-amber-50/40">
+          <div class="flex items-center justify-between">
+            <span class="text-[11px] font-extrabold uppercase tracking-wider text-amber-800">Active Queue</span>
+            <div class="w-9 h-9 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center text-sm relative">
+              <i class="fa-solid fa-clock-rotate-left"></i>
+              <span class="w-2 h-2 rounded-full bg-amber-500 absolute top-1 right-1 animate-ping"></span>
+            </div>
+          </div>
+          <div class="mt-2">
+            <h3 id="kpiInProgress" class="text-2xl sm:text-3xl font-black text-amber-600 tracking-tight">0</h3>
+            <div class="mt-2 flex items-center gap-1.5 text-[11px] text-amber-800 font-bold">
+              <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+              <span>Requires support action</span>
+            </div>
+          </div>
+          <div class="absolute bottom-0 left-0 right-0 h-1 bg-amber-500"></div>
+        </div>
+
+        <!-- KPI 3: Total Done / Resolved -->
+        <div class="bg-white rounded-2xl p-5 border border-emerald-200 glow-card glow-card-hover relative overflow-hidden flex flex-col justify-between bg-gradient-to-br from-white to-emerald-50/40">
+          <div class="flex items-center justify-between">
+            <span class="text-[11px] font-extrabold uppercase tracking-wider text-emerald-800">Resolved</span>
+            <div class="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-sm font-bold">
+              <i class="fa-solid fa-circle-check"></i>
+            </div>
+          </div>
+          <div class="mt-2">
+            <h3 id="kpiDone" class="text-2xl sm:text-3xl font-black text-emerald-600 tracking-tight">0</h3>
+            <div class="mt-2 flex items-center gap-1.5 text-[11px] text-emerald-800 font-bold">
+              <span id="kpiResolutionRate" class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-md text-[10px]">
+                0%
+              </span>
+              <span>resolution rate</span>
+            </div>
+          </div>
+          <div class="absolute bottom-0 left-0 right-0 h-1 bg-emerald-500"></div>
+        </div>
+
+        <!-- KPI 4: Average Resolution SLA -->
+        <div class="bg-white rounded-2xl p-5 border border-slate-200/80 glow-card glow-card-hover relative overflow-hidden flex flex-col justify-between">
+          <div class="flex items-center justify-between">
+            <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-500">Avg Resolution</span>
+            <div class="w-9 h-9 rounded-xl bg-orange-50 text-amberBrand flex items-center justify-center text-sm font-bold">
+              <i class="fa-solid fa-stopwatch"></i>
+            </div>
+          </div>
+          <div class="mt-2">
+            <h3 id="kpiAvgTime" class="text-2xl sm:text-3xl font-black text-obsidian font-mono tracking-tight">--:--</h3>
+            <div class="mt-2 text-[11px] text-slate-600 font-medium truncate">
+              <strong id="kpiAvgHuman" class="text-slate-800 font-bold">--</strong> avg per ticket
+            </div>
+          </div>
+          <div class="absolute bottom-0 left-0 right-0 h-1 bg-amberBrand"></div>
+        </div>
+
+        <!-- KPI 5: SLA Compliance Target -->
+        <div class="bg-white rounded-2xl p-5 border border-slate-200/80 glow-card glow-card-hover relative overflow-hidden flex flex-col justify-between col-span-2 lg:col-span-1">
+          <div class="flex items-center justify-between">
+            <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-500">SLA Standard</span>
+            <div class="w-9 h-9 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-sm font-bold">
+              <i class="fa-solid fa-shield-halved"></i>
+            </div>
+          </div>
+          <div class="mt-2">
+            <h3 class="text-2xl sm:text-3xl font-black text-obsidian tracking-tight">&lt; 45m</h3>
+            <div class="mt-2 flex items-center gap-1.5 text-[11px] text-slate-500 font-semibold">
+              <span class="bg-purple-100 text-purple-800 font-bold px-2 py-0.5 rounded-md text-[10px]">
+                Target SLA
+              </span>
+              <span>turnaround</span>
+            </div>
+          </div>
+          <div class="absolute bottom-0 left-0 right-0 h-1 bg-purple-500"></div>
+        </div>
+
+      </section>
+
+      <!-- 2. COMMAND BAR & ADVANCED FILTER TRAY -->
+      <section class="bg-white rounded-3xl p-5 border border-slate-200/80 glow-card space-y-4">
+        
+        <!-- Top Row: Search Input with [Ctrl+K] Cue & View Mode Switcher -->
+        <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+          
+          <!-- Search Bar -->
+          <div class="relative flex-grow max-w-xl">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-slate-400">
+              <i class="fa-solid fa-magnifying-glass text-xs"></i>
+            </span>
+            <input 
+              type="text" 
+              id="searchInput" 
+              placeholder="Search by Ticket ID (DA-...), Requester Name, or Mobile Number..." 
+              class="w-full pl-11 pr-20 py-3 bg-slate-50 border border-slate-300 rounded-2xl text-xs sm:text-sm font-medium focus:ring-2 focus:ring-amberBrand/20 focus:border-amberBrand focus:bg-white outline-none transition"
+            >
+            <div class="absolute inset-y-0 right-0 pr-3 flex items-center gap-1.5">
+              <button 
+                id="clearSearchBtn" 
+                class="text-slate-400 hover:text-slate-600 hidden p-1"
+                title="Clear search"
+              >
+                <i class="fa-solid fa-xmark text-xs"></i>
+              </button>
+              <kbd class="hidden sm:inline-block px-2 py-0.5 text-[10px] font-mono font-bold text-slate-400 bg-slate-200/70 border border-slate-300 rounded-md">
+                Ctrl K
+              </kbd>
+            </div>
+          </div>
+
+          <!-- View Mode Toggle: [ Table ] vs [ Kanban Board ] -->
+          <div class="inline-flex rounded-xl bg-slate-100 p-1 border border-slate-200 self-start md:self-auto text-xs font-bold">
+            <button 
+              type="button" 
+              id="viewModeTableBtn" 
+              class="px-3 py-1.5 rounded-lg bg-white text-obsidian shadow-sm transition flex items-center gap-1.5"
+            >
+              <i class="fa-solid fa-table-list text-[11px]"></i>
+              <span>Table</span>
+            </button>
+            <button 
+              type="button" 
+              id="viewModeKanbanBtn" 
+              class="px-3 py-1.5 rounded-lg text-slate-600 hover:text-obsidian transition flex items-center gap-1.5"
+            >
+              <i class="fa-solid fa-table-columns text-[11px]"></i>
+              <span>Kanban</span>
+            </button>
+          </div>
+
+          <!-- Export CSV -->
+          <button 
+            type="button" 
+            id="exportCsvBtn" 
+            class="px-4 py-2.5 border border-slate-300 hover:bg-slate-50 text-slate-700 text-xs font-bold rounded-2xl transition flex items-center justify-center gap-2 self-start md:self-auto cursor-pointer"
+          >
+            <i class="fa-solid fa-file-excel text-emerald-600 text-sm"></i>
+            <span>Export CSV</span>
+          </button>
+
+        </div>
+
+        <!-- Quick Filter Filter Chips (Linear Style) -->
+        <div class="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-100 text-xs font-semibold">
+          <span class="text-[11px] uppercase font-extrabold text-slate-400 mr-1">Filter Queue:</span>
+          
+          <button type="button" data-status="all" class="status-tab-btn active px-3 py-1.5 rounded-xl bg-obsidian text-white text-xs font-bold transition shadow-sm">
+            All (<span id="tabCountAll">0</span>)
+          </button>
+          
+          <button type="button" data-status="In Progress" class="status-tab-btn px-3 py-1.5 rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 text-xs font-bold transition">
+            <span class="w-1.5 h-1.5 rounded-full bg-amber-500 inline-block mr-1"></span>
+            In Progress (<span id="tabCountInProgress">0</span>)
+          </button>
+          
+          <button type="button" data-status="Done" class="status-tab-btn px-3 py-1.5 rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 text-xs font-bold transition">
+            <i class="fa-solid fa-check text-emerald-500 text-[10px] mr-1"></i>
+            Done (<span id="tabCountDone">0</span>)
+          </button>
+
+          <!-- Dropdown Filter Controls -->
+          <div class="ml-auto flex flex-wrap items-center gap-2">
+            <!-- Date Filter -->
+            <select id="filterDateRange" class="bg-slate-50 border border-slate-300 rounded-xl py-1.5 px-2.5 text-xs font-semibold focus:ring-1 focus:ring-amberBrand outline-none">
+              <option value="all">All Dates</option>
+              <option value="today">Today</option>
+              <option value="yesterday">Yesterday</option>
+              <option value="last7days">Last 7 Days</option>
+            </select>
+
+            <!-- Platform Filter -->
+            <select id="filterPlatform" class="bg-slate-50 border border-slate-300 rounded-xl py-1.5 px-2.5 text-xs font-semibold focus:ring-1 focus:ring-amberBrand outline-none">
+              <option value="all">All Platforms</option>
+              <option value="Chakravyuh">Chakravyuh</option>
+              <option value="Digital Azadi">Digital Azadi</option>
+            </select>
+
+            <!-- Category Filter -->
+            <select id="filterCategory" class="bg-slate-50 border border-slate-300 rounded-xl py-1.5 px-2.5 text-xs font-semibold focus:ring-1 focus:ring-amberBrand outline-none">
+              <option value="all">All Categories</option>
+              <option value="Student">Student</option>
+              <option value="Franchise">Franchise</option>
+            </select>
+
+            <!-- Membership Filter -->
+            <select id="filterMembership" class="bg-slate-50 border border-slate-300 rounded-xl py-1.5 px-2.5 text-xs font-semibold focus:ring-1 focus:ring-amberBrand outline-none">
+              <option value="all">All Memberships</option>
+              <option value="Diamond">Diamond</option>
+              <option value="Silver">Silver</option>
+            </select>
+
+            <!-- Reset Button -->
+            <button 
+              type="button" 
+              id="resetFiltersBtn" 
+              class="py-1.5 px-3 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl font-bold text-xs transition"
+              title="Reset all filters"
+            >
+              <i class="fa-solid fa-filter-circle-xmark"></i>
+            </button>
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- 3. MAIN DATA DISPLAY (Table View or Kanban View) -->
+      
+      <!-- Loading State -->
+      <div id="tableLoading" class="py-20 text-center bg-white rounded-3xl border border-slate-200/80 glow-card">
+        <i class="fa-solid fa-circle-notch fa-spin text-3xl text-amberBrand mb-3"></i>
+        <p class="text-sm font-bold text-slate-700">Synchronizing records with Google Sheets...</p>
+        <p class="text-xs text-slate-400 mt-1">Applying Indian Standard Time concurrency lock</p>
+      </div>
+
+      <!-- Empty State -->
+      <div id="tableEmpty" class="py-20 text-center bg-white rounded-3xl border border-slate-200/80 glow-card hidden">
+        <div class="w-16 h-16 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center text-3xl mx-auto mb-3">
+          <i class="fa-regular fa-folder-open"></i>
+        </div>
+        <h4 class="text-base font-bold text-slate-800">No Tickets Match Filter</h4>
+        <p class="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
+          No support queries match the current search filters. Try adjusting your search query or reset filters.
+        </p>
+      </div>
+
+      <!-- VIEW A: DENSE DATA TABLE -->
+      <section id="tableViewContainer" class="bg-white rounded-3xl border border-slate-200/80 glow-card overflow-hidden hidden">
+        
+        <!-- Table Header Info Bar -->
+        <div class="px-6 py-4 border-b border-slate-200/80 flex flex-wrap items-center justify-between gap-2 bg-slate-50/70">
+          <div class="flex items-center gap-2.5">
+            <h3 class="font-black text-sm text-obsidian tracking-tight">Support Tickets Queue</h3>
+            <span id="filteredCountBadge" class="bg-slate-200/80 text-slate-700 font-mono text-[11px] font-bold px-2.5 py-0.5 rounded-full">
+              Showing 0 tickets
+            </span>
+          </div>
+          <div class="text-[11px] text-slate-400">
+            <strong>1-Click Actions:</strong> Start Support timestamps IST &bull; Mark Done calculates SLA duration
+          </div>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs border-collapse">
+            <thead>
+              <tr class="bg-slate-100/70 text-slate-500 font-extrabold uppercase tracking-wider text-[10px] border-b border-slate-200">
+                <th class="py-3.5 px-5">Ticket ID & Time</th>
+                <th class="py-3.5 px-5">Requester Profile</th>
+                <th class="py-3.5 px-5">Platform & Plan</th>
+                <th class="py-3.5 px-5 min-w-[240px]">Query Description</th>
+                <th class="py-3.5 px-5">Status</th>
+                <th class="py-3.5 px-5 min-w-[140px]">Support Duration</th>
+                <th class="py-3.5 px-5 text-right min-w-[210px]">Action Hub</th>
+              </tr>
+            </thead>
+            <tbody id="ticketsTableBody" class="divide-y divide-slate-200/70 font-medium">
+              <!-- Injected by js/admin.js -->
+            </tbody>
+          </table>
+        </div>
+
+      </section>
+
+      <!-- VIEW B: KANBAN BOARD VIEW (Linear Style) -->
+      <section id="kanbanViewContainer" class="hidden grid grid-cols-1 md:grid-cols-2 gap-6">
+        
+        <!-- Column 1: In Progress -->
+        <div class="bg-slate-100/90 rounded-3xl p-5 border border-amber-200/70 space-y-4">
+          <div class="flex items-center justify-between pb-3 border-b border-slate-200">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-amber-500 animate-ping"></span>
+              <h4 class="font-black text-sm text-slate-800">In Progress Queue</h4>
+            </div>
+            <span id="kanbanCountInProgress" class="px-2.5 py-0.5 rounded-full bg-amber-200/60 text-amber-900 font-bold text-xs">
+              0
+            </span>
+          </div>
+          <div id="kanbanColumnInProgress" class="space-y-3 min-h-[300px]">
+            <!-- Injected by js/admin.js -->
+          </div>
+        </div>
+
+        <!-- Column 2: Resolved (Done) -->
+        <div class="bg-slate-100/90 rounded-3xl p-5 border border-emerald-200/70 space-y-4">
+          <div class="flex items-center justify-between pb-3 border-b border-slate-200">
+            <div class="flex items-center gap-2">
+              <i class="fa-solid fa-circle-check text-emerald-500 text-sm"></i>
+              <h4 class="font-black text-sm text-slate-800">Resolved (Done)</h4>
+            </div>
+            <span id="kanbanCountDone" class="px-2.5 py-0.5 rounded-full bg-emerald-200/60 text-emerald-900 font-bold text-xs">
+              0
+            </span>
+          </div>
+          <div id="kanbanColumnDone" class="space-y-3 min-h-[300px]">
+            <!-- Injected by js/admin.js -->
+          </div>
+        </div>
+
+      </section>
+
+    </main>
+
+  </div>
+
+  <!-- SLIDE-OVER / MODAL: MARK AS DONE & RESOLVE -->
+  <div id="resolveModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 glass-modal hidden">
+    <div class="bg-white rounded-3xl shadow-2xl max-w-lg w-full p-6 sm:p-8 border border-slate-200 animate-fadeIn relative">
+      
+      <div class="flex items-center justify-between pb-4 border-b border-slate-200">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-lg">
+            <i class="fa-solid fa-check-double"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-black text-obsidian">Resolve Support Ticket</h3>
+            <p id="resolveModalTicketId" class="text-xs font-mono font-bold text-amberBrand">DA-2026-XXXX</p>
+          </div>
+        </div>
+        <button id="closeResolveModalBtn" class="text-slate-400 hover:text-slate-600 p-1">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <form id="resolveForm" class="space-y-4 pt-4">
+        
+        <!-- Timings Display / Auto IST Duration -->
+        <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 grid grid-cols-3 gap-2.5 text-center text-xs">
+          <div>
+            <span class="text-[10px] text-slate-400 uppercase font-extrabold block">Start Time (IST)</span>
+            <input 
+              type="text" 
+              id="resolveStartTime" 
+              class="w-full mt-1.5 text-center font-mono font-bold text-slate-800 bg-white border border-slate-300 rounded-xl py-1.5 px-1 text-xs"
+              placeholder="HH:mm:ss"
+            >
+          </div>
+          <div>
+            <span class="text-[10px] text-slate-400 uppercase font-extrabold block">End Time (IST)</span>
+            <input 
+              type="text" 
+              id="resolveEndTime" 
+              class="w-full mt-1.5 text-center font-mono font-bold text-slate-800 bg-white border border-slate-300 rounded-xl py-1.5 px-1 text-xs"
+              placeholder="HH:mm:ss"
+            >
+          </div>
+          <div>
+            <span class="text-[10px] text-slate-400 uppercase font-extrabold block">Total SLA Time</span>
+            <input 
+              type="text" 
+              id="resolveTotalTime" 
+              readonly
+              class="w-full mt-1.5 text-center font-mono font-black text-emerald-700 bg-emerald-50 border border-emerald-300 rounded-xl py-1.5 px-1 text-xs"
+              placeholder="HH:mm"
+            >
+          </div>
+        </div>
+
+        <!-- Resolution Remarks -->
+        <div>
+          <label for="resolveRemarks" class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-2">
+            Resolution Remarks & Notes <span class="text-rose-500">*</span>
+          </label>
+          <textarea 
+            id="resolveRemarks" 
+            rows="3" 
+            required
+            placeholder="Document solution provided (e.g. WABA credentials reconnected, WordPress SSL renewed, payment webhook tested)..." 
+            class="w-full p-3.5 bg-slate-50 border border-slate-300 rounded-2xl text-xs font-medium focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none leading-relaxed"
+          ></textarea>
+        </div>
+
+        <div class="flex items-center justify-end gap-2.5 pt-2">
+          <button 
+            type="button" 
+            id="cancelResolveBtn" 
+            class="px-4 py-2.5 rounded-xl border border-slate-300 text-slate-600 hover:bg-slate-50 text-xs font-bold transition"
+          >
+            Cancel
+          </button>
+          <button 
+            type="submit" 
+            id="confirmResolveBtn" 
+            class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold shadow-md transition flex items-center gap-1.5"
+          >
+            <i class="fa-solid fa-circle-check"></i>
+            <span>Confirm Resolution</span>
+          </button>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+
+  <!-- MODAL: MANUAL TIME OVERRIDE -->
+  <div id="manualEditModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 glass-modal hidden">
+    <div class="bg-white rounded-3xl shadow-2xl max-w-lg w-full p-6 sm:p-8 border border-slate-200 animate-fadeIn relative">
+      
+      <div class="flex items-center justify-between pb-4 border-b border-slate-200">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-amber-100 text-amberBrand flex items-center justify-center font-bold text-lg">
+            <i class="fa-solid fa-clock-rotate-left"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-black text-obsidian">Manual Time Override</h3>
+            <p id="manualEditTicketId" class="text-xs font-mono font-bold text-amberBrand">DA-2026-XXXX</p>
+          </div>
+        </div>
+        <button id="closeManualEditBtn" class="text-slate-400 hover:text-slate-600 p-1">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <form id="manualEditForm" class="space-y-4 pt-4 text-xs">
+        
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Status</label>
+            <select id="editStatus" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-bold">
+              <option value="In Progress">In Progress</option>
+              <option value="Done">Done</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Total Duration (HH:mm)</label>
+            <input 
+              type="text" 
+              id="editTotalDuration" 
+              placeholder="e.g. 00:35" 
+              class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-mono font-bold"
+            >
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Start Time (IST)</label>
+            <input 
+              type="text" 
+              id="editStartTime" 
+              placeholder="e.g. 14:30:00" 
+              class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-mono"
+            >
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">End Time (IST)</label>
+            <input 
+              type="text" 
+              id="editEndTime" 
+              placeholder="e.g. 15:15:00" 
+              class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-mono"
+            >
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Resolution Remarks</label>
+          <textarea 
+            id="editRemarks" 
+            rows="3" 
+            class="w-full p-3 bg-slate-50 border border-slate-300 rounded-2xl"
+            placeholder="Notes or offline call summary..."
+          ></textarea>
+        </div>
+
+        <div class="flex items-center justify-end gap-2.5 pt-2">
+          <button 
+            type="button" 
+            id="cancelManualEditBtn" 
+            class="px-4 py-2.5 rounded-xl border border-slate-300 text-slate-600 font-bold"
+          >
+            Cancel
+          </button>
+          <button 
+            type="submit" 
+            class="px-5 py-2.5 rounded-xl bg-obsidian hover:bg-slate-800 text-white font-extrabold"
+          >
+            Save Changes
+          </button>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+
+  <!-- SLIDE-OVER DRAWER: FULL QUERY DETAILS (Linear Style) -->
+  <div id="detailsModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 glass-modal hidden">
+    <div class="bg-white rounded-3xl shadow-2xl max-w-xl w-full p-6 sm:p-8 border border-slate-200 animate-fadeIn relative">
+      
+      <div class="flex items-center justify-between pb-4 border-b border-slate-200">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-orange-100 text-amberBrand flex items-center justify-center font-bold text-lg">
+            <i class="fa-solid fa-file-lines"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-black text-obsidian">Full Ticket Record</h3>
+            <span id="detailsTicketId" class="text-xs font-mono font-bold text-slate-400">DA-2026-XXXX</span>
+          </div>
+        </div>
+        <button id="closeDetailsModalBtn" class="text-slate-400 hover:text-slate-600 p-1">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <div class="space-y-4 pt-4 text-xs">
+        
+        <!-- Requester Profile Strip -->
+        <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 grid grid-cols-2 sm:grid-cols-3 gap-3">
+          <div>
+            <span class="text-[10px] text-slate-400 uppercase font-extrabold block">Requester Name</span>
+            <strong id="detailsName" class="text-slate-900 text-sm">--</strong>
+          </div>
+          <div>
+            <span class="text-[10px] text-slate-400 uppercase font-extrabold block">Contact</span>
+            <div id="detailsContact" class="text-slate-700 font-mono font-bold">--</div>
+          </div>
+          <div>
+            <span class="text-[10px] text-slate-400 uppercase font-extrabold block">Plan / Platform</span>
+            <div id="detailsClassification" class="text-slate-700 font-bold">--</div>
+          </div>
+        </div>
+
+        <!-- Full Query Text -->
+        <div>
+          <span class="text-[10px] text-slate-400 uppercase font-extrabold block mb-1.5">Query Description</span>
+          <div id="detailsQuery" class="p-4 bg-slate-50 rounded-2xl border border-slate-200 text-slate-800 whitespace-pre-wrap leading-relaxed max-h-48 overflow-y-auto font-medium">
+          </div>
+        </div>
+
+        <!-- Remarks Strip -->
+        <div class="p-3.5 bg-amber-50/70 rounded-2xl border border-amber-200 text-amber-900">
+          <span class="text-[10px] uppercase font-extrabold block mb-1">Resolution Remarks</span>
+          <p id="detailsRemarks" class="text-xs italic leading-relaxed">No remarks recorded yet.</p>
+        </div>
+
+        <!-- Action CTAs -->
+        <div class="flex items-center justify-between pt-2">
+          <a 
+            id="detailsWhatsAppBtn" 
+            href="#" 
+            target="_blank" 
+            class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl flex items-center gap-2 transition glow-emerald-sm"
+          >
+            <i class="fa-brands fa-whatsapp text-sm"></i>
+            <span>WhatsApp Direct</span>
+          </a>
+          <button 
+            type="button" 
+            id="closeDetailsBtnBottom" 
+            class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition"
+          >
+            Dismiss
+          </button>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- MODAL: CLOUD BACKEND & SETTINGS -->
+  <div id="settingsModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 glass-modal hidden">
+    <div class="bg-white rounded-3xl shadow-2xl max-w-lg w-full p-6 sm:p-8 border border-slate-200 animate-fadeIn relative">
+      
+      <div class="flex items-center justify-between pb-4 border-b border-slate-200">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-slate-100 text-obsidian flex items-center justify-center font-bold text-lg">
+            <i class="fa-solid fa-cloud-arrow-up text-amberBrand"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-black text-obsidian">Cloud Backend Configuration</h3>
+            <p class="text-xs text-slate-500">Google Sheet ID & Web App Webhook</p>
+          </div>
+        </div>
+        <button id="closeSettingsModalBtn" class="text-slate-400 hover:text-slate-600 p-1">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <div class="space-y-4 pt-4 text-xs">
+        
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Central Google Sheet ID</label>
+          <div class="flex items-center gap-2">
+            <input 
+              type="text" 
+              readonly 
+              value="16D1TXnUvGxPhp6YDwq9l0rCoBXnTwsDAHOe-0Z5uu1k" 
+              class="w-full p-2.5 bg-slate-100 border border-slate-300 rounded-xl font-mono text-slate-600 select-all"
+            >
+            <a 
+              href="https://docs.google.com/spreadsheets/d/16D1TXnUvGxPhp6YDwq9l0rCoBXnTwsDAHOe-0Z5uu1k/edit" 
+              target="_blank" 
+              class="p-2.5 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition" 
+              title="Open Google Sheet"
+            >
+              <i class="fa-solid fa-arrow-up-right-from-square"></i>
+            </a>
+          </div>
+        </div>
+
+        <div>
+          <label for="webAppUrlInput" class="block font-bold text-slate-700 mb-1">
+            Google Apps Script Web App URL
+          </label>
+          <input 
+            type="url" 
+            id="webAppUrlInput" 
+            placeholder="https://script.google.com/macros/s/.../exec" 
+            class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-mono focus:ring-2 focus:ring-amberBrand outline-none"
+          >
+          <p class="text-[11px] text-slate-500 mt-1">
+            Paste your deployed Google Apps Script URL here to enable live cloud synchronization.
+          </p>
+        </div>
+
+        <div>
+          <label for="customPinInput" class="block font-bold text-slate-700 mb-1">
+            Change Dashboard Security PIN (Optional)
+          </label>
+          <input 
+            type="text" 
+            id="customPinInput" 
+            placeholder="Enter new PIN" 
+            class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-mono"
+          >
+        </div>
+
+        <!-- Connection Test Result -->
+        <div id="testConnResult" class="p-3 rounded-xl border text-xs font-semibold hidden"></div>
+
+        <div class="flex items-center justify-between pt-2">
+          <button 
+            type="button" 
+            id="testConnectionBtn" 
+            class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold flex items-center gap-1.5 transition"
+          >
+            <i class="fa-solid fa-wifi text-xs"></i>
+            <span>Test Connection</span>
+          </button>
+          
+          <div class="flex items-center gap-2">
+            <button 
+              type="button" 
+              id="cancelSettingsBtn" 
+              class="px-4 py-2 border border-slate-300 rounded-xl text-slate-600 font-bold transition"
+            >
+              Cancel
+            </button>
+            <button 
+              type="button" 
+              id="saveSettingsBtn" 
+              class="px-5 py-2 bg-obsidian hover:bg-slate-800 text-white rounded-xl font-extrabold transition"
+            >
+              Save Config
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="bg-obsidian text-slate-400 text-xs py-4 border-t border-white/10">
+    <div class="max-w-7xl mx-auto px-4 flex flex-wrap items-center justify-between gap-2">
+      <p>Digital Azadi Support Ops Deck &bull; Asia/Kolkata (IST Standard Time)</p>
+      <p class="text-[11px] text-slate-500">Enterprise SLA Management Suite</p>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="js/timeCalculator.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>

@@ -1,0 +1,321 @@
+/* ==============================================================================
+   DIGITAL AZADI SUPPORT — ENTERPRISE SUPPORT SUITE
+   Design System: Inspired by Linear, Stripe Dashboard & Apple Developer Portals
+   ============================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
+
+:root {
+  /* Brand Obsidian & Slate Palette */
+  --da-obsidian: #0A1128;
+  --da-obsidian-card: #0F172A;
+  --da-obsidian-elev: #1E293B;
+  --da-obsidian-border: rgba(255, 255, 255, 0.08);
+
+  /* Azadi Imperial Amber / Orange Energy */
+  --da-amber: #FF6B00;
+  --da-amber-light: #FF8533;
+  --da-amber-glow: rgba(255, 107, 0, 0.35);
+  --da-amber-soft: #FFF7ED;
+  --da-amber-border: #FFD8A8;
+
+  /* Neutral Canvas (Light Mode) */
+  --da-frost-bg: #F8FAFC;
+  --da-surface: #FFFFFF;
+  --da-border: #E2E8F0;
+  --da-border-light: rgba(226, 232, 240, 0.8);
+  --da-text-main: #0F172A;
+  --da-text-muted: #64748B;
+  --da-text-subtle: #94A3B8;
+
+  /* Status Colors */
+  --da-gold: #F59E0B;
+  --da-gold-bg: #FFFBEB;
+  --da-gold-border: #FDE68A;
+  --da-emerald: #10B981;
+  --da-emerald-bg: #ECFDF5;
+  --da-emerald-border: #A7F3D0;
+  --da-sky: #0EA5E9;
+  --da-sky-bg: #F0F9FF;
+  --da-purple: #8B5CF6;
+  --da-purple-bg: #F5F3FF;
+}
+
+/* Global Reset & Base Typography */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-color: var(--da-frost-bg);
+  color: var(--da-text-main);
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.font-mono {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* --------------------------------------------------------------------------
+   AMBIENT GLOWS & GLASSMORPHISM
+   -------------------------------------------------------------------------- */
+.glow-amber {
+  box-shadow: 0 10px 25px -5px var(--da-amber-glow);
+}
+
+.glow-amber-sm {
+  box-shadow: 0 4px 14px 0 rgba(255, 107, 0, 0.25);
+}
+
+.glow-emerald-sm {
+  box-shadow: 0 4px 14px 0 rgba(16, 185, 129, 0.25);
+}
+
+.glow-card {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 10px 30px -10px rgba(11, 37, 69, 0.07);
+}
+
+.glow-card-hover {
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glow-card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 35px -8px rgba(11, 37, 69, 0.12);
+}
+
+/* Glassmorphism Classes */
+.glass-header {
+  background: rgba(10, 17, 40, 0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.glass-panel-light {
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--da-border-light);
+}
+
+.glass-modal {
+  background: rgba(10, 17, 40, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* --------------------------------------------------------------------------
+   MICRO-ANIMATIONS & PULSE RINGS
+   -------------------------------------------------------------------------- */
+@keyframes sonar-wave {
+  0% {
+    transform: scale(0.95);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.6);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1.6);
+    opacity: 0;
+  }
+}
+
+.sonar-ring {
+  position: relative;
+}
+
+.sonar-ring::after {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: 9999px;
+  background-color: var(--da-gold);
+  animation: sonar-wave 2s infinite ease-out;
+  pointer-events: none;
+}
+
+/* Ambient gradient mesh background */
+.bg-mesh-dark {
+  background: radial-gradient(at 0% 0%, #0A1128 0px, transparent 50%),
+              radial-gradient(at 100% 0%, #1E293B 0px, transparent 50%),
+              radial-gradient(at 50% 100%, #111E38 0px, transparent 50%),
+              #0A1128;
+}
+
+.bg-mesh-light {
+  background: radial-gradient(at 0% 0%, rgba(255, 107, 0, 0.04) 0px, transparent 50%),
+              radial-gradient(at 100% 100%, rgba(14, 165, 233, 0.04) 0px, transparent 50%),
+              #F8FAFC;
+}
+
+/* --------------------------------------------------------------------------
+   INTERACTIVE SEGMENTED CHIPS & RADIOS
+   -------------------------------------------------------------------------- */
+.segmented-chip {
+  position: relative;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  border: 1.5px solid var(--da-border);
+  background-color: #FFFFFF;
+}
+
+.segmented-chip:hover {
+  border-color: #CBD5E1;
+  background-color: #F8FAFC;
+  transform: translateY(-1px);
+}
+
+.segmented-chip input:checked + .chip-content {
+  border-color: var(--da-amber);
+  background-color: #FFF7ED;
+  box-shadow: 0 4px 12px rgba(255, 107, 0, 0.12);
+}
+
+.segmented-chip input:checked + .chip-content .chip-title {
+  color: #9A3412;
+  font-weight: 700;
+}
+
+.segmented-chip input:checked + .chip-content .chip-icon-active {
+  color: var(--da-amber);
+}
+
+/* --------------------------------------------------------------------------
+   STATUS BADGES
+   -------------------------------------------------------------------------- */
+.badge-in-progress {
+  background-color: #FFFBEB;
+  color: #B45309;
+  border: 1px solid #FDE68A;
+}
+
+.badge-done {
+  background-color: #ECFDF5;
+  color: #047857;
+  border: 1px solid #A7F3D0;
+}
+
+/* --------------------------------------------------------------------------
+   BUTTONS & CTAs
+   -------------------------------------------------------------------------- */
+.btn-amber-cta {
+  background: linear-gradient(135deg, #FF6B00 0%, #FF8533 100%);
+  color: #FFFFFF;
+  font-weight: 700;
+  box-shadow: 0 10px 25px -5px rgba(255, 107, 0, 0.35);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-amber-cta:hover {
+  background: linear-gradient(135deg, #E66000 0%, #FF781F 100%);
+  box-shadow: 0 14px 28px -4px rgba(255, 107, 0, 0.45);
+  transform: translateY(-1px);
+}
+
+.btn-amber-cta:active {
+  transform: scale(0.98);
+}
+
+.btn-obsidian {
+  background-color: var(--da-obsidian);
+  color: #FFFFFF;
+  font-weight: 700;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-obsidian:hover {
+  background-color: #16203D;
+  box-shadow: 0 8px 20px -4px rgba(10, 17, 40, 0.3);
+  transform: translateY(-1px);
+}
+
+/* --------------------------------------------------------------------------
+   TOAST NOTIFICATIONS
+   -------------------------------------------------------------------------- */
+.toast-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.toast {
+  pointer-events: auto;
+  background: #0F172A;
+  color: #FFFFFF;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 12px 18px;
+  border-radius: 14px;
+  font-size: 13px;
+  font-weight: 600;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  animation: toast-in 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes toast-in {
+  from {
+    transform: translateY(20px) scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   CUSTOM SCROLLBAR
+   -------------------------------------------------------------------------- */
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+
+::-webkit-scrollbar-track {
+  background: #F1F5F9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+}
+
+/* Print Rules */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #receiptCard, #receiptCard * {
+    visibility: visible;
+  }
+  #receiptCard {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    margin: 0;
+    box-shadow: none !important;
+    border: 1px solid #CBD5E1;
+  }
+  .no-print {
+    display: none !important;
+  }
+}

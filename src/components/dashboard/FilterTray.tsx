@@ -1,0 +1,198 @@
+import React from 'react';
+import { 
+  Filter, 
+  X, 
+  ArrowUpDown, 
+  Layers, 
+  Sparkles, 
+  ShieldCheck, 
+  Calendar,
+  RotateCcw
+} from 'lucide-react';
+import { ProductEcosystem, MembershipTier, TicketPriority } from '../../types/ticket';
+import { cn } from '../../lib/utils';
+
+export interface FilterState {
+  ecosystem: ProductEcosystem | 'all';
+  membershipTier: MembershipTier | 'all';
+  priority: TicketPriority | 'all';
+  category: string;
+  dateRange: 'all' | 'today' | 'week' | 'month';
+  sortBy: 'newest' | 'oldest' | 'priority' | 'duration';
+}
+
+interface FilterTrayProps {
+  filters: FilterState;
+  onFilterChange: (filters: FilterState) => void;
+  availableCategories: string[];
+  totalCount: number;
+  filteredCount: number;
+}
+
+export const FilterTray: React.FC<FilterTrayProps> = ({
+  filters,
+  onFilterChange,
+  availableCategories,
+  totalCount,
+  filteredCount,
+}) => {
+  const updateFilter = <K extends keyof FilterState>(key: K, val: FilterState[K]) => {
+    onFilterChange({
+      ...filters,
+      [key]: val,
+    });
+  };
+
+  const resetFilters = () => {
+    onFilterChange({
+      ecosystem: 'all',
+      membershipTier: 'all',
+      priority: 'all',
+      category: 'all',
+      dateRange: 'all',
+      sortBy: 'newest',
+    });
+  };
+
+  const isFiltered = 
+    filters.ecosystem !== 'all' ||
+    filters.membershipTier !== 'all' ||
+    filters.priority !== 'all' ||
+    filters.category !== 'all' ||
+    filters.dateRange !== 'all' ||
+    filters.sortBy !== 'newest';
+
+  return (
+    <div className="bg-surface border border-surface-border rounded-2xl p-4 space-y-3">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        {/* Left: Filter label and counts */}
+        <div className="flex items-center gap-2 text-xs font-mono">
+          <Filter className="w-3.5 h-3.5 text-nexus-electric" />
+          <span className="text-text-pure font-bold uppercase tracking-wider">Refine Queue</span>
+          <span className="px-2 py-0.5 rounded-md bg-surface-elevated text-text-muted border border-surface-border">
+            Showing {filteredCount} of {totalCount}
+          </span>
+          {isFiltered && (
+            <button
+              onClick={resetFilters}
+              className="flex items-center gap-1 text-[11px] text-nexus-electric hover:text-white transition ml-2"
+            >
+              <RotateCcw className="w-3 h-3" />
+              Reset All
+            </button>
+          )}
+        </div>
+
+        {/* Right: Sort selector */}
+        <div className="flex items-center gap-2">
+          <span className="text-[11px] font-mono text-text-faint flex items-center gap-1">
+            <ArrowUpDown className="w-3 h-3 text-text-muted" />
+            Sort:
+          </span>
+          <select
+            value={filters.sortBy}
+            onChange={e => updateFilter('sortBy', e.target.value as FilterState['sortBy'])}
+            className="bg-surface-elevated text-text-pure text-xs rounded-xl border border-surface-border px-2.5 py-1.5 focus:border-nexus-electric focus:outline-none"
+          >
+            <option value="newest">Newest First</option>
+            <option value="oldest">Oldest First</option>
+            <option value="priority">Highest Priority</option>
+            <option value="duration">Active Time</option>
+          </select>
+        </div>
+      </div>
+
+      {/* Filter Selectors Grid */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2.5 pt-1">
+        {/* Ecosystem */}
+        <div>
+          <label className="block text-[10px] font-mono uppercase text-text-faint mb-1">
+            Ecosystem
+          </label>
+          <select
+            value={filters.ecosystem}
+            onChange={e => updateFilter('ecosystem', e.target.value as FilterState['ecosystem'])}
+            className="w-full bg-surface-elevated text-text-pure text-xs rounded-xl border border-surface-border px-2.5 py-1.5 focus:border-nexus-electric focus:outline-none truncate"
+          >
+            <option value="all">All Ecosystems</option>
+            <option value="Chakravyuh CRM">Chakravyuh CRM</option>
+            <option value="Digital Azadi Hub">Digital Azadi Hub</option>
+            <option value="WordPress & Hosting">WordPress & Hosting</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+
+        {/* Membership Tier */}
+        <div>
+          <label className="block text-[10px] font-mono uppercase text-text-faint mb-1">
+            Tier
+          </label>
+          <select
+            value={filters.membershipTier}
+            onChange={e => updateFilter('membershipTier', e.target.value as FilterState['membershipTier'])}
+            className="w-full bg-surface-elevated text-text-pure text-xs rounded-xl border border-surface-border px-2.5 py-1.5 focus:border-nexus-electric focus:outline-none truncate"
+          >
+            <option value="all">All Memberships</option>
+            <option value="Diamond Elite">Diamond Elite</option>
+            <option value="Silver Pass">Silver Pass</option>
+            <option value="Other / Not Specified">Other</option>
+          </select>
+        </div>
+
+        {/* Priority */}
+        <div>
+          <label className="block text-[10px] font-mono uppercase text-text-faint mb-1">
+            Priority
+          </label>
+          <select
+            value={filters.priority}
+            onChange={e => updateFilter('priority', e.target.value as FilterState['priority'])}
+            className="w-full bg-surface-elevated text-text-pure text-xs rounded-xl border border-surface-border px-2.5 py-1.5 focus:border-nexus-electric focus:outline-none truncate"
+          >
+            <option value="all">All Priorities</option>
+            <option value="Urgent">Urgent</option>
+            <option value="High">High</option>
+            <option value="Normal">Normal</option>
+            <option value="Low">Low</option>
+          </select>
+        </div>
+
+        {/* Category */}
+        <div>
+          <label className="block text-[10px] font-mono uppercase text-text-faint mb-1">
+            Category
+          </label>
+          <select
+            value={filters.category}
+            onChange={e => updateFilter('category', e.target.value)}
+            className="w-full bg-surface-elevated text-text-pure text-xs rounded-xl border border-surface-border px-2.5 py-1.5 focus:border-nexus-electric focus:outline-none truncate"
+          >
+            <option value="all">All Categories</option>
+            {availableCategories.map(cat => (
+              <option key={cat} value={cat}>
+                {cat}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Date Range */}
+        <div>
+          <label className="block text-[10px] font-mono uppercase text-text-faint mb-1">
+            Timeframe (IST)
+          </label>
+          <select
+            value={filters.dateRange}
+            onChange={e => updateFilter('dateRange', e.target.value as FilterState['dateRange'])}
+            className="w-full bg-surface-elevated text-text-pure text-xs rounded-xl border border-surface-border px-2.5 py-1.5 focus:border-nexus-electric focus:outline-none truncate"
+          >
+            <option value="all">All Time</option>
+            <option value="today">Today (IST)</option>
+            <option value="week">Last 7 Days</option>
+            <option value="month">This Month</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  );
+};
