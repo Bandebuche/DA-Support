@@ -6,11 +6,8 @@ import {
   LayoutGrid, 
   Table, 
   Clock, 
-  Cloud, 
   SlidersHorizontal,
-  Zap,
-  Activity,
-  CheckCircle2
+  Activity
 } from 'lucide-react';
 import { getCurrentISTClockString } from '../../lib/timezone';
 import { isLiveSheetsConnected } from '../../services/sheetsSync';
@@ -67,121 +64,118 @@ export const TopCommandBar: React.FC<TopCommandBarProps> = ({
   const isSheetsLive = isLiveSheetsConnected();
 
   return (
-    <div className="sticky top-2 z-40 px-4 md:px-6">
-      <header className="glass-floating rounded-2xl px-4 py-2.5 flex items-center justify-between gap-4 border border-surface-borderLight/20 shadow-2xl">
+    <header className="sticky top-0 z-30 bg-surface/95 backdrop-blur-md border-b border-surface-border px-4 md:px-6 py-3">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 max-w-7xl mx-auto">
         
-        {/* Left: Branded Hologram Logo + Live IST Digital HUD */}
-        <div className="flex items-center gap-3 shrink-0">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-surface-obsidian border border-neon-violet/50 flex items-center justify-center shadow-nexus-sm">
-              <Activity className="w-4 h-4 text-neon-electric" />
-            </div>
-            <div className="hidden sm:block">
-              <span className="text-xs font-black font-mono tracking-wider uppercase text-text-pure block">
-                COMMAND HUD
+        {/* Left: Section Title + Live IST Status */}
+        <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-start">
+          <div>
+            <h1 className="text-base font-bold text-text-pure tracking-tight">
+              {title}
+            </h1>
+            <div className="flex items-center gap-2 text-xs text-text-muted mt-0.5">
+              <span className="flex items-center gap-1.5 font-mono">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="text-emerald-700 dark:text-emerald-400 font-semibold">{istTime} IST</span>
               </span>
-              <div className="flex items-center gap-1.5 text-[10px] font-mono">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
-                <span className="text-emerald-400 font-bold">{istTime} IST</span>
-                <span className="text-text-faint">• Cloud: Active</span>
-              </div>
+              <span>•</span>
+              <span className="text-text-muted">Cloud Sync: Active</span>
             </div>
           </div>
         </div>
 
-        {/* Center: Quick Search Bar with Keyboard Shortcut Badge */}
-        <div className="relative flex-1 max-w-lg mx-auto">
-          <Search className="w-3.5 h-3.5 absolute left-3.5 top-1/2 -translate-y-1/2 text-text-muted" />
+        {/* Center: Search Bar */}
+        <div className="relative w-full sm:max-w-md mx-auto">
+          <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-text-muted" />
           <input
             ref={searchInputRef}
             type="text"
             value={searchQuery}
             onChange={e => onSearchChange(e.target.value)}
-            placeholder="Search Ticket ID (NEXUS-2026-XXXX), Phone, Name..."
+            placeholder="Search Ticket ID (DA-2026-XXXX), Phone, Name..."
             className={cn(
-              'w-full pl-9 pr-24 py-2 rounded-xl text-xs bg-surface-obsidian text-text-pure',
+              'w-full pl-9 pr-24 py-2 rounded-xl text-xs bg-surface-elevated text-text-pure',
               'border border-surface-border placeholder:text-text-faint',
-              'focus:border-neon-electric focus:shadow-nexus-sm focus:outline-none transition'
+              'focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none transition'
             )}
           />
           <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-1 pointer-events-none">
-            <kbd className="px-1.5 py-0.5 text-[9px] font-mono font-bold bg-void border border-surface-border rounded text-text-muted">
-              Press ⌘K or /
+            <kbd className="px-1.5 py-0.5 text-[10px] font-mono font-medium bg-surface border border-surface-border rounded text-text-muted shadow-sm">
+              ⌘K or /
             </kbd>
           </div>
         </div>
 
-        {/* Right: Live Mode Switcher (Kanban vs Grid vs Table) + Sync Button */}
-        <div className="flex items-center gap-2.5 shrink-0">
+        {/* Right: View Switcher, Sync, Settings & Theme Toggle */}
+        <div className="flex items-center gap-2 shrink-0 w-full sm:w-auto justify-end">
           
           {/* View Mode Switcher */}
-          <div className="flex items-center p-1 rounded-xl bg-surface-obsidian border border-surface-border">
+          <div className="flex items-center p-1 rounded-xl bg-surface-elevated border border-surface-border">
             <button
               onClick={() => onViewModeChange('kanban')}
               className={cn(
-                'p-1.5 rounded-lg text-xs transition flex items-center gap-1 font-mono',
+                'px-2.5 py-1 rounded-lg text-xs transition flex items-center gap-1.5 font-medium',
                 viewMode === 'kanban'
-                  ? 'bg-violet-600 text-white shadow-nexus-sm'
-                  : 'text-text-muted hover:text-white'
+                  ? 'bg-indigo-600 text-white shadow-sm'
+                  : 'text-text-soft hover:text-text-pure hover:bg-surface'
               )}
               title="Kanban Board View"
             >
               <Kanban className="w-3.5 h-3.5" />
-              <span className="text-[10px] hidden xl:inline">Kanban</span>
+              <span className="text-xs hidden xl:inline">Kanban</span>
             </button>
             <button
               onClick={() => onViewModeChange('cards')}
               className={cn(
-                'p-1.5 rounded-lg text-xs transition flex items-center gap-1 font-mono',
+                'px-2.5 py-1 rounded-lg text-xs transition flex items-center gap-1.5 font-medium',
                 viewMode === 'cards'
-                  ? 'bg-violet-600 text-white shadow-nexus-sm'
-                  : 'text-text-muted hover:text-white'
+                  ? 'bg-indigo-600 text-white shadow-sm'
+                  : 'text-text-soft hover:text-text-pure hover:bg-surface'
               )}
-              title="Modular Card Grid View"
+              title="Card Grid View"
             >
               <LayoutGrid className="w-3.5 h-3.5" />
-              <span className="text-[10px] hidden xl:inline">Cards</span>
+              <span className="text-xs hidden xl:inline">Cards</span>
             </button>
             <button
               onClick={() => onViewModeChange('table')}
               className={cn(
-                'p-1.5 rounded-lg text-xs transition flex items-center gap-1 font-mono',
+                'px-2.5 py-1 rounded-lg text-xs transition flex items-center gap-1.5 font-medium',
                 viewMode === 'table'
-                  ? 'bg-violet-600 text-white shadow-nexus-sm'
-                  : 'text-text-muted hover:text-white'
+                  ? 'bg-indigo-600 text-white shadow-sm'
+                  : 'text-text-soft hover:text-text-pure hover:bg-surface'
               )}
-              title="Dense Table View"
+              title="Table View"
             >
               <Table className="w-3.5 h-3.5" />
-              <span className="text-[10px] hidden xl:inline">Table</span>
+              <span className="text-xs hidden xl:inline">Table</span>
             </button>
           </div>
 
-          {/* Sync Button with pulse dot */}
+          {/* Sync Button */}
           <button
             onClick={onRefresh}
             disabled={isRefreshing}
-            className="p-2 rounded-xl bg-surface-obsidian hover:bg-surface-cosmic border border-surface-border text-text-muted hover:text-white transition disabled:opacity-50 relative"
+            className="p-2 rounded-xl bg-surface-elevated hover:bg-surface-hover border border-surface-border text-text-soft hover:text-text-pure transition disabled:opacity-50 relative"
             title="Sync with Database & Sheets"
           >
-            <RotateCw className={cn('w-4 h-4', isRefreshing && 'animate-spin text-neon-electric')} />
-            <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+            <RotateCw className={cn('w-4 h-4', isRefreshing && 'animate-spin text-indigo-600 dark:text-indigo-400')} />
           </button>
 
           {/* Settings */}
           <button
             onClick={onOpenSettings}
-            className="p-2 rounded-xl bg-surface-obsidian hover:bg-surface-cosmic border border-surface-border text-text-muted hover:text-white transition"
+            className="p-2 rounded-xl bg-surface-elevated hover:bg-surface-hover border border-surface-border text-text-soft hover:text-text-pure transition"
             title="Cloud Backend Settings"
           >
-            <SlidersHorizontal className="w-4 h-4 text-neon-electric" />
+            <SlidersHorizontal className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
           </button>
 
           {/* Theme Switcher */}
           <ThemeToggle />
         </div>
 
-      </header>
-    </div>
+      </div>
+    </header>
   );
 };

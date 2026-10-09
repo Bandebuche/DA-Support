@@ -10,19 +10,19 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant = 'primary', size = 'md', loading, disabled, children, ...props }, ref) => {
     const baseStyles =
-      'inline-flex items-center justify-center font-medium rounded-xl transition-all duration-200 select-none disabled:opacity-50 disabled:pointer-events-none active:scale-[0.98]';
+      'inline-flex items-center justify-center font-medium rounded-xl transition-all duration-150 select-none disabled:opacity-50 disabled:pointer-events-none active:scale-[0.98]';
 
     const variants = {
       primary:
-        'bg-nexus hover:bg-nexus-deep text-white border border-nexus-electric/30 shadow-nexus-sm hover:shadow-nexus-glow',
+        'bg-indigo-600 hover:bg-indigo-700 text-white font-semibold shadow-sm',
       secondary:
-        'bg-surface-elevated hover:bg-surface-hover text-text-soft border border-surface-border hover:border-white/20',
+        'bg-surface-elevated hover:bg-surface-hover text-text-pure border border-surface-border',
       outline:
-        'bg-transparent hover:bg-white/5 text-text-soft border border-surface-border hover:border-nexus/40 hover:text-white',
+        'bg-transparent hover:bg-surface-elevated text-text-pure border border-surface-border',
       ghost:
-        'bg-transparent hover:bg-white/5 text-text-muted hover:text-white',
+        'bg-transparent hover:bg-surface-elevated text-text-soft hover:text-text-pure',
       danger:
-        'bg-white/10 hover:bg-white/15 text-text-pure border border-white/20',
+        'bg-red-50 hover:bg-red-100 dark:bg-red-950/20 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800',
     };
 
     const sizes = {

@@ -7,13 +7,10 @@ import { Badge } from '../ui/Badge';
 import { 
   X, 
   Search, 
-  Clock, 
   CheckCircle, 
   AlertCircle, 
   MessageCircle, 
-  FileText,
-  User,
-  ExternalLink
+  Clock 
 } from 'lucide-react';
 
 interface TicketTrackerModalProps {
@@ -25,23 +22,45 @@ export const TicketTrackerModal: React.FC<TicketTrackerModalProps> = ({
   isOpen,
   onClose,
 }) => {
-  const [query, setQuery] = useState('');
+  const [ticketIdQuery, setTicketIdQuery] = useState('');
+  const [phoneQuery, setPhoneQuery] = useState('');
   const [searched, setSearched] = useState(false);
   const [matchedTicket, setMatchedTicket] = useState<Ticket | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   if (!isOpen) return null;
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    const clean = query.trim().toUpperCase();
-    if (!clean) return;
+    setErrorMessage(null);
+    const cleanId = ticketIdQuery.trim().toUpperCase();
+    const cleanPhone = phoneQuery.replace(/\D/g, '');
+
+    if (!cleanId) {
+      setErrorMessage('Please enter your Ticket ID (e.g. DA-2026-XXXX).');
+      return;
+    }
+    if (!cleanPhone || cleanPhone.length < 10) {
+      setErrorMessage('Please enter your registered 10-digit WhatsApp number for verification.');
+      return;
+    }
 
     const all = loadStoredTickets();
     const found = all.find(
-      t => t.ticketId.toUpperCase() === clean || t.requesterPhone === query.trim()
+      t => t.ticketId.toUpperCase() === cleanId && t.requesterPhone.replace(/\D/g, '').endsWith(cleanPhone.slice(-10))
     );
 
-    setMatchedTicket(found || null);
+    if (!found) {
+      const idExists = all.some(t => t.ticketId.toUpperCase() === cleanId);
+      if (idExists) {
+        setErrorMessage('Ticket found, but phone number does not match registered details.');
+      } else {
+        setErrorMessage(`No ticket found with ID "${cleanId}".`);
+      }
+      setMatchedTicket(null);
+    } else {
+      setMatchedTicket(found);
+    }
     setSearched(true);
   };
 
@@ -49,139 +68,152 @@ export const TicketTrackerModal: React.FC<TicketTrackerModalProps> = ({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
       <div 
-        className="fixed inset-0 bg-void/85 backdrop-blur-sm transition-opacity" 
+        className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" 
         onClick={onClose} 
       />
 
       {/* Modal Dialog */}
-      <div className="relative bg-surface border border-surface-border rounded-2xl w-full max-w-lg p-6 space-y-5 shadow-nexus-lg z-10 text-xs">
+      <div className="relative bg-surface border border-surface-border rounded-2xl w-full max-w-lg p-6 space-y-5 shadow-2xl z-10 text-xs">
         
         {/* Header */}
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-surface-elevated border border-surface-border flex items-center justify-center">
-              <Search className="w-5 h-5 text-nexus-electric" />
+            <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
+              <Search className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-text-pure font-mono">
+              <h3 className="text-base font-bold text-text-pure">
                 Track Ticket Status
               </h3>
-              <p className="text-xs font-mono text-text-muted">
-                Enter your Ticket ID or registered mobile number
+              <p className="text-xs text-text-muted">
+                Enter your Ticket ID and registered mobile number
               </p>
             </div>
           </div>
 
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-text-muted hover:text-white hover:bg-surface-elevated transition"
+            className="p-1.5 rounded-lg text-text-muted hover:text-text-pure hover:bg-surface-elevated transition"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Search Bar Form */}
-        <form onSubmit={handleSearch} className="flex gap-2">
-          <input
-            type="text"
-            value={query}
-            onChange={e => setQuery(e.target.value)}
-            placeholder="e.g. NEXUS-2026-8941 or 9823012345"
-            className="flex-1 bg-surface-elevated text-text-pure rounded-xl border border-surface-border px-3.5 py-2.5 text-xs font-mono focus:border-nexus-electric focus:outline-none placeholder:text-text-faint"
-          />
-          <button
-            type="submit"
-            className="px-4 py-2.5 bg-nexus hover:bg-nexus-dark text-white font-mono font-medium rounded-xl flex items-center gap-1.5 shadow-nexus-sm transition"
-          >
-            <Search className="w-3.5 h-3.5" />
-            Check
-          </button>
+        <form onSubmit={handleSearch} className="space-y-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="block text-[11px] font-medium text-text-muted mb-1">
+                Ticket ID
+              </label>
+              <input
+                type="text"
+                value={ticketIdQuery}
+                onChange={e => setTicketIdQuery(e.target.value.toUpperCase())}
+                placeholder="e.g. DA-2026-8941"
+                className="w-full bg-surface-elevated text-text-pure rounded-xl border border-surface-border px-3.5 py-2 text-xs font-mono focus:border-indigo-500 focus:outline-none placeholder:text-text-faint"
+              />
+            </div>
+            <div>
+              <label className="block text-[11px] font-medium text-text-muted mb-1">
+                WhatsApp Number
+              </label>
+              <input
+                type="tel"
+                maxLength={10}
+                value={phoneQuery}
+                onChange={e => setPhoneQuery(e.target.value.replace(/\D/g, ''))}
+                placeholder="10-Digit Mobile"
+                className="w-full bg-surface-elevated text-text-pure rounded-xl border border-surface-border px-3.5 py-2 text-xs font-mono focus:border-indigo-500 focus:outline-none placeholder:text-text-faint"
+              />
+            </div>
+          </div>
+
+          {errorMessage && (
+            <p className="text-xs text-red-500 font-medium">{errorMessage}</p>
+          )}
+
+          <div className="flex justify-end pt-1">
+            <button
+              type="submit"
+              className="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl flex items-center gap-1.5 shadow-sm transition"
+            >
+              <Search className="w-3.5 h-3.5" />
+              Check Status
+            </button>
+          </div>
         </form>
 
         {/* Results view */}
-        {searched && (
-          <div>
-            {matchedTicket ? (
-              <div className="bg-surface-elevated border border-surface-border rounded-xl p-4 space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="font-mono text-sm font-bold text-text-pure">
-                    {matchedTicket.ticketId}
-                  </span>
-                  <Badge variant="status" value={matchedTicket.status} size="sm" />
-                </div>
+        {searched && matchedTicket && (
+          <div className="bg-surface-elevated border border-surface-border rounded-xl p-4 space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="font-mono text-sm font-bold text-indigo-600 dark:text-indigo-400">
+                {matchedTicket.ticketId}
+              </span>
+              <Badge variant="status" value={matchedTicket.status} size="sm" />
+            </div>
 
-                <div className="space-y-1">
-                  <h4 className="font-semibold text-text-pure text-xs">{matchedTicket.subject}</h4>
-                  <p className="text-[11px] font-mono text-nexus-electric">
-                    {matchedTicket.ecosystem} • {matchedTicket.category}
-                  </p>
-                </div>
+            <div className="space-y-1">
+              <h4 className="font-semibold text-text-pure text-xs">{matchedTicket.subject}</h4>
+              <p className="text-xs text-text-muted">
+                {matchedTicket.ecosystem} • {matchedTicket.category}
+              </p>
+            </div>
 
-                <div className="pt-2 border-t border-surface-border grid grid-cols-2 gap-2 text-[11px] font-mono">
-                  <div>
-                    <span className="text-text-faint block">Requester:</span>
-                    <span className="text-text-pure">{matchedTicket.requesterName}</span>
-                  </div>
-                  <div>
-                    <span className="text-text-faint block">Submitted At:</span>
-                    <span className="text-text-pure">{formatToISTDateTimeString(matchedTicket.createdAt)} IST</span>
-                  </div>
-                </div>
-
-                {matchedTicket.status === 'Resolved' && (
-                  <div className="p-3 bg-surface rounded-xl border border-surface-border space-y-1.5">
-                    <div className="flex items-center justify-between text-xs font-mono">
-                      <span className="text-white font-bold flex items-center gap-1">
-                        <CheckCircle className="w-3.5 h-3.5 text-white" />
-                        Resolution Recorded
-                      </span>
-                      {matchedTicket.resolutionDurationSeconds && (
-                        <span className="text-nexus-electric">
-                          Time taken: {formatDurationHuman(matchedTicket.resolutionDurationSeconds)}
-                        </span>
-                      )}
-                    </div>
-                    {matchedTicket.resolutionNotes && (
-                      <p className="text-[11px] text-text-pure leading-relaxed">
-                        {matchedTicket.resolutionNotes}
-                      </p>
-                    )}
-                  </div>
-                )}
-
-                {matchedTicket.status === 'In Progress' && (
-                  <div className="p-3 bg-nexus/10 rounded-xl border border-nexus/30 flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-nexus-electric animate-ping" />
-                    <span className="text-[11px] font-mono text-text-pure">
-                      An agent is actively working on your issue.
-                    </span>
-                  </div>
-                )}
-
-                {/* Follow up button */}
-                <div className="pt-1">
-                  <a
-                    href={`https://wa.me/919823012345?text=${encodeURIComponent(`Hello Nexus Support, I am following up on ticket ${matchedTicket.ticketId}`)}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="w-full py-2 rounded-xl bg-surface hover:bg-surface-hover border border-surface-border text-nexus-electric hover:text-white font-mono text-xs flex items-center justify-center gap-1.5 transition"
-                  >
-                    <MessageCircle className="w-3.5 h-3.5" />
-                    Chat with Support Desk on WhatsApp
-                  </a>
-                </div>
+            <div className="pt-2 border-t border-surface-border grid grid-cols-2 gap-2 text-xs">
+              <div>
+                <span className="text-text-muted block text-[11px]">Requester:</span>
+                <span className="text-text-pure font-medium">{matchedTicket.requesterName}</span>
               </div>
-            ) : (
-              <div className="p-6 text-center bg-surface-elevated border border-surface-border rounded-xl space-y-2">
-                <AlertCircle className="w-6 h-6 text-text-faint mx-auto" />
-                <p className="text-xs font-mono text-text-muted">
-                  No ticket found matching <span className="text-text-pure font-bold">"{query}"</span>
-                </p>
-                <p className="text-[11px] font-mono text-text-faint">
-                  Please verify your Ticket ID or mobile number and try again.
-                </p>
+              <div>
+                <span className="text-text-muted block text-[11px]">Submitted At:</span>
+                <span className="text-text-pure font-mono">{formatToISTDateTimeString(matchedTicket.createdAt)}</span>
+              </div>
+            </div>
+
+            {matchedTicket.status === 'Resolved' && (
+              <div className="p-3 bg-surface rounded-xl border border-emerald-200 dark:border-emerald-800 space-y-1.5">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-emerald-700 dark:text-emerald-400 font-bold flex items-center gap-1">
+                    <CheckCircle className="w-3.5 h-3.5" />
+                    Resolution Recorded
+                  </span>
+                  {matchedTicket.resolutionDurationSeconds && (
+                    <span className="text-text-muted font-mono text-[11px]">
+                      Duration: {formatDurationHuman(matchedTicket.resolutionDurationSeconds)}
+                    </span>
+                  )}
+                </div>
+                {matchedTicket.resolutionNotes && (
+                  <p className="text-xs text-text-pure leading-relaxed">
+                    {matchedTicket.resolutionNotes}
+                  </p>
+                )}
               </div>
             )}
+
+            {matchedTicket.status === 'In Progress' && (
+              <div className="p-3 bg-amber-50 dark:bg-amber-950/20 rounded-xl border border-amber-200 dark:border-amber-800 flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+                <span className="text-xs text-amber-800 dark:text-amber-300 font-medium">
+                  A support engineer is actively working on your issue.
+                </span>
+              </div>
+            )}
+
+            {/* Follow up button */}
+            <div className="pt-1">
+              <a
+                href={`https://wa.me/919823012345?text=${encodeURIComponent(`Hello Digital Azadi Support, I am following up on ticket ${matchedTicket.ticketId}`)}`}
+                target="_blank"
+                rel="noreferrer"
+                className="w-full py-2 rounded-xl bg-surface hover:bg-surface-elevated border border-surface-border text-emerald-600 dark:text-emerald-400 font-semibold text-xs flex items-center justify-center gap-1.5 transition"
+              >
+                <MessageCircle className="w-3.5 h-3.5" />
+                Chat with Support Desk on WhatsApp
+              </a>
+            </div>
           </div>
         )}
 

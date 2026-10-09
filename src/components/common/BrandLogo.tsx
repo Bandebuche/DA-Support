@@ -79,7 +79,7 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
     return (
       <div
         className={cn(
-          'inline-flex items-center justify-center bg-[#070B19] border border-white/10 shadow-nexus-sm backdrop-blur-md transition-all duration-200 hover:border-violet-500/40',
+          'inline-flex items-center justify-center bg-slate-900 border border-slate-800 shadow-sm transition-all duration-150',
           badgePadding[size],
           className
         )}

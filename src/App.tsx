@@ -6,7 +6,7 @@ import { ToastProvider, useToast } from './components/ui/Toast';
 import { ThemeProvider } from './context/ThemeContext';
 
 // Layout & Navigation
-import { NexusRail, NavItemKey } from './components/navigation/NexusRail';
+import { AdminSidebar, NavItemKey } from './components/navigation/AdminSidebar';
 import { TopCommandBar, ViewMode } from './components/navigation/TopCommandBar';
 import { KPICards } from './components/dashboard/KPICards';
 import { FilterTray, FilterState } from './components/dashboard/FilterTray';
@@ -381,10 +381,10 @@ function AppContent() {
 
   // 3. Admin Operations Deck (Authenticated)
   return (
-    <div className="min-h-screen bg-void text-text-pure flex flex-row selection:bg-nexus selection:text-white">
+    <div className="min-h-screen bg-void text-text-pure flex flex-row selection:bg-indigo-600 selection:text-white">
       
-      {/* Left Collapsible Rail */}
-      <NexusRail
+      {/* Left Collapsible Sidebar */}
+      <AdminSidebar
         currentTab={currentTab}
         onSelectTab={tab => {
           if (tab === 'settings') {
@@ -430,19 +430,19 @@ function AppContent() {
           onOpenSettings={() => setIsCloudConfigOpen(true)}
         />
 
-        {/* Global Page Directory Floating Trigger */}
-        <div className="px-6 pt-4 flex items-center justify-between">
+        {/* Global Page Directory Trigger */}
+        <div className="px-6 pt-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <button
               onClick={() => setIsLinksModalOpen(true)}
-              className="px-3 py-1.5 rounded-xl bg-surface-elevated hover:bg-surface-hover border border-surface-border text-nexus-electric hover:text-white font-mono text-xs flex items-center gap-1.5 transition"
+              className="px-3 py-1.5 rounded-xl bg-surface hover:bg-surface-elevated border border-surface-border text-indigo-600 dark:text-indigo-400 text-xs flex items-center gap-1.5 transition font-medium"
               title="View all separate page links"
             >
               <Link2 className="w-3.5 h-3.5" />
               <span>All Page Links</span>
             </button>
-            <span className="text-[11px] font-mono text-text-faint hidden sm:inline">
-              Click to copy direct URLs for Students, Franchisees, or Support Agents
+            <span className="text-xs text-text-muted hidden sm:inline">
+              Click to view direct URLs for Students, Franchisees, or Support Agents
             </span>
           </div>
 

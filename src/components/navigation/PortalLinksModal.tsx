@@ -101,24 +101,24 @@ export const PortalLinksModal: React.FC<PortalLinksModalProps> = ({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
       <div 
-        className="fixed inset-0 bg-void/85 backdrop-blur-sm transition-opacity" 
+        className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" 
         onClick={onClose} 
       />
 
       {/* Modal Dialog */}
-      <div className="relative bg-surface border border-surface-border rounded-2xl w-full max-w-2xl p-6 space-y-5 shadow-nexus-lg z-10 text-xs">
+      <div className="relative bg-surface border border-surface-border rounded-2xl w-full max-w-2xl p-6 space-y-5 shadow-2xl z-10 text-xs">
         
         {/* Header */}
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-surface-elevated border border-surface-border flex items-center justify-center">
-              <Globe className="w-5 h-5 text-nexus-electric" />
+            <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
+              <Globe className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-text-pure font-mono">
-                Separate Portal & Page Direct Links
+              <h3 className="text-base font-bold text-text-pure">
+                Portal & Page Direct Links
               </h3>
-              <p className="text-xs font-mono text-text-muted">
+              <p className="text-xs text-text-muted">
                 Direct URLs for Students, Franchisees, Support Agents, and Admins
               </p>
             </div>
@@ -126,7 +126,7 @@ export const PortalLinksModal: React.FC<PortalLinksModalProps> = ({
 
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-text-muted hover:text-white hover:bg-surface-elevated transition"
+            className="p-1.5 rounded-lg text-text-muted hover:text-text-pure hover:bg-surface-elevated transition"
           >
             <X className="w-4 h-4" />
           </button>
@@ -141,18 +141,18 @@ export const PortalLinksModal: React.FC<PortalLinksModalProps> = ({
             return (
               <div
                 key={link.id}
-                className="bg-surface-elevated border border-surface-border rounded-xl p-4 space-y-2 hover:border-nexus/40 transition"
+                className="bg-surface-elevated border border-surface-border rounded-xl p-4 space-y-2 hover:border-indigo-500/40 transition"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-center gap-2.5">
                     <div className="w-7 h-7 rounded-lg bg-surface border border-surface-border flex items-center justify-center shrink-0">
-                      <Icon className="w-3.5 h-3.5 text-nexus-electric" />
+                      <Icon className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
                     </div>
                     <div>
-                      <h4 className="font-mono font-bold text-text-pure text-xs">
+                      <h4 className="font-semibold text-text-pure text-xs">
                         {link.title}
                       </h4>
-                      <span className="text-[10px] font-mono text-nexus-electric">
+                      <span className="text-[10px] font-medium text-indigo-600 dark:text-indigo-400">
                         {link.badge}
                       </span>
                     </div>
@@ -161,10 +161,10 @@ export const PortalLinksModal: React.FC<PortalLinksModalProps> = ({
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => handleCopy(link.id, link.fullUrl)}
-                      className="px-2.5 py-1.5 rounded-lg bg-surface hover:bg-surface-hover border border-surface-border text-text-muted hover:text-white font-mono text-[11px] flex items-center gap-1 transition"
+                      className="px-2.5 py-1.5 rounded-lg bg-surface hover:bg-surface-hover border border-surface-border text-text-soft hover:text-text-pure text-[11px] flex items-center gap-1 transition font-medium"
                       title="Copy Direct URL"
                     >
-                      {isCopied ? <Check className="w-3 h-3 text-nexus-electric" /> : <Copy className="w-3 h-3" />}
+                      {isCopied ? <Check className="w-3 h-3 text-emerald-600 dark:text-emerald-400" /> : <Copy className="w-3 h-3" />}
                       <span>{isCopied ? 'Copied' : 'Copy Link'}</span>
                     </button>
 
@@ -173,7 +173,7 @@ export const PortalLinksModal: React.FC<PortalLinksModalProps> = ({
                         href={link.fullUrl}
                         target="_blank"
                         rel="noreferrer"
-                        className="px-3 py-1.5 rounded-lg bg-white text-void font-mono font-bold text-[11px] flex items-center gap-1 hover:bg-white/90 transition"
+                        className="px-3 py-1.5 rounded-lg bg-slate-900 text-white dark:bg-white dark:text-slate-900 font-semibold text-[11px] flex items-center gap-1 hover:opacity-90 transition"
                       >
                         <span>Open</span>
                         <ExternalLink className="w-3 h-3" />
@@ -181,7 +181,7 @@ export const PortalLinksModal: React.FC<PortalLinksModalProps> = ({
                     ) : (
                       <button
                         onClick={link.action}
-                        className="px-3 py-1.5 rounded-lg bg-nexus hover:bg-nexus-dark text-white font-mono font-bold text-[11px] flex items-center gap-1 shadow-nexus-sm transition"
+                        className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-[11px] flex items-center gap-1 shadow-sm transition"
                       >
                         <span>Navigate</span>
                         <ArrowRight className="w-3 h-3" />
@@ -190,14 +190,14 @@ export const PortalLinksModal: React.FC<PortalLinksModalProps> = ({
                   </div>
                 </div>
 
-                <p className="text-[11px] text-text-muted leading-relaxed font-sans">
+                <p className="text-xs text-text-muted leading-relaxed">
                   {link.description}
                 </p>
 
                 {/* URL Pill */}
-                <div className="bg-surface rounded-lg p-2 border border-surface-border flex items-center justify-between font-mono text-[11px] text-text-pure">
-                  <span className="truncate text-nexus-electric select-all">{link.fullUrl}</span>
-                  <span className="text-[10px] text-text-faint ml-2 shrink-0">
+                <div className="bg-surface rounded-lg p-2 border border-surface-border flex items-center justify-between text-xs text-text-pure">
+                  <span className="truncate text-indigo-600 dark:text-indigo-400 select-all font-mono">{link.fullUrl}</span>
+                  <span className="text-[11px] text-text-muted ml-2 shrink-0">
                     Alt: {link.altUrl}
                   </span>
                 </div>
@@ -207,11 +207,11 @@ export const PortalLinksModal: React.FC<PortalLinksModalProps> = ({
         </div>
 
         {/* Footer info */}
-        <div className="pt-2 border-t border-surface-border flex items-center justify-between font-mono text-[11px] text-text-faint">
+        <div className="pt-2 border-t border-surface-border flex items-center justify-between text-xs text-text-muted">
           <span>Supports path `/submit`, `/admin`, `/track` & query `?page=...`</span>
           <button
             onClick={onClose}
-            className="px-4 py-1.5 rounded-xl bg-surface-elevated hover:bg-surface-hover border border-surface-border text-text-pure transition"
+            className="px-4 py-1.5 rounded-xl bg-surface-elevated hover:bg-surface-hover border border-surface-border text-text-pure transition font-medium"
           >
             Close
           </button>

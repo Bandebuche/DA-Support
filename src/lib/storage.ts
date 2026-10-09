@@ -1,29 +1,37 @@
 import { Ticket } from '../types/ticket';
 import { INITIAL_TICKETS } from '../data/mockTickets';
 
-const STORAGE_KEY_TICKETS = 'NEXUS_TICKETS_STORE_V2';
-const STORAGE_KEY_WEB_APP_URL = 'NEXUS_APPS_SCRIPT_URL_V2';
-const STORAGE_KEY_AUTH = 'NEXUS_AUTH_SESSION_V2';
+const STORAGE_KEY_TICKETS = 'DA_SUPPORT_TICKETS_V2';
+const LEGACY_STORAGE_KEY_TICKETS = 'NEXUS_TICKETS_STORE_V2';
+
+const STORAGE_KEY_WEB_APP_URL = 'DA_SUPPORT_APPS_SCRIPT_URL_V2';
+const LEGACY_STORAGE_KEY_WEB_APP_URL = 'NEXUS_APPS_SCRIPT_URL_V2';
+
+const STORAGE_KEY_AUTH = 'DA_SUPPORT_AUTH_SESSION_V2';
+const LEGACY_STORAGE_KEY_AUTH = 'NEXUS_AUTH_SESSION_V2';
 
 /**
- * Generate unique, authoritative Ticket ID: NEXUS-YYYY-XXXX
+ * Generate unique, authoritative Ticket ID: DA-YYYY-XXXX
  */
-export function generateNexusTicketId(): string {
+export function generateDATicketId(): string {
   const year = new Date().getFullYear();
   const chars = '0123456789ABCDEFGHJKLMNPQRSTUVWXYZ';
   let rand = '';
   for (let i = 0; i < 4; i++) {
     rand += chars.charAt(Math.floor(Math.random() * chars.length));
   }
-  return `NEXUS-${year}-${rand}`;
+  return `DA-${year}-${rand}`;
 }
+
+// Backward-compatible alias
+export const generateNexusTicketId = generateDATicketId;
 
 /**
  * Load all tickets with zero-duplicate guarantee
  */
 export function loadStoredTickets(): Ticket[] {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY_TICKETS);
+    const raw = localStorage.getItem(STORAGE_KEY_TICKETS) || localStorage.getItem(LEGACY_STORAGE_KEY_TICKETS);
     if (!raw) {
       saveStoredTickets(INITIAL_TICKETS);
       return INITIAL_TICKETS;
@@ -74,7 +82,7 @@ export function upsertStoredTicket(ticket: Ticket): Ticket[] {
  * Get configured Google Apps Script Webhook URL
  */
 export function getSavedAppsScriptUrl(): string {
-  return localStorage.getItem(STORAGE_KEY_WEB_APP_URL) || '';
+  return localStorage.getItem(STORAGE_KEY_WEB_APP_URL) || localStorage.getItem(LEGACY_STORAGE_KEY_WEB_APP_URL) || '';
 }
 
 /**
@@ -85,6 +93,7 @@ export function saveAppsScriptUrl(url: string): void {
     localStorage.setItem(STORAGE_KEY_WEB_APP_URL, url.trim());
   } else {
     localStorage.removeItem(STORAGE_KEY_WEB_APP_URL);
+    localStorage.removeItem(LEGACY_STORAGE_KEY_WEB_APP_URL);
   }
 }
 
@@ -112,7 +121,7 @@ export function saveSpreadsheetUrl(url: string): void {
  * Session auth helpers
  */
 export function isUserAuthenticated(): boolean {
-  return sessionStorage.getItem(STORAGE_KEY_AUTH) === 'true';
+  return sessionStorage.getItem(STORAGE_KEY_AUTH) === 'true' || sessionStorage.getItem(LEGACY_STORAGE_KEY_AUTH) === 'true';
 }
 
 export function setUserAuthenticated(auth: boolean): void {
@@ -120,5 +129,6 @@ export function setUserAuthenticated(auth: boolean): void {
     sessionStorage.setItem(STORAGE_KEY_AUTH, 'true');
   } else {
     sessionStorage.removeItem(STORAGE_KEY_AUTH);
+    sessionStorage.removeItem(LEGACY_STORAGE_KEY_AUTH);
   }
 }

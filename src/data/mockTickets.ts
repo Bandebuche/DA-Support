@@ -3,7 +3,7 @@ import { Ticket } from '../types/ticket';
 export const INITIAL_TICKETS: Ticket[] = [
   {
     id: 't-001',
-    ticketId: 'NEXUS-2026-K492',
+    ticketId: 'DA-2026-K492',
     requesterName: 'Pramod K Siriah',
     requesterEmail: 'pramodksiriah9@gmail.com',
     requesterPhone: '8779594384',
@@ -46,7 +46,7 @@ export const INITIAL_TICKETS: Ticket[] = [
   },
   {
     id: 't-002',
-    ticketId: 'NEXUS-2026-T821',
+    ticketId: 'DA-2026-T821',
     requesterName: 'Rashmi Naiknavare',
     requesterEmail: 'rashnaik125@gmail.com',
     requesterPhone: '9702957888',
@@ -72,7 +72,7 @@ export const INITIAL_TICKETS: Ticket[] = [
   },
   {
     id: 't-003',
-    ticketId: 'NEXUS-2026-8941',
+    ticketId: 'DA-2026-8941',
     requesterName: 'Shivpoojan Maurya',
     requesterEmail: 'shivpoojanm138@gmail.com',
     requesterPhone: '7889966942',
@@ -110,7 +110,7 @@ export const INITIAL_TICKETS: Ticket[] = [
   },
   {
     id: 't-004',
-    ticketId: 'NEXUS-2026-9014',
+    ticketId: 'DA-2026-9014',
     requesterName: 'Harsh Sandhu',
     requesterEmail: 'thegopeakin@gmail.com',
     requesterPhone: '9478961561',
@@ -133,7 +133,7 @@ export const INITIAL_TICKETS: Ticket[] = [
   },
   {
     id: 't-005',
-    ticketId: 'NEXUS-2026-B102',
+    ticketId: 'DA-2026-B102',
     requesterName: 'Kallappa Ganiger',
     requesterEmail: 'kalmeshg@gmail.com',
     requesterPhone: '9880359248',

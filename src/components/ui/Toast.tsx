@@ -39,17 +39,17 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           <div
             key={t.id}
             className={cn(
-              'pointer-events-auto p-3.5 rounded-2xl border flex items-start gap-3 shadow-2xl transition-all duration-300',
-              'bg-surface-elevated/95 backdrop-blur-md border-surface-border',
-              t.type === 'success' && 'border-nexus/40 shadow-nexus-sm',
-              t.type === 'error' && 'border-white/30',
+              'pointer-events-auto p-3.5 rounded-2xl border flex items-start gap-3 shadow-lg transition-all duration-200',
+              'bg-surface border-surface-border text-xs',
+              t.type === 'success' && 'border-emerald-300 dark:border-emerald-800',
+              t.type === 'error' && 'border-red-300 dark:border-red-800',
               'animate-in fade-in slide-in-from-bottom-3'
             )}
           >
             <div className="mt-0.5 shrink-0">
-              {t.type === 'success' && <CheckCircle2 className="w-4 h-4 text-nexus-electric" />}
-              {t.type === 'error' && <AlertCircle className="w-4 h-4 text-white" />}
-              {t.type === 'info' && <Info className="w-4 h-4 text-nexus" />}
+              {t.type === 'success' && <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />}
+              {t.type === 'error' && <AlertCircle className="w-4 h-4 text-red-600 dark:text-red-400" />}
+              {t.type === 'info' && <Info className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />}
             </div>
             <div className="flex-1 min-w-0">
               <h5 className="text-xs font-semibold text-text-pure">{t.title}</h5>

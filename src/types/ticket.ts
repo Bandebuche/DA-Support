@@ -33,7 +33,7 @@ export interface TicketAuditEvent {
 
 export interface Ticket {
   id: string;
-  ticketId: string; // e.g. NEXUS-2026-8941
+  ticketId: string; // e.g. DA-2026-8941
   requesterName: string;
   requesterEmail: string;
   requesterPhone: string; // Validated 10 digits

@@ -1,12 +1,7 @@
 import React from 'react';
 import { 
   Filter, 
-  X, 
   ArrowUpDown, 
-  Layers, 
-  Sparkles, 
-  ShieldCheck, 
-  Calendar,
   RotateCcw
 } from 'lucide-react';
 import { ProductEcosystem, MembershipTier, TicketPriority } from '../../types/ticket';
@@ -63,19 +58,19 @@ export const FilterTray: React.FC<FilterTrayProps> = ({
     filters.sortBy !== 'newest';
 
   return (
-    <div className="bg-surface border border-surface-border rounded-2xl p-4 space-y-3">
+    <div className="bg-surface border border-surface-border rounded-2xl p-4 space-y-3 shadow-sm">
       <div className="flex flex-wrap items-center justify-between gap-3">
         {/* Left: Filter label and counts */}
-        <div className="flex items-center gap-2 text-xs font-mono">
-          <Filter className="w-3.5 h-3.5 text-nexus-electric" />
-          <span className="text-text-pure font-bold uppercase tracking-wider">Refine Queue</span>
-          <span className="px-2 py-0.5 rounded-md bg-surface-elevated text-text-muted border border-surface-border">
+        <div className="flex items-center gap-2 text-xs">
+          <Filter className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+          <span className="text-text-pure font-bold tracking-wide">Filter Queue</span>
+          <span className="px-2 py-0.5 rounded-md bg-surface-elevated text-text-muted border border-surface-border font-medium">
             Showing {filteredCount} of {totalCount}
           </span>
           {isFiltered && (
             <button
               onClick={resetFilters}
-              className="flex items-center gap-1 text-[11px] text-nexus-electric hover:text-white transition ml-2"
+              className="flex items-center gap-1 text-xs text-indigo-600 dark:text-indigo-400 hover:underline transition ml-2 font-medium"
             >
               <RotateCcw className="w-3 h-3" />
               Reset All
@@ -85,14 +80,14 @@ export const FilterTray: React.FC<FilterTrayProps> = ({
 
         {/* Right: Sort selector */}
         <div className="flex items-center gap-2">
-          <span className="text-[11px] font-mono text-text-faint flex items-center gap-1">
-            <ArrowUpDown className="w-3 h-3 text-text-muted" />
+          <span className="text-xs text-text-muted flex items-center gap-1 font-medium">
+            <ArrowUpDown className="w-3.5 h-3.5 text-text-muted" />
             Sort:
           </span>
           <select
             value={filters.sortBy}
             onChange={e => updateFilter('sortBy', e.target.value as FilterState['sortBy'])}
-            className="bg-surface-elevated text-text-pure text-xs rounded-xl border border-surface-border px-2.5 py-1.5 focus:border-nexus-electric focus:outline-none"
+            className="bg-surface-elevated text-text-pure text-xs rounded-xl border border-surface-border px-2.5 py-1.5 focus:border-indigo-500 focus:outline-none"
           >
             <option value="newest">Newest First</option>
             <option value="oldest">Oldest First</option>
@@ -106,13 +101,13 @@ export const FilterTray: React.FC<FilterTrayProps> = ({
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2.5 pt-1">
         {/* Ecosystem */}
         <div>
-          <label className="block text-[10px] font-mono uppercase text-text-faint mb-1">
+          <label className="block text-[11px] font-medium text-text-muted mb-1">
             Ecosystem
           </label>
           <select
             value={filters.ecosystem}
             onChange={e => updateFilter('ecosystem', e.target.value as FilterState['ecosystem'])}
-            className="w-full bg-surface-elevated text-text-pure text-xs rounded-xl border border-surface-border px-2.5 py-1.5 focus:border-nexus-electric focus:outline-none truncate"
+            className="w-full bg-surface-elevated text-text-pure text-xs rounded-xl border border-surface-border px-2.5 py-1.5 focus:border-indigo-500 focus:outline-none truncate"
           >
             <option value="all">All Ecosystems</option>
             <option value="Chakravyuh CRM">Chakravyuh CRM</option>
@@ -124,13 +119,13 @@ export const FilterTray: React.FC<FilterTrayProps> = ({
 
         {/* Membership Tier */}
         <div>
-          <label className="block text-[10px] font-mono uppercase text-text-faint mb-1">
-            Tier
+          <label className="block text-[11px] font-medium text-text-muted mb-1">
+            Membership
           </label>
           <select
             value={filters.membershipTier}
             onChange={e => updateFilter('membershipTier', e.target.value as FilterState['membershipTier'])}
-            className="w-full bg-surface-elevated text-text-pure text-xs rounded-xl border border-surface-border px-2.5 py-1.5 focus:border-nexus-electric focus:outline-none truncate"
+            className="w-full bg-surface-elevated text-text-pure text-xs rounded-xl border border-surface-border px-2.5 py-1.5 focus:border-indigo-500 focus:outline-none truncate"
           >
             <option value="all">All Memberships</option>
             <option value="Diamond Elite">Diamond Elite</option>
@@ -141,13 +136,13 @@ export const FilterTray: React.FC<FilterTrayProps> = ({
 
         {/* Priority */}
         <div>
-          <label className="block text-[10px] font-mono uppercase text-text-faint mb-1">
+          <label className="block text-[11px] font-medium text-text-muted mb-1">
             Priority
           </label>
           <select
             value={filters.priority}
             onChange={e => updateFilter('priority', e.target.value as FilterState['priority'])}
-            className="w-full bg-surface-elevated text-text-pure text-xs rounded-xl border border-surface-border px-2.5 py-1.5 focus:border-nexus-electric focus:outline-none truncate"
+            className="w-full bg-surface-elevated text-text-pure text-xs rounded-xl border border-surface-border px-2.5 py-1.5 focus:border-indigo-500 focus:outline-none truncate"
           >
             <option value="all">All Priorities</option>
             <option value="Urgent">Urgent</option>
@@ -159,13 +154,13 @@ export const FilterTray: React.FC<FilterTrayProps> = ({
 
         {/* Category */}
         <div>
-          <label className="block text-[10px] font-mono uppercase text-text-faint mb-1">
+          <label className="block text-[11px] font-medium text-text-muted mb-1">
             Category
           </label>
           <select
             value={filters.category}
             onChange={e => updateFilter('category', e.target.value)}
-            className="w-full bg-surface-elevated text-text-pure text-xs rounded-xl border border-surface-border px-2.5 py-1.5 focus:border-nexus-electric focus:outline-none truncate"
+            className="w-full bg-surface-elevated text-text-pure text-xs rounded-xl border border-surface-border px-2.5 py-1.5 focus:border-indigo-500 focus:outline-none truncate"
           >
             <option value="all">All Categories</option>
             {availableCategories.map(cat => (
@@ -178,13 +173,13 @@ export const FilterTray: React.FC<FilterTrayProps> = ({
 
         {/* Date Range */}
         <div>
-          <label className="block text-[10px] font-mono uppercase text-text-faint mb-1">
+          <label className="block text-[11px] font-medium text-text-muted mb-1">
             Timeframe (IST)
           </label>
           <select
             value={filters.dateRange}
             onChange={e => updateFilter('dateRange', e.target.value as FilterState['dateRange'])}
-            className="w-full bg-surface-elevated text-text-pure text-xs rounded-xl border border-surface-border px-2.5 py-1.5 focus:border-nexus-electric focus:outline-none truncate"
+            className="w-full bg-surface-elevated text-text-pure text-xs rounded-xl border border-surface-border px-2.5 py-1.5 focus:border-indigo-500 focus:outline-none truncate"
           >
             <option value="all">All Time</option>
             <option value="today">Today (IST)</option>

@@ -3,19 +3,11 @@ import { Ticket, TicketStatus } from '../../types/ticket';
 import { LiveStopwatch } from '../stopwatch/LiveStopwatch';
 import { Badge } from '../ui/Badge';
 import { formatDurationHuman } from '../../lib/stopwatch';
-import { formatToISTDateString, formatToISTTimeString } from '../../lib/timezone';
 import { 
   Play, 
   CheckCircle, 
-  Clock, 
-  User, 
-  ExternalLink, 
-  Phone, 
-  ArrowRight,
-  MoreVertical,
-  Layers,
-  Sparkles,
-  MessageCircle
+  MessageCircle, 
+  Sparkles 
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
@@ -28,10 +20,10 @@ interface KanbanBoardProps {
 }
 
 const COLUMNS: { id: TicketStatus; label: string; description: string; dotColor: string }[] = [
-  { id: 'New', label: 'New Inquiries', description: 'Incoming queue', dotColor: 'bg-violet-400' },
-  { id: 'In Progress', label: 'In Progress', description: 'Active stopwatch sessions', dotColor: 'bg-amber-400 animate-ping' },
+  { id: 'New', label: 'New Inquiries', description: 'Incoming queue', dotColor: 'bg-indigo-500' },
+  { id: 'In Progress', label: 'In Progress', description: 'Active stopwatch sessions', dotColor: 'bg-amber-500' },
   { id: 'Waiting for User', label: 'Waiting for User', description: 'Student response pending', dotColor: 'bg-slate-400' },
-  { id: 'Resolved', label: 'Resolved', description: 'Closed SLA records', dotColor: 'bg-emerald-400' },
+  { id: 'Resolved', label: 'Resolved', description: 'Closed SLA records', dotColor: 'bg-emerald-500' },
 ];
 
 export const KanbanBoard: React.FC<KanbanBoardProps> = ({
@@ -39,7 +31,6 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
   onSelectTicket,
   onStartSupport,
   onResolveTicket,
-  onStatusChange,
 }) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-start">
@@ -49,38 +40,29 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
         return (
           <div
             key={col.id}
-            className="bg-surface-obsidian border border-surface-border rounded-3xl p-3.5 flex flex-col min-h-[600px] max-h-[82vh] backdrop-blur-xl shadow-xl"
+            className="bg-surface border border-surface-border rounded-2xl p-3 flex flex-col min-h-[500px] max-h-[82vh] shadow-sm"
           >
             {/* Column Header */}
-            <div className="px-2 py-2 flex items-center justify-between border-b border-surface-border pb-3 mb-3">
+            <div className="px-2 py-2 flex items-center justify-between border-b border-surface-border pb-2.5 mb-2.5">
               <div>
                 <div className="flex items-center gap-2">
                   <span className={cn('w-2 h-2 rounded-full', col.dotColor)} />
-                  <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-text-pure">
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-text-pure">
                     {col.label}
                   </h3>
-                  <span
-                    className={cn(
-                      'px-2 py-0.5 rounded-full text-[10px] font-mono font-bold',
-                      col.id === 'In Progress' 
-                        ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' 
-                        : col.id === 'Resolved'
-                        ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
-                        : 'bg-surface-elevated text-text-muted border border-surface-border'
-                    )}
-                  >
+                  <span className="px-1.5 py-0.2 rounded-full text-[10px] font-semibold bg-surface-elevated text-text-muted border border-surface-border">
                     {columnTickets.length}
                   </span>
                 </div>
-                <p className="text-[10px] font-mono text-text-faint mt-0.5 pl-4">{col.description}</p>
+                <p className="text-[11px] text-text-muted mt-0.5 pl-4">{col.description}</p>
               </div>
             </div>
 
             {/* Column Cards List */}
-            <div className="flex-1 overflow-y-auto space-y-3 pr-1">
+            <div className="flex-1 overflow-y-auto space-y-2.5 pr-1">
               {columnTickets.length === 0 ? (
-                <div className="h-32 border border-dashed border-surface-border rounded-2xl flex items-center justify-center text-center p-4">
-                  <p className="text-xs font-mono text-text-faint">No tickets in this lane</p>
+                <div className="h-28 border border-dashed border-surface-border rounded-xl flex items-center justify-center text-center p-4">
+                  <p className="text-xs text-text-muted">No tickets in this lane</p>
                 </div>
               ) : (
                 columnTickets.map(ticket => (
@@ -88,119 +70,70 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
                     key={ticket.id}
                     onClick={() => onSelectTicket(ticket)}
                     className={cn(
-                      'bg-surface-elevated/70 hover:bg-surface-cosmic border border-surface-border rounded-2xl p-4 space-y-3 cursor-pointer transition-all duration-300 group relative backdrop-blur-md shadow-md',
-                      'hover:border-neon-violet/40 hover:shadow-nexus-glow',
-                      ticket.membershipTier === 'Diamond Elite' && 'border-l-4 border-l-violet-500'
+                      'bg-surface-elevated/70 hover:bg-surface border border-surface-border rounded-xl p-3.5 space-y-2.5 cursor-pointer transition-all duration-150 group shadow-sm hover:shadow hover:border-indigo-400/50',
+                      ticket.membershipTier === 'Diamond Elite' && 'border-l-4 border-l-indigo-500'
                     )}
                   >
                     {/* Top Row: Ticket ID & Tier */}
                     <div className="flex items-center justify-between gap-2">
-                      <span className="font-mono text-xs font-black text-white group-hover:text-neon-electric transition tracking-wider">
+                      <span className="font-mono text-xs font-bold text-indigo-600 dark:text-indigo-400 group-hover:underline">
                         {ticket.ticketId}
                       </span>
-                      <div className="flex items-center gap-1.5">
-                        {ticket.membershipTier === 'Diamond Elite' && (
-                          <span className="px-1.5 py-0.5 rounded-full text-[9px] font-mono font-bold bg-violet-500/20 text-neon-electric border border-violet-500/30">
-                            DIAMOND
-                          </span>
-                        )}
-                        <Badge variant="status" value={ticket.status} size="sm" />
-                      </div>
-                    </div>
-
-                    {/* Requester & Ecosystem */}
-                    <div className="space-y-1">
-                      <h4 className="text-xs font-bold text-white line-clamp-1 group-hover:text-violet-200 transition">
-                        {ticket.subject}
-                      </h4>
-                      <p className="text-[11px] text-text-muted line-clamp-2 leading-relaxed font-sans">
-                        {ticket.description}
-                      </p>
-                    </div>
-
-                    {/* Requester info */}
-                    <div className="flex items-center justify-between text-[11px] font-mono text-text-faint pt-1 border-t border-surface-border">
-                      <div className="flex items-center gap-1.5 text-text-soft truncate max-w-[140px]">
-                        <User className="w-3 h-3 text-text-faint shrink-0" />
-                        <span className="truncate">{ticket.requesterName}</span>
-                      </div>
-                      <span className="text-[10px] text-neon-electric shrink-0">
-                        {ticket.ecosystem.replace(' CRM', '')}
-                      </span>
-                    </div>
-
-                    {/* Active Stopwatch Counting UP */}
-                    {ticket.status === 'In Progress' && ticket.supportStartedAt && (
-                      <div className="pt-2 border-t border-amber-500/20 flex items-center justify-between bg-amber-500/5 -mx-4 -mb-4 p-3 rounded-b-2xl">
-                        <div className="flex items-center gap-1.5">
-                          <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />
-                          <span className="text-[10px] font-mono text-amber-300 font-bold">Live Support:</span>
-                        </div>
-                        <LiveStopwatch 
-                          startedAtUtc={ticket.supportStartedAt} 
-                          size="sm" 
-                          variant="compact" 
-                        />
-                      </div>
-                    )}
-
-                    {ticket.status === 'Resolved' && (
-                      <div className="pt-2 border-t border-surface-border flex items-center justify-between text-[11px] font-mono">
-                        <span className="text-emerald-400 flex items-center gap-1">
-                          <CheckCircle className="w-3 h-3" />
-                          Total Time:
+                      {ticket.membershipTier === 'Diamond Elite' && (
+                        <span className="px-1.5 py-0.2 rounded text-[10px] font-semibold bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 flex items-center gap-1">
+                          <Sparkles className="w-2.5 h-2.5" />
+                          Diamond
                         </span>
-                        <span className="text-white font-bold">
-                          {formatDurationHuman(ticket.resolutionDurationSeconds || ticket.activeDurationSeconds || 0)}
-                        </span>
-                      </div>
-                    )}
-
-                    {/* Quick Action Dock */}
-                    <div className="pt-2 flex items-center justify-between gap-1.5" onClick={e => e.stopPropagation()}>
-                      {/* WhatsApp Link */}
-                      <a
-                        href={`https://wa.me/91${ticket.requesterPhone}?text=${encodeURIComponent(`Hello ${ticket.requesterName}, regarding your Nexus ticket ${ticket.ticketId}: `)}`}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="p-1.5 rounded-lg bg-surface-elevated hover:bg-surface-hover border border-surface-border text-emerald-400 hover:text-white transition"
-                        title="Quick WhatsApp Chat"
-                      >
-                        <MessageCircle className="w-3.5 h-3.5 text-emerald-400" />
-                      </a>
-
-                      <div className="flex items-center gap-1.5">
-                        {ticket.status === 'New' && (
-                          <button
-                            onClick={() => onStartSupport(ticket.ticketId)}
-                            className="px-3 py-1 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-[11px] font-mono font-bold flex items-center gap-1 shadow-nexus-glow transition"
-                          >
-                            <Play className="w-3 h-3 fill-current" />
-                            Start
-                          </button>
-                        )}
-
-                        {ticket.status === 'In Progress' && (
-                          <button
-                            onClick={() => onResolveTicket(ticket)}
-                            className="px-3 py-1 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-void text-[11px] font-mono font-black flex items-center gap-1 shadow-[0_0_15px_-2px_rgba(16,185,129,0.5)] transition"
-                          >
-                            <CheckCircle className="w-3.5 h-3.5" />
-                            Resolve
-                          </button>
-                        )}
-
-                        {ticket.status === 'Waiting for User' && (
-                          <button
-                            onClick={() => onStatusChange(ticket.ticketId, 'In Progress')}
-                            className="px-3 py-1 rounded-xl bg-surface-elevated hover:bg-surface-hover border border-surface-border text-white text-[11px] font-mono font-medium flex items-center gap-1 transition"
-                          >
-                            <ArrowRight className="w-3 h-3 text-neon-electric" />
-                            Resume
-                          </button>
-                        )}
-                      </div>
+                      )}
                     </div>
+
+                    {/* Subject */}
+                    <h4 className="text-xs font-bold text-text-pure group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors line-clamp-2">
+                      {ticket.subject}
+                    </h4>
+
+                    {/* Requester & Category */}
+                    <div className="text-[11px] text-text-muted flex items-center justify-between gap-2 pt-1 border-t border-surface-border">
+                      <span className="font-medium truncate text-text-soft">{ticket.requesterName}</span>
+                      <span className="truncate">{ticket.category}</span>
+                    </div>
+
+                    {/* Action Bar */}
+                    <div className="flex items-center justify-between gap-1 pt-1" onClick={e => e.stopPropagation()}>
+                      <div className="flex items-center gap-1.5">
+                        <Badge variant="priority" value={ticket.priority} size="sm" />
+                        <a
+                          href={`https://wa.me/91${ticket.requesterPhone}?text=${encodeURIComponent(`Hello ${ticket.requesterName}, regarding your ticket ${ticket.ticketId}: `)}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="p-1 rounded-md bg-surface hover:bg-emerald-50 dark:hover:bg-emerald-950/30 border border-surface-border text-emerald-600 dark:text-emerald-400 transition"
+                          title="WhatsApp Chat"
+                        >
+                          <MessageCircle className="w-3 h-3" />
+                        </a>
+                      </div>
+
+                      {ticket.status === 'New' && (
+                        <button
+                          onClick={() => onStartSupport(ticket.ticketId)}
+                          className="px-2 py-0.5 rounded-md bg-indigo-600 hover:bg-indigo-700 text-white text-[11px] font-semibold flex items-center gap-1 transition"
+                        >
+                          <Play className="w-2.5 h-2.5 fill-current" />
+                          Start
+                        </button>
+                      )}
+
+                      {ticket.status === 'In Progress' && (
+                        <button
+                          onClick={() => onResolveTicket(ticket)}
+                          className="px-2 py-0.5 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-semibold flex items-center gap-1 transition"
+                        >
+                          <CheckCircle className="w-2.5 h-2.5" />
+                          Resolve
+                        </button>
+                      )}
+                    </div>
+
                   </div>
                 ))
               )}

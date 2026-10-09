@@ -10,12 +10,13 @@ interface ThemeContextType {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-const THEME_STORAGE_KEY = 'NEXUS_THEME_PREFERENCE';
+const THEME_STORAGE_KEY = 'DA_SUPPORT_THEME';
+const LEGACY_THEME_KEY = 'NEXUS_THEME_PREFERENCE';
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [theme, setThemeState] = useState<Theme>(() => {
     if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem(THEME_STORAGE_KEY);
+      const saved = localStorage.getItem(THEME_STORAGE_KEY) || localStorage.getItem(LEGACY_THEME_KEY);
       if (saved === 'light' || saved === 'dark') return saved;
       // Default to dark mode for signature operations deck aesthetic
       if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {

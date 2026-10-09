@@ -7,17 +7,8 @@ import { formatToISTDateString, formatToISTTimeString } from '../../lib/timezone
 import { 
   Play, 
   CheckCircle, 
-  Clock, 
-  User, 
-  Phone, 
-  Mail, 
-  ExternalLink,
-  MessageCircle,
-  Sliders,
-  Sparkles,
-  Shield,
-  Zap,
-  Tag
+  MessageCircle, 
+  Sparkles 
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
@@ -34,12 +25,11 @@ export const TicketCardGrid: React.FC<TicketCardGridProps> = ({
   onSelectTicket,
   onStartSupport,
   onResolveTicket,
-  onStatusChange,
 }) => {
   if (tickets.length === 0) {
     return (
-      <div className="bg-surface-obsidian border border-surface-border rounded-3xl p-12 text-center backdrop-blur-xl">
-        <p className="text-sm font-mono text-text-muted">No tickets match the selected filters</p>
+      <div className="bg-surface border border-surface-border rounded-2xl p-12 text-center shadow-sm">
+        <p className="text-sm font-medium text-text-muted">No tickets match the selected filters</p>
       </div>
     );
   }
@@ -55,22 +45,21 @@ export const TicketCardGrid: React.FC<TicketCardGridProps> = ({
             key={ticket.id}
             onClick={() => onSelectTicket(ticket)}
             className={cn(
-              'bg-surface-obsidian hover:bg-surface-cosmic border border-surface-border rounded-2xl p-5 flex flex-col justify-between transition-all duration-300 cursor-pointer group relative backdrop-blur-xl shadow-lg',
-              'hover:border-neon-violet/40 hover:shadow-nexus-glow',
-              isDiamond && 'border-l-4 border-l-violet-500'
+              'bg-surface hover:bg-surface-elevated/50 border border-surface-border rounded-2xl p-5 flex flex-col justify-between transition-all duration-200 cursor-pointer group shadow-sm hover:shadow-md hover:border-indigo-400/50',
+              isDiamond && 'border-l-4 border-l-indigo-500'
             )}
           >
-            {/* Top Row: Glowing Monospace Ticket ID, Category Chip, and Status Badge */}
+            {/* Header: ID, Diamond badge, Status */}
             <div className="space-y-3">
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
-                  <span className="font-mono text-xs font-black text-white group-hover:text-neon-electric tracking-wider transition drop-shadow-[0_0_10px_rgba(167,139,250,0.3)]">
+                  <span className="font-mono text-xs font-bold text-indigo-600 dark:text-indigo-400 tracking-wider">
                     {ticket.ticketId}
                   </span>
                   {isDiamond && (
-                    <span className="px-2 py-0.5 rounded-full text-[9px] font-mono font-bold bg-violet-500/20 text-neon-electric border border-violet-500/30 flex items-center gap-1 shadow-sm">
-                      <Sparkles className="w-2.5 h-2.5 text-neon-electric" />
-                      DIAMOND
+                    <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 flex items-center gap-1">
+                      <Sparkles className="w-2.5 h-2.5" />
+                      Diamond
                     </span>
                   )}
                 </div>
@@ -81,128 +70,72 @@ export const TicketCardGrid: React.FC<TicketCardGridProps> = ({
               </div>
 
               {/* Category & Ecosystem Chip */}
-              <div className="flex items-center gap-2 text-[11px] font-mono">
-                <span className="px-2 py-0.5 rounded-md bg-void/60 text-neon-electric border border-surface-border">
-                  {ticket.userType === 'Franchise Hub' ? '🏢 Franchise' : '👨‍🎓 Student'} • {ticket.membershipTier.replace(' Elite', '').replace(' Pass', '')}
+              <div className="flex items-center gap-2 text-xs text-text-muted">
+                <span className="px-2 py-0.5 rounded-md bg-surface-elevated border border-surface-border font-medium">
+                  {ticket.userType.includes('Franchise') ? '🏢 Franchise' : '👨‍🎓 Student'}
                 </span>
-                <span className="text-text-faint">•</span>
-                <span className="text-text-muted truncate">
+                <span>•</span>
+                <span className="truncate">
                   {ticket.ecosystem.replace(' CRM', '')}
                 </span>
               </div>
 
-              {/* Query Module: Subject & 2-Line Expandable Teaser with Tag Highlights */}
+              {/* Subject & Description */}
               <div>
-                <h3 className="text-sm font-bold text-white group-hover:text-violet-200 transition line-clamp-1">
+                <h3 className="text-sm font-bold text-text-pure group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors line-clamp-1">
                   {ticket.subject}
                 </h3>
-                <p className="text-xs text-text-muted line-clamp-2 leading-relaxed mt-1 font-sans">
+                <p className="text-xs text-text-muted line-clamp-2 leading-relaxed mt-1">
                   {ticket.description}
                 </p>
               </div>
             </div>
 
-            {/* Requester Dossier & Live Action Dock */}
-            <div className="mt-4 pt-3 border-t border-surface-border space-y-3">
-              
-              {/* Requester Section */}
-              <div className="flex items-center justify-between text-xs font-mono">
-                <div className="flex items-center gap-2 text-white font-bold truncate">
-                  <div className="w-5 h-5 rounded-full bg-violet-600/30 border border-violet-500/40 flex items-center justify-center text-[10px] text-neon-electric shrink-0">
-                    {ticket.requesterName.charAt(0)}
-                  </div>
-                  <span className="truncate">{ticket.requesterName}</span>
+            {/* Bottom Module: Requester & Actions */}
+            <div className="mt-4 pt-3 border-t border-surface-border flex items-center justify-between gap-2">
+              <div className="space-y-0.5">
+                <div className="font-semibold text-text-pure text-xs">
+                  {ticket.requesterName}
                 </div>
-                
-                <div className="flex items-center gap-1 text-[11px] text-text-faint shrink-0">
-                  <Clock className="w-3 h-3 text-text-faint" />
-                  <span>{formatToISTTimeString(ticket.createdAt)} IST</span>
+                <div className="text-[11px] font-mono text-text-muted">
+                  {ticket.requesterPhone}
                 </div>
               </div>
 
-              {/* Live Stopwatch Counting UP Second-by-Second */}
-              {isLive && (
-                <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-2.5 flex items-center justify-between shadow-[0_0_15px_-3px_rgba(245,158,11,0.25)]">
-                  <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />
-                    <span className="text-xs font-mono text-amber-300 font-bold">Active Timer:</span>
-                  </div>
-                  <LiveStopwatch 
-                    startedAtUtc={ticket.supportStartedAt!} 
-                    size="sm" 
-                    variant="compact" 
-                  />
-                </div>
-              )}
-
-              {ticket.status === 'Resolved' && (
-                <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-2 flex items-center justify-between text-xs font-mono">
-                  <span className="text-emerald-400 flex items-center gap-1">
-                    <CheckCircle className="w-3 h-3 text-emerald-400" />
-                    Support Duration:
-                  </span>
-                  <span className="text-emerald-300 font-bold">
-                    {formatDurationHuman(ticket.resolutionDurationSeconds || ticket.activeDurationSeconds || 0)}
-                  </span>
-                </div>
-              )}
-
-              {/* Live Action Dock (One-Click Timers & Direct Actions) */}
-              <div 
-                className="flex items-center justify-between pt-1 gap-2" 
-                onClick={e => e.stopPropagation()}
-              >
-                {/* WhatsApp Quick Chat */}
+              <div className="flex items-center gap-1.5" onClick={e => e.stopPropagation()}>
+                {/* WhatsApp Chat */}
                 <a
-                  href={`https://wa.me/91${ticket.requesterPhone}?text=${encodeURIComponent(`Hello ${ticket.requesterName}, regarding your Nexus ticket ${ticket.ticketId}: `)}`}
+                  href={`https://wa.me/91${ticket.requesterPhone}?text=${encodeURIComponent(`Hello ${ticket.requesterName}, regarding your ticket ${ticket.ticketId}: `)}`}
                   target="_blank"
                   rel="noreferrer"
-                  className="px-2.5 py-1.5 rounded-xl bg-surface-elevated hover:bg-surface-hover border border-surface-border text-emerald-400 hover:text-white text-xs font-mono flex items-center gap-1.5 transition shadow-sm"
-                  title="Direct WhatsApp Chat"
+                  className="p-1.5 rounded-lg bg-surface-elevated hover:bg-emerald-50 dark:hover:bg-emerald-950/30 border border-surface-border text-emerald-600 dark:text-emerald-400 transition"
+                  title="WhatsApp Chat"
                 >
-                  <MessageCircle className="w-3.5 h-3.5 text-emerald-400" />
-                  <span className="hidden sm:inline">WhatsApp</span>
+                  <MessageCircle className="w-3.5 h-3.5" />
                 </a>
 
-                {/* State Transition Actions */}
                 {ticket.status === 'New' && (
                   <button
                     onClick={() => onStartSupport(ticket.ticketId)}
-                    className="px-3.5 py-1.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-xs font-mono font-bold flex items-center gap-1.5 shadow-nexus-glow transition"
+                    className="px-2.5 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold flex items-center gap-1 shadow-sm transition"
                   >
                     <Play className="w-3 h-3 fill-current" />
-                    <span>Start Support</span>
+                    Start
                   </button>
                 )}
 
-                {ticket.status === 'In Progress' && (
+                {isLive && (
                   <button
                     onClick={() => onResolveTicket(ticket)}
-                    className="px-3.5 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-void text-xs font-mono font-black flex items-center gap-1.5 shadow-[0_0_20px_-3px_rgba(16,185,129,0.5)] transition"
+                    className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold flex items-center gap-1 shadow-sm transition"
                   >
-                    <CheckCircle className="w-3.5 h-3.5" />
-                    <span>Resolve / Done</span>
+                    <CheckCircle className="w-3 h-3" />
+                    Resolve
                   </button>
-                )}
-
-                {ticket.status === 'Waiting for User' && (
-                  <button
-                    onClick={() => onStatusChange(ticket.ticketId, 'In Progress')}
-                    className="px-3 py-1.5 rounded-xl bg-surface-elevated hover:bg-surface-hover border border-surface-border text-white text-xs font-mono flex items-center gap-1.5 transition"
-                  >
-                    <Play className="w-3 h-3 text-neon-electric" />
-                    <span>Resume Timer</span>
-                  </button>
-                )}
-
-                {ticket.status === 'Resolved' && (
-                  <span className="text-[11px] font-mono text-emerald-400 flex items-center gap-1 bg-emerald-500/10 px-2 py-1 rounded-lg border border-emerald-500/20">
-                    <CheckCircle className="w-3 h-3 text-emerald-400" />
-                    Done
-                  </span>
                 )}
               </div>
             </div>
+
           </div>
         );
       })}

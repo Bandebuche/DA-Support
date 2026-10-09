@@ -99,16 +99,16 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({ tickets }) => {
           <div className="flex items-center justify-between">
             <span className="text-xs font-mono uppercase text-text-muted">SLA Target Met</span>
             <div className="w-8 h-8 rounded-lg bg-surface-elevated border border-surface-border flex items-center justify-center">
-              <ShieldCheck className="w-4 h-4 text-nexus-electric" />
+              <ShieldCheck className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
             </div>
           </div>
           <div className="mt-3 flex items-baseline gap-2">
             <span className="text-3xl font-mono font-bold text-text-pure">{slaCompliance}%</span>
-            <span className="text-xs font-mono text-nexus-electric">(&lt;45 min goal)</span>
+            <span className="text-xs font-mono text-indigo-600 dark:text-indigo-400">(&lt;45 min goal)</span>
           </div>
           <div className="mt-3 w-full bg-surface-elevated rounded-full h-1.5 overflow-hidden">
             <div 
-              className="bg-nexus h-full rounded-full transition-all duration-500" 
+              className="bg-indigo-600 h-full rounded-full transition-all duration-500" 
               style={{ width: `${slaCompliance}%` }} 
             />
           </div>
@@ -118,7 +118,7 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({ tickets }) => {
           <div className="flex items-center justify-between">
             <span className="text-xs font-mono uppercase text-text-muted">Avg Resolution Time</span>
             <div className="w-8 h-8 rounded-lg bg-surface-elevated border border-surface-border flex items-center justify-center">
-              <Clock className="w-4 h-4 text-white" />
+              <Clock className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
             </div>
           </div>
           <div className="mt-3">
@@ -135,7 +135,7 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({ tickets }) => {
           <div className="flex items-center justify-between">
             <span className="text-xs font-mono uppercase text-text-muted">Diamond Fast-Track</span>
             <div className="w-8 h-8 rounded-lg bg-surface-elevated border border-surface-border flex items-center justify-center">
-              <Award className="w-4 h-4 text-nexus-electric" />
+              <Award className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
             </div>
           </div>
           <div className="mt-3 flex items-baseline gap-2">
@@ -155,14 +155,14 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({ tickets }) => {
           <div className="flex items-center justify-between">
             <span className="text-xs font-mono uppercase text-text-muted">Active Stopwatch Load</span>
             <div className="w-8 h-8 rounded-lg bg-surface-elevated border border-surface-border flex items-center justify-center">
-              <Zap className="w-4 h-4 text-nexus-electric animate-pulse" />
+              <Zap className="w-4 h-4 text-indigo-600 dark:text-indigo-400 animate-pulse" />
             </div>
           </div>
           <div className="mt-3 flex items-baseline gap-2">
             <span className="text-3xl font-mono font-bold text-text-pure">
               {activeTickets.length}
             </span>
-            <span className="text-xs font-mono text-nexus-electric">
+            <span className="text-xs font-mono text-indigo-600 dark:text-indigo-400">
               Active sessions
             </span>
           </div>
@@ -181,7 +181,7 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({ tickets }) => {
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-sm font-bold text-text-pure font-mono uppercase tracking-wider flex items-center gap-2">
-                <BarChart2 className="w-4 h-4 text-nexus" />
+                <BarChart2 className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
                 Resolution Time Distribution
               </h3>
               <p className="text-xs text-text-muted mt-0.5">Duration from session start to completion</p>
@@ -228,7 +228,7 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({ tickets }) => {
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-sm font-bold text-text-pure font-mono uppercase tracking-wider flex items-center gap-2">
-                <PieIcon className="w-4 h-4 text-nexus-electric" />
+                <PieIcon className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
                 Tickets by Ecosystem
               </h3>
               <p className="text-xs text-text-muted mt-0.5">Platform volume across Digital Azadi products</p>
@@ -315,7 +315,7 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({ tickets }) => {
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-sm font-bold text-text-pure font-mono uppercase tracking-wider flex items-center gap-2">
-                <Award className="w-4 h-4 text-nexus-electric" />
+                <Award className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
                 Tier Proportions
               </h3>
               <p className="text-xs text-text-muted mt-0.5">Diamond Elite vs Silver Pass queue share</p>

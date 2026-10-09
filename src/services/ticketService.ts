@@ -3,7 +3,7 @@ import {
   loadStoredTickets, 
   saveStoredTickets, 
   upsertStoredTicket, 
-  generateNexusTicketId 
+  generateDATicketId 
 } from '../lib/storage';
 import { computeElapsedSeconds } from '../lib/stopwatch';
 import { 
@@ -35,10 +35,10 @@ export const ticketService = {
    */
   async submitTicket(data: TicketFormData): Promise<Ticket> {
     const nowIso = new Date().toISOString();
-    const ticketId = generateNexusTicketId();
+    const ticketId = generateDATicketId();
 
     const newTicket: Ticket = {
-      id: `nexus-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+      id: `da-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
       ticketId,
       requesterName: data.fullName.trim(),
       requesterEmail: data.email.trim(),
