@@ -360,7 +360,7 @@ export const TicketDetailDrawer: React.FC<TicketDetailDrawerProps> = ({
           <div className="p-4 border-t border-surface-border bg-surface-elevated flex items-center justify-between">
             <div className="flex items-center gap-2 text-xs font-mono text-text-faint">
               <Cloud className="w-4 h-4 text-emerald-400" />
-              <span>Google Sheets ID: 16D1TXnUvGxPhp6YDwq9l0rCoBXnTwsDAHOe-0Z5uu1k</span>
+              <span>Technical_Support_DB • Cloud Synced</span>
             </div>
 
             <div className="flex items-center gap-2">

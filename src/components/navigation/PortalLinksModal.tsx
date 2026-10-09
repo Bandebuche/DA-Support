@@ -12,6 +12,7 @@ import {
   Database,
   ArrowRight
 } from 'lucide-react';
+import { getSavedSpreadsheetUrl } from '../../lib/storage';
 
 interface PortalLinksModalProps {
   isOpen: boolean;
@@ -81,8 +82,8 @@ export const PortalLinksModal: React.FC<PortalLinksModalProps> = ({
       badge: 'Centralized Master DB',
       description: 'Direct access to Technical_Support_DB single source of truth.',
       path: 'docs.google.com',
-      fullUrl: 'https://docs.google.com/spreadsheets/d/16D1TXnUvGxPhp6YDwq9l0rCoBXnTwsDAHOe-0Z5uu1k/edit#gid=1624538793',
-      altUrl: 'Google Sheets ID: 16D1TXnUvGxPhp6YDwq9l0rCoBXnTwsDAHOe-0Z5uu1k',
+      fullUrl: getSavedSpreadsheetUrl(),
+      altUrl: 'Google Sheets DB Engine',
       isExternal: true,
       icon: Database,
     },

@@ -13,12 +13,15 @@ import {
 } from 'lucide-react';
 import { 
   getSavedAppsScriptUrl, 
-  saveAppsScriptUrl 
+  saveAppsScriptUrl,
+  getSavedSpreadsheetUrl,
+  saveSpreadsheetUrl
 } from '../../lib/storage';
 import { 
   testSheetsConnection, 
   isLiveSheetsConnected 
 } from '../../services/sheetsSync';
+import { Download, Plus } from 'lucide-react';
 
 interface CloudConfigModalProps {
   isOpen: boolean;
@@ -32,6 +35,7 @@ export const CloudConfigModal: React.FC<CloudConfigModalProps> = ({
   onRefreshData,
 }) => {
   const [url, setUrl] = useState('');
+  const [sheetUrl, setSheetUrl] = useState('');
   const [isTesting, setIsTesting] = useState(false);
   const [testResult, setTestResult] = useState<{ success: boolean; message: string } | null>(null);
   const [isSaved, setIsSaved] = useState(false);
@@ -39,6 +43,7 @@ export const CloudConfigModal: React.FC<CloudConfigModalProps> = ({
   useEffect(() => {
     if (isOpen) {
       setUrl(getSavedAppsScriptUrl());
+      setSheetUrl(getSavedSpreadsheetUrl());
       setTestResult(null);
       setIsSaved(false);
     }
@@ -54,6 +59,7 @@ export const CloudConfigModal: React.FC<CloudConfigModalProps> = ({
       setTestResult(result);
       if (result.success) {
         saveAppsScriptUrl(url);
+        saveSpreadsheetUrl(sheetUrl);
         setIsSaved(true);
       }
     } finally {
@@ -63,14 +69,13 @@ export const CloudConfigModal: React.FC<CloudConfigModalProps> = ({
 
   const handleSave = () => {
     saveAppsScriptUrl(url);
+    saveSpreadsheetUrl(sheetUrl);
     setIsSaved(true);
     setTimeout(() => {
       onRefreshData();
       onClose();
     }, 600);
   };
-
-  const spreadsheetUrl = "https://docs.google.com/spreadsheets/d/16D1TXnUvGxPhp6YDwq9l0rCoBXnTwsDAHOe-0Z5uu1k/edit#gid=1624538793";
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -107,23 +112,63 @@ export const CloudConfigModal: React.FC<CloudConfigModalProps> = ({
           </button>
         </div>
 
-        {/* Spreadsheet Link Banner */}
-        <div className="p-3.5 rounded-xl bg-surface-elevated border border-surface-border flex items-center justify-between">
-          <div className="space-y-0.5 font-mono">
-            <span className="text-[10px] uppercase text-text-faint">Linked Spreadsheet ID</span>
-            <p className="font-bold text-text-pure truncate max-w-xs">
-              16D1TXnUvGxPhp6YDwq9l0rCoBXnTwsDAHOe-0Z5uu1k
-            </p>
-          </div>
+        {/* Quick Actions: 1-Click Create New Sheet & Download Template */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
           <a
-            href={spreadsheetUrl}
+            href="https://sheets.new"
             target="_blank"
             rel="noreferrer"
-            className="px-3 py-1.5 rounded-lg bg-surface hover:bg-surface-hover border border-surface-border text-nexus-electric hover:text-white font-mono text-[11px] flex items-center gap-1.5 transition"
+            className="p-3 rounded-xl bg-surface-elevated hover:bg-surface-hover border border-surface-border text-text-pure font-mono text-xs flex items-center justify-between transition group"
           >
-            <span>Open Sheet</span>
-            <ExternalLink className="w-3 h-3" />
+            <div className="flex items-center gap-2">
+              <Plus className="w-4 h-4 text-emerald-400 group-hover:scale-110 transition" />
+              <div className="text-left">
+                <span className="font-bold block">Create New Sheet</span>
+                <span className="text-[10px] text-text-faint">Opens sheets.new in Drive</span>
+              </div>
+            </div>
+            <ExternalLink className="w-3.5 h-3.5 text-text-muted" />
           </a>
+
+          <a
+            href="/Digital_Azadi_Support_Master_DB_Template.csv"
+            download="Digital_Azadi_Support_Master_DB_Template.csv"
+            className="p-3 rounded-xl bg-surface-elevated hover:bg-surface-hover border border-surface-border text-text-pure font-mono text-xs flex items-center justify-between transition group"
+          >
+            <div className="flex items-center gap-2">
+              <Download className="w-4 h-4 text-nexus-electric group-hover:scale-110 transition" />
+              <div className="text-left">
+                <span className="font-bold block">Download Template CSV</span>
+                <span className="text-[10px] text-text-faint">All 16 columns formatted</span>
+              </div>
+            </div>
+            <Download className="w-3.5 h-3.5 text-text-muted" />
+          </a>
+        </div>
+
+        {/* Spreadsheet URL Input & Link Banner */}
+        <div className="p-3.5 rounded-xl bg-surface-elevated border border-surface-border space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] uppercase font-mono text-text-faint">Connected Google Spreadsheet URL / ID</span>
+            {sheetUrl && (
+              <a
+                href={sheetUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="text-nexus-electric hover:underline font-mono text-[11px] inline-flex items-center gap-1"
+              >
+                <span>Open Current Sheet</span>
+                <ExternalLink className="w-3 h-3" />
+              </a>
+            )}
+          </div>
+          <input
+            type="text"
+            value={sheetUrl}
+            onChange={e => setSheetUrl(e.target.value)}
+            placeholder="https://docs.google.com/spreadsheets/d/.../edit"
+            className="w-full bg-surface text-text-pure rounded-xl border border-surface-border px-3 py-2 text-xs focus:border-nexus-electric focus:outline-none placeholder:text-text-faint font-mono"
+          />
         </div>
 
         {/* Web App URL Input */}

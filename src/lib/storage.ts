@@ -88,6 +88,26 @@ export function saveAppsScriptUrl(url: string): void {
   }
 }
 
+const STORAGE_KEY_SPREADSHEET_URL = 'DIGITAL_AZADI_SPREADSHEET_URL';
+
+/**
+ * Get configured Google Spreadsheet URL
+ */
+export function getSavedSpreadsheetUrl(): string {
+  return localStorage.getItem(STORAGE_KEY_SPREADSHEET_URL) || 'https://docs.google.com/spreadsheets/d/16D1TXnUvGxPhp6YDwq9l0rCoBXnTwsDAHOe-0Z5uu1k/edit#gid=1624538793';
+}
+
+/**
+ * Save Google Spreadsheet URL
+ */
+export function saveSpreadsheetUrl(url: string): void {
+  if (url) {
+    localStorage.setItem(STORAGE_KEY_SPREADSHEET_URL, url.trim());
+  } else {
+    localStorage.removeItem(STORAGE_KEY_SPREADSHEET_URL);
+  }
+}
+
 /**
  * Session auth helpers
  */

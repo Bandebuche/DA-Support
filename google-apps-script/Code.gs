@@ -176,6 +176,63 @@ function getDbSheet() {
 }
 
 /**
+ * ONE-CLICK GENERATOR: Creates a brand new Google Sheet in Google Drive
+ * Run this function in Apps Script to automatically generate and format a new spreadsheet!
+ */
+function createNewGoogleSpreadsheet() {
+  const newSs = SpreadsheetApp.create("Digital Azadi Support — Technical Support DB");
+  const sheet = newSs.getActiveSheet();
+  sheet.setName(SHEET_NAME);
+
+  const headers = [
+    "Ticket ID", "Submission Date", "Submission Time", "Full Name",
+    "Mobile Number", "Email Address", "User Category", "Membership Type",
+    "Platform", "Query Description", "Current Status", "Support Start Time",
+    "Support End Time", "Total Time Taken", "Remarks", "Last Updated"
+  ];
+  sheet.appendRow(headers);
+  sheet.getRange(1, 1, 1, headers.length)
+    .setFontWeight("bold")
+    .setBackground("#0A1128")
+    .setFontColor("#FFFFFF")
+    .setFontSize(10)
+    .setHorizontalAlignment("center");
+  sheet.setFrozenRows(1);
+
+  // Auto-fit & format columns
+  sheet.setColumnWidth(1, 140); // Ticket ID
+  sheet.setColumnWidth(2, 110); // Submission Date
+  sheet.setColumnWidth(3, 100); // Submission Time
+  sheet.setColumnWidth(4, 160); // Full Name
+  sheet.setColumnWidth(5, 130); // Mobile Number
+  sheet.setColumnWidth(6, 180); // Email Address
+  sheet.setColumnWidth(7, 120); // User Category
+  sheet.setColumnWidth(8, 120); // Membership Type
+  sheet.setColumnWidth(9, 130); // Platform
+  sheet.setColumnWidth(10, 260); // Query Description
+  sheet.setColumnWidth(11, 110); // Current Status
+  sheet.setColumnWidth(12, 120); // Support Start Time
+  sheet.setColumnWidth(13, 120); // Support End Time
+  sheet.setColumnWidth(14, 110); // Total Time Taken
+  sheet.setColumnWidth(15, 200); // Remarks
+  sheet.setColumnWidth(16, 160); // Last Updated
+
+  // Set Timezone to Asia/Kolkata
+  newSs.setSpreadsheetTimeZone("Asia/Kolkata");
+
+  Logger.log("=================================================");
+  Logger.log("🎉 NEW GOOGLE SHEET CREATED SUCCESSFULLY!");
+  Logger.log("URL: " + newSs.getUrl());
+  Logger.log("ID: " + newSs.getId());
+  Logger.log("=================================================");
+
+  return {
+    url: newSs.getUrl(),
+    id: newSs.getId()
+  };
+}
+
+/**
  * Helper to get current IST formatted timestamp string
  */
 function getISTDateTimeString() {
