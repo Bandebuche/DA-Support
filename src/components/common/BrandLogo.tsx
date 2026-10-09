@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { cn } from '../../lib/utils';
 
 export const OFFICIAL_LOGO_URL = 'https://digitalazadi.com/wp-content/uploads/2026/03/Digital-Azadi-White-Logo-scaled.png';
-export const LOCAL_FALLBACK_LOGO_URL = '/digital-azadi-logo.png';
+export const LOCAL_FALLBACK_LOGO_URL = './digital-azadi-logo.png';
 
 interface BrandLogoProps {
   className?: string;

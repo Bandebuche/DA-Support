@@ -30,6 +30,8 @@ export const PortalLinksModal: React.FC<PortalLinksModalProps> = ({
   if (!isOpen) return null;
 
   const origin = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:5173';
+  const isSubdir = typeof window !== 'undefined' && window.location.pathname.toLowerCase().startsWith('/support');
+  const baseRoot = isSubdir ? `${origin}/support` : origin;
 
   const LINKS = [
     {
@@ -38,8 +40,8 @@ export const PortalLinksModal: React.FC<PortalLinksModalProps> = ({
       badge: 'Student & Franchise Facing',
       description: 'Clean public portal for students and franchise owners to submit support queries with IST timestamps and WhatsApp validation.',
       path: '/submit',
-      fullUrl: `${origin}/submit`,
-      altUrl: `${origin}/?portal=public`,
+      fullUrl: `${baseRoot}/submit`,
+      altUrl: `${baseRoot}/?portal=public`,
       action: () => { onNavigate('public'); onClose(); },
       icon: Layers,
     },
@@ -49,8 +51,8 @@ export const PortalLinksModal: React.FC<PortalLinksModalProps> = ({
       badge: 'Support Agents & Admins • Secure Login',
       description: 'Secured administrative operations deck with live stopwatches, Kanban boards, dense data table, SLA tracking, and Google Sheets cloud sync.',
       path: '/admin',
-      fullUrl: `${origin}/admin`,
-      altUrl: `${origin}/?portal=admin`,
+      fullUrl: `${baseRoot}/admin`,
+      altUrl: `${baseRoot}/?portal=admin`,
       action: () => { onNavigate('admin'); onClose(); },
       icon: ShieldCheck,
     },
@@ -60,8 +62,8 @@ export const PortalLinksModal: React.FC<PortalLinksModalProps> = ({
       badge: 'Self-Service Status Check',
       description: 'Quick lookup page where students check real-time resolution status and duration using their Ticket ID or Phone.',
       path: '/track',
-      fullUrl: `${origin}/track`,
-      altUrl: `${origin}/?page=track`,
+      fullUrl: `${baseRoot}/track`,
+      altUrl: `${baseRoot}/?page=track`,
       action: () => { onNavigate('track'); onClose(); },
       icon: Search,
     },
@@ -71,8 +73,8 @@ export const PortalLinksModal: React.FC<PortalLinksModalProps> = ({
       badge: 'Executive & SLA Performance',
       description: 'Direct SLA reporting deck with resolution duration distributions, platform breakdowns, and compliance scores.',
       path: '/analytics',
-      fullUrl: `${origin}/analytics`,
-      altUrl: `${origin}/?portal=admin&tab=analytics`,
+      fullUrl: `${baseRoot}/analytics`,
+      altUrl: `${baseRoot}/?portal=admin&tab=analytics`,
       action: () => { onNavigate('analytics'); onClose(); },
       icon: BarChart3,
     },

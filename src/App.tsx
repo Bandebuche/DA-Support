@@ -91,13 +91,16 @@ function AppContent() {
       resolvedRoute = 'public';
     }
 
-    let newPath = '/';
+    const isSubdir = typeof window !== 'undefined' && window.location.pathname.toLowerCase().startsWith('/support');
+    const basePath = isSubdir ? '/support' : '';
+
+    let newPath = basePath ? `${basePath}/` : '/';
     let query = '';
 
     if (resolvedRoute === 'public') {
-      newPath = '/submit';
+      newPath = basePath ? `${basePath}/submit` : '/submit';
     } else if (resolvedRoute === 'admin') {
-      newPath = '/admin';
+      newPath = basePath ? `${basePath}/admin` : '/admin';
       query = targetTab === 'analytics' ? '?tab=analytics' : '';
     }
 
