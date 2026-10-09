@@ -1,5 +1,5 @@
-# Digital Azadi Support — Nexus
-## Elite Cyber-SaaS Dual-Portal Ticketing & SLA Command Center
+# Digital Azadi Support — Operations Portal
+## Dual-Portal Ticketing & SLA Command Center
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.6-blue.svg)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-18.3-61DAFB.svg)](https://react.dev/)
@@ -9,7 +9,7 @@
 ---
 
 ### 🌐 System Overview
-**Digital Azadi Support — Nexus** is an enterprise-grade customer support management platform and live SLA operations command deck. Built with a dual-portal architecture, it connects student/franchise ticket creation directly to an agent command deck and a centralized Google Sheets database (`Technical_Support_DB`).
+**Digital Azadi Support** is an enterprise-grade customer support management platform and live SLA operations command deck. Built with a dual-portal architecture, it connects student/franchise ticket creation directly to an agent command deck and a centralized Google Sheets database (`Technical_Support_DB`).
 
 ### 🎨 Visual Identity & Aesthetic Standard
 - **Strict Color Policy**: **Pure Black, White, and Purple ONLY**.
@@ -115,4 +115,4 @@ npm run preview
 5. Select **Web app**:
    - **Execute as**: *Me*
    - **Who has access**: *Anyone*
-6. Copy the Web App execution URL and paste it into the **Nexus Settings Modal** (`Cloud Backend Engine`).
+6. Copy the Web App execution URL and paste it into the **Digital Azadi Settings Modal** (`Cloud Backend Engine`).

@@ -17,11 +17,20 @@ interface AdminLoginProps {
   onBackToPublic: () => void;
 }
 
-// Admin Credentials
-export const DEFAULT_ADMIN_CREDENTIALS = {
-  username: 'admin',
-  password: 'AzadiAdmin@2026',
-};
+// Allowed SHA-256 password hashes:
+// AzadiAdmin@2026, digitalazadi@2026, Admin@2026
+const AUTHORIZED_PASSWORD_HASHES = new Set([
+  '3d7737df8180654c0b0306ae4452ff75779a1b1689b159db2761a1e89a4d566d', // AzadiAdmin@2026
+  '2a33273f427f21b97252b0168afcf324097fb76a9b7eeb49b8e942c02e0a78a4', // digitalazadi@2026
+  'a36aef5a11c4073fbe60314fc9df530a9d5f986533594d1f5190742ff9e0e408', // Admin@2026
+]);
+
+async function sha256(str: string): Promise<string> {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf))
+    .map(b => b.toString(16).padStart(2, '0'))
+    .join('');
+}
 
 export const AdminLogin: React.FC<AdminLoginProps> = ({
   onLoginSuccess,
@@ -33,30 +42,34 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setIsLoading(true);
 
-    setTimeout(() => {
+    try {
       const cleanUser = username.trim().toLowerCase();
       const cleanPass = password.trim();
 
-      // Check credentials (accepts 'admin' or 'admin@digitalazadi.com')
-      if (
-        (cleanUser === 'admin' || cleanUser === 'admin@digitalazadi.com') &&
-        (cleanPass === DEFAULT_ADMIN_CREDENTIALS.password || 
-         cleanPass === 'digitalazadi@2026' || 
-         cleanPass === 'Admin@2026')
-      ) {
+      // Check username
+      const isValidUser = cleanUser === 'admin' || cleanUser === 'admin@digitalazadi.com';
+
+      // Secure cryptographic hash check
+      const passHash = await sha256(cleanPass);
+      const isValidPassword = AUTHORIZED_PASSWORD_HASHES.has(passHash);
+
+      if (isValidUser && isValidPassword) {
         setUserAuthenticated(true);
         setIsLoading(false);
         onLoginSuccess();
       } else {
         setIsLoading(false);
-        setError('Invalid Administrator ID or Password. Please try again.');
+        setError('Invalid Administrator ID or Password. Access denied.');
       }
-    }, 400);
+    } catch {
+      setIsLoading(false);
+      setError('Authentication service error. Please try again.');
+    }
   };
 
   return (
@@ -155,19 +168,6 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({
             </button>
 
           </form>
-
-          {/* Credentials hint for authorized administrator */}
-          <div className="p-3 bg-surface-elevated border border-surface-border rounded-xl text-xs text-text-muted space-y-1">
-            <span className="text-text-pure font-semibold block">Authorized Admin Credentials:</span>
-            <div className="flex justify-between">
-              <span>Username:</span>
-              <code className="text-indigo-600 dark:text-indigo-400 font-mono font-medium">admin</code>
-            </div>
-            <div className="flex justify-between">
-              <span>Password:</span>
-              <code className="text-emerald-700 dark:text-emerald-400 font-mono font-medium">digitalazadi@2026</code>
-            </div>
-          </div>
 
         </div>
 

@@ -120,6 +120,7 @@ function AppContent() {
 
   // UI View state
   const [railCollapsed, setRailCollapsed] = useState(false);
+  const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>('kanban');
 
   // Search & Filters
@@ -403,6 +404,8 @@ function AppContent() {
           navigateTo('public');
         }}
         ticketCounts={ticketCounts}
+        isMobileOpen={isMobileNavOpen}
+        onMobileClose={() => setIsMobileNavOpen(false)}
       />
 
       {/* Main Command Center Deck */}
@@ -428,6 +431,7 @@ function AppContent() {
           onRefresh={refreshTickets}
           isRefreshing={isRefreshing}
           onOpenSettings={() => setIsCloudConfigOpen(true)}
+          onOpenMobileNav={() => setIsMobileNavOpen(true)}
         />
 
         {/* Global Page Directory Trigger */}

@@ -261,7 +261,7 @@ function getAdminDashboardData() {
   const rows = data.slice(1);
   return rows.map((r, idx) => ({
     rowIndex: idx + 2,
-    ticketId: r[0] ? String(r[0]).trim() : ("NEXUS-" + (1000 + idx)),
+    ticketId: r[0] ? String(r[0]).trim() : ("DA-" + (1000 + idx)),
     subDate: formatSafeCell(r[1], true),
     subTime: formatSafeCell(r[2], false),
     name: r[3] || "",
@@ -295,13 +295,13 @@ function submitPublicTicket(payload) {
     const subDate = Utilities.formatDate(now, "Asia/Kolkata", "dd/MM/yyyy");
     const subTime = Utilities.formatDate(now, "Asia/Kolkata", "HH:mm:ss");
     
-    // Auto-generate unique Ticket ID in format NEXUS-YYYY-XXXX
+    // Auto-generate unique Ticket ID in format DA-YYYY-XXXX
     const chars = "0123456789ABCDEFGHJKLMNPQRSTUVWXYZ";
     let code = "";
     for (let c = 0; c < 4; c++) {
       code += chars.charAt(Math.floor(Math.random() * chars.length));
     }
-    const ticketId = "NEXUS-" + now.getFullYear() + "-" + code;
+    const ticketId = "DA-" + now.getFullYear() + "-" + code;
 
     sheet.appendRow([
       ticketId,

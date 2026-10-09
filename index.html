@@ -9,7 +9,7 @@
     <script>
       (function() {
         try {
-          var saved = localStorage.getItem('DA_SUPPORT_THEME') || localStorage.getItem('NEXUS_THEME_PREFERENCE');
+          var saved = localStorage.getItem('DA_SUPPORT_THEME');
           if (saved === 'light') {
             document.documentElement.classList.remove('dark');
             document.documentElement.classList.add('light');
