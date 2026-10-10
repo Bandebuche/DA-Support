@@ -387,31 +387,31 @@ export const PublicGateway: React.FC = () => {
                   {/* ============================================================== */}
                   {/* SECTION 1: Personal & Contact Information */}
                   {/* ============================================================== */}
-                  <div className="space-y-5">
+                  <div className="space-y-6">
                     
-                    <div className="flex items-center gap-3 pb-3 border-b border-surface-border">
-                      <div className="w-9 h-9 rounded-xl bg-indigo-50 dark:bg-indigo-950/50 border border-indigo-200 dark:border-indigo-800/60 flex items-center justify-center text-indigo-600 dark:text-indigo-400 font-bold shrink-0">
+                    <div className="flex items-center gap-3.5 pb-3 border-b border-surface-border">
+                      <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800 flex items-center justify-center text-indigo-600 dark:text-indigo-400 font-bold shrink-0 shadow-xs">
                         <User className="w-5 h-5" />
                       </div>
                       <div>
-                        <h2 className="text-base sm:text-lg font-bold text-text-pure tracking-tight leading-snug">
-                          1. Contact Information
+                        <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white tracking-tight leading-snug">
+                          1. Your Contact Information
                         </h2>
-                        <p className="text-xs sm:text-sm text-text-muted font-normal">
-                          Please provide your genuine details so our engineers can reach you with updates.
+                        <p className="text-sm text-slate-600 dark:text-slate-400 font-normal">
+                          Provide your registered name, WhatsApp number, Gmail, and city for priority resolution.
                         </p>
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-6">
                       
                       {/* Full Name */}
                       <div>
-                        <label className="block text-sm font-semibold text-text-pure mb-2">
+                        <label className="block text-sm sm:text-base font-semibold text-slate-900 dark:text-slate-100 mb-2">
                           Full Name <span className="text-red-500">*</span>
                         </label>
                         <div className="relative">
-                          <User className="w-5 h-5 text-text-muted absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                          <User className="w-5 h-5 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none" />
                           <input
                             type="text"
                             name="fullName"
@@ -420,17 +420,17 @@ export const PublicGateway: React.FC = () => {
                             onChange={e => setFormData({ ...formData, fullName: e.target.value })}
                             placeholder="e.g. Ramesh Kulkarni"
                             className={cn(
-                              'w-full h-12 bg-surface-elevated text-text-pure rounded-xl border pl-11 pr-4 text-sm sm:text-base font-medium',
-                              'transition-all duration-150 placeholder:text-text-faint focus:outline-none focus:ring-2',
+                              'w-full h-13 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-xl border pl-12 pr-4 text-base font-medium',
+                              'transition-all duration-150 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 shadow-xs',
                               errors.fullName 
-                                ? 'border-red-400 focus:border-red-500 focus:ring-red-500/15' 
-                                : 'border-surface-border focus:border-indigo-500 focus:ring-indigo-500/15'
+                                ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20' 
+                                : 'border-slate-300 dark:border-slate-700 focus:border-indigo-600 focus:ring-indigo-600/20'
                             )}
                           />
                         </div>
                         {errors.fullName && (
-                          <p className="text-xs text-red-500 mt-1.5 font-medium flex items-center gap-1">
-                            <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                          <p className="text-xs sm:text-sm text-red-600 dark:text-red-400 mt-1.5 font-medium flex items-center gap-1">
+                            <AlertCircle className="w-4 h-4 shrink-0" />
                             <span>{errors.fullName}</span>
                           </p>
                         )}
@@ -439,18 +439,18 @@ export const PublicGateway: React.FC = () => {
                       {/* Contact Number (WhatsApp) */}
                       <div>
                         <div className="flex items-center justify-between mb-2">
-                          <label className="text-sm font-semibold text-text-pure">
+                          <label className="text-sm sm:text-base font-semibold text-slate-900 dark:text-slate-100">
                             Contact Number (WhatsApp) <span className="text-red-500">*</span>
                           </label>
                           {isMobileValid && (
-                            <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-md border border-emerald-200 dark:border-emerald-800">
-                              <Check className="w-3 h-3" />
-                              <span>Valid 10-Digit Mobile</span>
+                            <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 px-2 py-0.5 rounded-md border border-emerald-300 dark:border-emerald-800">
+                              <Check className="w-3.5 h-3.5" />
+                              <span>Valid Mobile</span>
                             </span>
                           )}
                         </div>
                         <div className="relative">
-                          <span className="text-sm text-text-muted absolute left-3.5 top-1/2 -translate-y-1/2 font-semibold font-mono pointer-events-none select-none">
+                          <span className="text-sm sm:text-base text-slate-600 dark:text-slate-400 absolute left-4 top-1/2 -translate-y-1/2 font-bold font-mono pointer-events-none select-none">
                             🇮🇳 +91
                           </span>
                           <input
@@ -462,24 +462,24 @@ export const PublicGateway: React.FC = () => {
                             onChange={e => setFormData({ ...formData, mobile: e.target.value.replace(/\D/g, '') })}
                             placeholder="9823012345"
                             className={cn(
-                              'w-full h-12 bg-surface-elevated text-text-pure rounded-xl border pl-19 pr-4 text-sm sm:text-base font-mono font-medium',
-                              'transition-all duration-150 focus:outline-none focus:ring-2',
+                              'w-full h-13 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-xl border pl-20 pr-4 text-base font-mono font-medium',
+                              'transition-all duration-150 focus:outline-none focus:ring-2 shadow-xs',
                               errors.mobile 
-                                ? 'border-red-400 focus:border-red-500 focus:ring-red-500/15' 
+                                ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20' 
                                 : isMobileValid
-                                ? 'border-emerald-400 focus:border-emerald-500 focus:ring-emerald-500/15'
-                                : 'border-surface-border focus:border-indigo-500 focus:ring-indigo-500/15'
+                                ? 'border-emerald-500 focus:border-emerald-500 focus:ring-emerald-500/20'
+                                : 'border-slate-300 dark:border-slate-700 focus:border-indigo-600 focus:ring-indigo-600/20'
                             )}
                           />
                         </div>
                         {errors.mobile ? (
-                          <p className="text-xs text-red-500 mt-1.5 font-medium flex items-center gap-1">
-                            <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                          <p className="text-xs sm:text-sm text-red-600 dark:text-red-400 mt-1.5 font-medium flex items-center gap-1">
+                            <AlertCircle className="w-4 h-4 shrink-0" />
                             <span>{errors.mobile}</span>
                           </p>
                         ) : (
-                          <p className="text-xs text-text-muted mt-1.5 font-normal">
-                            We will send ticket progress and WhatsApp support updates to this number.
+                          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1.5 font-normal">
+                            Direct updates and WhatsApp resolution will be sent to this number.
                           </p>
                         )}
                       </div>
@@ -487,17 +487,17 @@ export const PublicGateway: React.FC = () => {
                       {/* Email Address (Gmail) */}
                       <div>
                         <div className="flex items-center justify-between mb-2">
-                          <label className="text-sm font-semibold text-text-pure">
+                          <label className="text-sm sm:text-base font-semibold text-slate-900 dark:text-slate-100">
                             Email Address (Gmail) <span className="text-red-500">*</span>
                           </label>
                           {isGmail && (
-                            <span className="text-[11px] font-semibold text-indigo-700 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/40 px-2 py-0.5 rounded-md border border-indigo-200 dark:border-indigo-800">
+                            <span className="text-xs font-semibold text-indigo-700 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/50 px-2 py-0.5 rounded-md border border-indigo-200 dark:border-indigo-800">
                               Gmail Verified
                             </span>
                           )}
                         </div>
                         <div className="relative">
-                          <Mail className="w-5 h-5 text-text-muted absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                          <Mail className="w-5 h-5 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none" />
                           <input
                             type="email"
                             name="email"
@@ -506,33 +506,33 @@ export const PublicGateway: React.FC = () => {
                             onChange={e => setFormData({ ...formData, email: e.target.value })}
                             placeholder="yourname@gmail.com"
                             className={cn(
-                              'w-full h-12 bg-surface-elevated text-text-pure rounded-xl border pl-11 pr-4 text-sm sm:text-base font-medium',
-                              'transition-all duration-150 placeholder:text-text-faint focus:outline-none focus:ring-2',
+                              'w-full h-13 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-xl border pl-12 pr-4 text-base font-medium',
+                              'transition-all duration-150 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 shadow-xs',
                               errors.email 
-                                ? 'border-red-400 focus:border-red-500 focus:ring-red-500/15' 
-                                : 'border-surface-border focus:border-indigo-500 focus:ring-indigo-500/15'
+                                ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20' 
+                                : 'border-slate-300 dark:border-slate-700 focus:border-indigo-600 focus:ring-indigo-600/20'
                             )}
                           />
                         </div>
                         {errors.email ? (
-                          <p className="text-xs text-red-500 mt-1.5 font-medium flex items-center gap-1">
-                            <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                          <p className="text-xs sm:text-sm text-red-600 dark:text-red-400 mt-1.5 font-medium flex items-center gap-1">
+                            <AlertCircle className="w-4 h-4 shrink-0" />
                             <span>{errors.email}</span>
                           </p>
                         ) : (
-                          <p className="text-xs text-text-muted mt-1.5 font-normal">
-                            Gmail is preferred for Google Meet screen share and email receipts.
+                          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1.5 font-normal">
+                            Used for email receipts and Google Meet screen share requests.
                           </p>
                         )}
                       </div>
 
                       {/* City */}
                       <div>
-                        <label className="block text-sm font-semibold text-text-pure mb-2">
+                        <label className="block text-sm sm:text-base font-semibold text-slate-900 dark:text-slate-100 mb-2">
                           City <span className="text-red-500">*</span>
                         </label>
                         <div className="relative">
-                          <MapPin className="w-5 h-5 text-text-muted absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                          <MapPin className="w-5 h-5 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none" />
                           <input
                             type="text"
                             name="city"
@@ -541,17 +541,17 @@ export const PublicGateway: React.FC = () => {
                             onChange={e => setFormData({ ...formData, city: e.target.value })}
                             placeholder="e.g. Pune, Mumbai, Delhi, Nagpur"
                             className={cn(
-                              'w-full h-12 bg-surface-elevated text-text-pure rounded-xl border pl-11 pr-4 text-sm sm:text-base font-medium',
-                              'transition-all duration-150 placeholder:text-text-faint focus:outline-none focus:ring-2',
+                              'w-full h-13 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-xl border pl-12 pr-4 text-base font-medium',
+                              'transition-all duration-150 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 shadow-xs',
                               errors.city 
-                                ? 'border-red-400 focus:border-red-500 focus:ring-red-500/15' 
-                                : 'border-surface-border focus:border-indigo-500 focus:ring-indigo-500/15'
+                                ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20' 
+                                : 'border-slate-300 dark:border-slate-700 focus:border-indigo-600 focus:ring-indigo-600/20'
                             )}
                           />
                         </div>
                         {errors.city && (
-                          <p className="text-xs text-red-500 mt-1.5 font-medium flex items-center gap-1">
-                            <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                          <p className="text-xs sm:text-sm text-red-600 dark:text-red-400 mt-1.5 font-medium flex items-center gap-1">
+                            <AlertCircle className="w-4 h-4 shrink-0" />
                             <span>{errors.city}</span>
                           </p>
                         )}
@@ -564,35 +564,42 @@ export const PublicGateway: React.FC = () => {
                   {/* ============================================================== */}
                   {/* SECTION 2: Membership Tier & Category */}
                   {/* ============================================================== */}
-                  <div className="space-y-5 pt-3">
+                  <div className="space-y-6 pt-3">
                     
-                    <div className="flex items-center gap-3 pb-3 border-b border-surface-border">
-                      <div className="w-9 h-9 rounded-xl bg-purple-50 dark:bg-purple-950/50 border border-purple-200 dark:border-purple-800/60 flex items-center justify-center text-purple-600 dark:text-purple-400 font-bold shrink-0">
+                    <div className="flex items-center gap-3.5 pb-3 border-b border-surface-border">
+                      <div className="w-10 h-10 rounded-xl bg-purple-50 dark:bg-purple-950/60 border border-purple-200 dark:border-purple-800 flex items-center justify-center text-purple-600 dark:text-purple-400 font-bold shrink-0 shadow-xs">
                         <Award className="w-5 h-5" />
                       </div>
                       <div>
-                        <h2 className="text-base sm:text-lg font-bold text-text-pure tracking-tight leading-snug">
-                          2. Membership Tier & Category
+                        <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white tracking-tight leading-snug">
+                          2. Classification & Membership
                         </h2>
-                        <p className="text-xs sm:text-sm text-text-muted font-normal">
-                          Select your registered Digital Azadi membership level to apply corresponding priority.
+                        <p className="text-sm text-slate-600 dark:text-slate-400 font-normal">
+                          Choose your exact membership tier (Diamond, Silver, Gold, or PMP) and category.
                         </p>
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <div className="space-y-6">
                       
-                      {/* Membership Tier Dropdown */}
+                      {/* Membership Tier */}
                       <div>
-                        <label className="block text-sm font-semibold text-text-pure mb-2">
-                          Membership Tier <span className="text-red-500">*</span>
-                        </label>
-                        <div className="relative">
+                        <div className="flex items-center justify-between mb-2.5">
+                          <label className="text-sm sm:text-base font-semibold text-slate-900 dark:text-slate-100">
+                            Membership Tier <span className="text-red-500">*</span>
+                          </label>
+                          <span className="text-xs text-indigo-600 dark:text-indigo-400 font-bold">
+                            Selected: {formData.membershipTier}
+                          </span>
+                        </div>
+
+                        {/* Dropdown for Accessibility */}
+                        <div className="relative mb-3">
                           <select
                             name="membershipTier"
                             value={formData.membershipTier}
                             onChange={e => setFormData({ ...formData, membershipTier: e.target.value as MembershipTier })}
-                            className="w-full h-12 bg-surface-elevated text-text-pure rounded-xl border border-surface-border px-4 text-sm sm:text-base font-semibold focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/15 focus:outline-none transition cursor-pointer"
+                            className="w-full h-13 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-xl border border-slate-300 dark:border-slate-700 px-4 text-base font-semibold focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/20 focus:outline-none transition cursor-pointer shadow-xs"
                           >
                             <option value="Diamond Member">💎 1. Diamond Member</option>
                             <option value="Silver Member">🥈 2. Silver Member</option>
@@ -601,8 +608,8 @@ export const PublicGateway: React.FC = () => {
                           </select>
                         </div>
 
-                        {/* Interactive Pill Selector for 1-click convenience */}
-                        <div className="grid grid-cols-2 gap-2 mt-2.5">
+                        {/* Prominent 4 Tier Cards for 1-Click Selection */}
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                           {MEMBERSHIP_OPTIONS.map(opt => {
                             const isSelected = formData.membershipTier === opt.id;
                             return (
@@ -611,14 +618,28 @@ export const PublicGateway: React.FC = () => {
                                 key={opt.id}
                                 onClick={() => setFormData({ ...formData, membershipTier: opt.id })}
                                 className={cn(
-                                  'p-2.5 rounded-xl border text-left transition select-none flex items-center gap-2',
+                                  'p-3.5 rounded-2xl border text-left transition-all duration-150 select-none flex flex-col justify-between h-24 shadow-xs',
                                   isSelected 
-                                    ? 'bg-indigo-50 dark:bg-indigo-950/50 border-indigo-500 text-indigo-700 dark:text-indigo-300 font-bold shadow-xs' 
-                                    : 'bg-surface-elevated border-surface-border text-text-soft hover:text-text-pure hover:border-surface-hover font-medium'
+                                    ? 'bg-indigo-50 dark:bg-indigo-950/60 border-indigo-600 dark:border-indigo-500 text-indigo-700 dark:text-indigo-300 ring-2 ring-indigo-600/20 font-bold' 
+                                    : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-700 font-medium'
                                 )}
                               >
-                                <span className="text-base">{opt.icon}</span>
-                                <span className="text-xs sm:text-sm font-semibold truncate">{opt.label}</span>
+                                <div className="flex items-center justify-between w-full">
+                                  <span className="text-2xl">{opt.icon}</span>
+                                  {isSelected && (
+                                    <span className="w-5 h-5 rounded-full bg-indigo-600 text-white flex items-center justify-center shrink-0">
+                                      <Check className="w-3.5 h-3.5" />
+                                    </span>
+                                  )}
+                                </div>
+                                <div>
+                                  <span className="text-sm sm:text-base font-bold block leading-tight text-slate-900 dark:text-white">
+                                    {opt.label}
+                                  </span>
+                                  <span className="text-xs text-slate-500 dark:text-slate-400 block truncate mt-0.5">
+                                    {opt.desc}
+                                  </span>
+                                </div>
                               </button>
                             );
                           })}
@@ -627,10 +648,10 @@ export const PublicGateway: React.FC = () => {
 
                       {/* User Category (Student Pro vs Franchise Hub) */}
                       <div>
-                        <label className="block text-sm font-semibold text-text-pure mb-2">
+                        <label className="block text-sm sm:text-base font-semibold text-slate-900 dark:text-slate-100 mb-2.5">
                           Category <span className="text-red-500">*</span>
                         </label>
-                        <div className="grid grid-cols-2 gap-3">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                           {[
                             { 
                               id: 'Student Pro' as UserType, 
@@ -653,20 +674,26 @@ export const PublicGateway: React.FC = () => {
                                 key={item.id}
                                 onClick={() => setFormData({ ...formData, userType: item.id })}
                                 className={cn(
-                                  'p-3.5 rounded-2xl border text-left transition-all duration-150 select-none flex flex-col justify-between h-24',
+                                  'p-4 rounded-2xl border text-left transition-all duration-150 select-none flex items-center justify-between shadow-xs',
                                   isSelected 
-                                    ? 'bg-indigo-50 dark:bg-indigo-950/50 border-indigo-500 text-indigo-700 dark:text-indigo-300 font-bold shadow-xs' 
-                                    : 'bg-surface-elevated border-surface-border text-text-pure hover:border-surface-hover font-medium'
+                                    ? 'bg-indigo-50 dark:bg-indigo-950/60 border-indigo-600 dark:border-indigo-500 text-indigo-700 dark:text-indigo-300 ring-2 ring-indigo-600/20 font-bold' 
+                                    : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-700 font-medium'
                                 )}
                               >
-                                <div className="flex items-center justify-between w-full">
-                                  <Icon className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
-                                  {isSelected && <Check className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />}
+                                <div className="flex items-center gap-3.5">
+                                  <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800 flex items-center justify-center text-indigo-600 dark:text-indigo-400 shrink-0">
+                                    <Icon className="w-5 h-5" />
+                                  </div>
+                                  <div>
+                                    <span className="text-base font-bold block text-slate-900 dark:text-white">{item.title}</span>
+                                    <span className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 block">{item.desc}</span>
+                                  </div>
                                 </div>
-                                <div>
-                                  <span className="text-xs sm:text-sm font-bold block">{item.title}</span>
-                                  <span className="text-[11px] text-text-muted font-normal block truncate">{item.desc}</span>
-                                </div>
+                                {isSelected && (
+                                  <span className="w-6 h-6 rounded-full bg-indigo-600 text-white flex items-center justify-center shrink-0">
+                                    <Check className="w-4 h-4" />
+                                  </span>
+                                )}
                               </button>
                             );
                           })}
@@ -680,33 +707,33 @@ export const PublicGateway: React.FC = () => {
                   {/* ============================================================== */}
                   {/* SECTION 3: Technical Inquiry Specifications */}
                   {/* ============================================================== */}
-                  <div className="space-y-5 pt-3">
+                  <div className="space-y-6 pt-3">
                     
-                    <div className="flex items-center gap-3 pb-3 border-b border-surface-border">
-                      <div className="w-9 h-9 rounded-xl bg-amber-50 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-800/60 flex items-center justify-center text-amber-600 dark:text-amber-400 font-bold shrink-0">
+                    <div className="flex items-center gap-3.5 pb-3 border-b border-surface-border">
+                      <div className="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-950/60 border border-amber-200 dark:border-amber-800 flex items-center justify-center text-amber-600 dark:text-amber-400 font-bold shrink-0 shadow-xs">
                         <FileText className="w-5 h-5" />
                       </div>
                       <div>
-                        <h2 className="text-base sm:text-lg font-bold text-text-pure tracking-tight leading-snug">
-                          3. Query Details & Technical Specifications
+                        <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white tracking-tight leading-snug">
+                          3. Issue Details
                         </h2>
-                        <p className="text-xs sm:text-sm text-text-muted font-normal">
-                          Tell us about the issue you are facing so we can assign the most suitable technical specialist.
+                        <p className="text-sm text-slate-600 dark:text-slate-400 font-normal">
+                          Provide detailed context regarding your setup, issue, or question.
                         </p>
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-6">
                       
                       {/* Platform / Ecosystem */}
                       <div>
-                        <label className="block text-sm font-semibold text-text-pure mb-2">
+                        <label className="block text-sm sm:text-base font-semibold text-slate-900 dark:text-slate-100 mb-2">
                           Platform / Ecosystem <span className="text-red-500">*</span>
                         </label>
                         <select
                           value={formData.ecosystem}
                           onChange={e => setFormData({ ...formData, ecosystem: e.target.value as ProductEcosystem })}
-                          className="w-full h-12 bg-surface-elevated text-text-pure rounded-xl border border-surface-border px-4 text-sm sm:text-base font-medium focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/15 focus:outline-none transition cursor-pointer"
+                          className="w-full h-13 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-xl border border-slate-300 dark:border-slate-700 px-4 text-base font-medium focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/20 focus:outline-none transition cursor-pointer shadow-xs"
                         >
                           <option value="Chakravyuh CRM">Chakravyuh CRM (Meta / WABA / Leads)</option>
                           <option value="Digital Azadi Hub">Digital Azadi Hub (LMS / Course Portal)</option>
@@ -717,13 +744,13 @@ export const PublicGateway: React.FC = () => {
 
                       {/* Issue Category */}
                       <div>
-                        <label className="block text-sm font-semibold text-text-pure mb-2">
+                        <label className="block text-sm sm:text-base font-semibold text-slate-900 dark:text-slate-100 mb-2">
                           Issue Category <span className="text-red-500">*</span>
                         </label>
                         <select
                           value={formData.category}
                           onChange={e => setFormData({ ...formData, category: e.target.value })}
-                          className="w-full h-12 bg-surface-elevated text-text-pure rounded-xl border border-surface-border px-4 text-sm sm:text-base font-medium focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/15 focus:outline-none transition cursor-pointer"
+                          className="w-full h-13 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-xl border border-slate-300 dark:border-slate-700 px-4 text-base font-medium focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/20 focus:outline-none transition cursor-pointer shadow-xs"
                         >
                           <option value="CRM & Lead Management">CRM & Lead Management</option>
                           <option value="LMS & Course Access">LMS & Course Access</option>
@@ -739,7 +766,7 @@ export const PublicGateway: React.FC = () => {
 
                     {/* Inquiry Subject */}
                     <div>
-                      <label className="block text-sm font-semibold text-text-pure mb-2">
+                      <label className="block text-sm sm:text-base font-semibold text-slate-900 dark:text-slate-100 mb-2">
                         Inquiry Subject <span className="text-red-500">*</span>
                       </label>
                       <input
@@ -750,30 +777,30 @@ export const PublicGateway: React.FC = () => {
                         onChange={e => setFormData({ ...formData, subject: e.target.value })}
                         placeholder="e.g. WhatsApp WABA webhook integration failing on port 443"
                         className={cn(
-                          'w-full h-12 bg-surface-elevated text-text-pure rounded-xl border px-4 text-sm sm:text-base font-medium',
-                          'transition-all duration-150 placeholder:text-text-faint focus:outline-none focus:ring-2',
+                          'w-full h-13 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-xl border px-4 text-base font-medium',
+                          'transition-all duration-150 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 shadow-xs',
                           errors.subject 
-                            ? 'border-red-400 focus:border-red-500 focus:ring-red-500/15' 
-                            : 'border-surface-border focus:border-indigo-500 focus:ring-indigo-500/15'
+                            ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20' 
+                            : 'border-slate-300 dark:border-slate-700 focus:border-indigo-600 focus:ring-indigo-600/20'
                         )}
                       />
                       {errors.subject && (
-                        <p className="text-xs text-red-500 mt-1.5 font-medium flex items-center gap-1">
-                          <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                        <p className="text-xs sm:text-sm text-red-600 dark:text-red-400 mt-1.5 font-medium flex items-center gap-1">
+                          <AlertCircle className="w-4 h-4 shrink-0" />
                           <span>{errors.subject}</span>
                         </p>
                       )}
                     </div>
 
                     {/* Quick Topic Chips */}
-                    <div className="space-y-2">
+                    <div className="space-y-2.5">
                       <div className="flex items-center justify-between">
-                        <label className="text-sm font-semibold text-text-pure">
+                        <label className="text-sm sm:text-base font-semibold text-slate-900 dark:text-slate-100">
                           Detailed Description <span className="text-red-500">*</span>
                         </label>
-                        <span className="text-xs text-indigo-600 dark:text-indigo-400 flex items-center gap-1 font-semibold">
+                        <span className="text-xs text-indigo-600 dark:text-indigo-400 flex items-center gap-1 font-bold">
                           <Tag className="w-3.5 h-3.5" />
-                          <span>Click to auto-insert topic tag:</span>
+                          <span>Click chip to auto-insert prefix:</span>
                         </span>
                       </div>
 
@@ -783,7 +810,7 @@ export const PublicGateway: React.FC = () => {
                             type="button"
                             key={item.tag}
                             onClick={() => handleAppendIssueTag(item.append)}
-                            className="px-3 py-1.5 rounded-xl bg-surface-elevated hover:bg-surface-hover border border-surface-border text-xs sm:text-sm text-text-soft hover:text-text-pure font-semibold transition active:scale-95"
+                            className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-750 border border-slate-300 dark:border-slate-700 text-xs sm:text-sm text-slate-700 dark:text-slate-200 font-semibold transition active:scale-95 shadow-xs"
                           >
                             {item.tag}
                           </button>
@@ -799,16 +826,16 @@ export const PublicGateway: React.FC = () => {
                         onChange={e => setFormData({ ...formData, description: e.target.value })}
                         placeholder="Please explain the details of your issue, what happened, and any steps to reproduce so our engineers can resolve it quickly..."
                         className={cn(
-                          'w-full p-4 bg-surface-elevated text-text-pure rounded-2xl border text-sm sm:text-base font-medium leading-relaxed resize-none',
-                          'transition-all duration-150 placeholder:text-text-faint focus:outline-none focus:ring-2',
+                          'w-full p-4 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-2xl border text-base font-medium leading-relaxed resize-none',
+                          'transition-all duration-150 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 shadow-xs',
                           errors.description 
-                            ? 'border-red-400 focus:border-red-500 focus:ring-red-500/15' 
-                            : 'border-surface-border focus:border-indigo-500 focus:ring-indigo-500/15'
+                            ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20' 
+                            : 'border-slate-300 dark:border-slate-700 focus:border-indigo-600 focus:ring-indigo-600/20'
                         )}
                       />
                       {errors.description && (
-                        <p className="text-xs text-red-500 mt-1.5 font-medium flex items-center gap-1">
-                          <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                        <p className="text-xs sm:text-sm text-red-600 dark:text-red-400 mt-1.5 font-medium flex items-center gap-1">
+                          <AlertCircle className="w-4 h-4 shrink-0" />
                           <span>{errors.description}</span>
                         </p>
                       )}
@@ -816,17 +843,17 @@ export const PublicGateway: React.FC = () => {
 
                     {/* Target Website URL (Optional) */}
                     <div>
-                      <label className="block text-sm font-semibold text-text-pure mb-2">
-                        Target Website URL <span className="text-text-muted text-xs font-normal">(Optional)</span>
+                      <label className="block text-sm sm:text-base font-semibold text-slate-900 dark:text-slate-100 mb-2">
+                        Target Website URL <span className="text-slate-500 dark:text-slate-400 text-xs font-normal">(Optional)</span>
                       </label>
                       <div className="relative">
-                        <Globe className="w-5 h-5 text-text-muted absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                        <Globe className="w-5 h-5 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none" />
                         <input
                           type="url"
                           value={formData.websiteUrl}
                           onChange={e => setFormData({ ...formData, websiteUrl: e.target.value })}
                           placeholder="https://yourwebsite.com"
-                          className="w-full h-12 bg-surface-elevated text-text-pure rounded-xl border border-surface-border pl-11 pr-4 text-sm sm:text-base font-medium focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/15 focus:outline-none transition placeholder:text-text-faint"
+                          className="w-full h-13 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-xl border border-slate-300 dark:border-slate-700 pl-12 pr-4 text-base font-medium focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/20 focus:outline-none transition placeholder:text-slate-400 dark:placeholder:text-slate-500 shadow-xs"
                         />
                       </div>
                     </div>
@@ -834,16 +861,16 @@ export const PublicGateway: React.FC = () => {
                   </div>
 
                   {/* Submission Action Bar */}
-                  <div className="pt-4 border-t border-surface-border flex flex-col sm:flex-row items-center justify-between gap-4">
-                    <p className="text-xs text-text-muted text-center sm:text-left font-medium">
-                      🔒 Your inquiry is logged securely in our centralized technical database.
+                  <div className="pt-6 border-t border-surface-border flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 text-center sm:text-left font-medium">
+                      🔒 Your query is logged directly into the Digital Azadi operations database.
                     </p>
 
                     <button
                       type="submit"
                       disabled={isSubmitting}
                       className={cn(
-                        'w-full sm:w-auto h-13 px-10 py-3.5 rounded-2xl text-base font-bold text-white shadow-lg transition-all',
+                        'w-full sm:w-auto h-14 px-10 py-3.5 rounded-2xl text-base font-bold text-white shadow-lg transition-all',
                         'bg-indigo-600 hover:bg-indigo-700 active:scale-[0.99] disabled:opacity-50 disabled:pointer-events-none',
                         'flex items-center justify-center gap-2.5 shadow-indigo-600/25'
                       )}
