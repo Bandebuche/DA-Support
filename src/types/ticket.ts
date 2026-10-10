@@ -1,6 +1,13 @@
 export type UserType = 'Student Pro' | 'Franchise Hub';
 
-export type MembershipTier = 'Diamond Elite' | 'Silver Pass' | 'Other / Not Specified';
+export type MembershipTier = 
+  | 'Diamond Member' 
+  | 'Silver Member' 
+  | 'Gold Member' 
+  | 'PMP Member' 
+  | 'Diamond Elite' 
+  | 'Silver Pass' 
+  | 'Other / Not Specified';
 
 export type ProductEcosystem = 
   | 'Chakravyuh CRM' 
@@ -37,6 +44,7 @@ export interface Ticket {
   requesterName: string;
   requesterEmail: string;
   requesterPhone: string; // Validated 10 digits
+  city?: string;
   userType: UserType;
   membershipTier: MembershipTier;
   ecosystem: ProductEcosystem;
@@ -73,6 +81,7 @@ export interface TicketFormData {
   fullName: string;
   email: string;
   mobile: string;
+  city: string;
   userType: UserType;
   membershipTier: MembershipTier;
   ecosystem: ProductEcosystem;

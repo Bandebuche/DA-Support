@@ -22,12 +22,22 @@ import {
   Mail, 
   Phone, 
   Globe, 
-  FileText,
-  Tag,
-  Search,
-  RotateCcw,
-  ShieldCheck,
-  AlertCircle
+  FileText, 
+  Tag, 
+  Search, 
+  RotateCcw, 
+  ShieldCheck, 
+  AlertCircle,
+  MapPin,
+  Award,
+  Building2,
+  GraduationCap,
+  HelpCircle,
+  ExternalLink,
+  Layers,
+  ArrowRight,
+  Shield,
+  Zap
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { BrandLogo } from '../common/BrandLogo';
@@ -40,6 +50,37 @@ const ISSUE_TAGS = [
   { tag: '+ Payment/SSL', append: '[Payment Gateway & SSL Issue] ' },
   { tag: '+ Funnel/Login', append: '[LMS Funnel & Login Access] ' },
   { tag: '+ CRM Lead Sync', append: '[Chakravyuh CRM Webhook Sync] ' },
+];
+
+const MEMBERSHIP_OPTIONS: { id: MembershipTier; label: string; badge: string; icon: string; desc: string }[] = [
+  { 
+    id: 'Diamond Member', 
+    label: 'Diamond Member', 
+    badge: 'Diamond Tier', 
+    icon: '💎',
+    desc: 'Highest priority SLA with direct engineer review' 
+  },
+  { 
+    id: 'Gold Member', 
+    label: 'Gold Member', 
+    badge: 'Gold Tier', 
+    icon: '🥇',
+    desc: 'Priority queue with fast technical turnaround' 
+  },
+  { 
+    id: 'Silver Member', 
+    label: 'Silver Member', 
+    badge: 'Silver Tier', 
+    icon: '🥈',
+    desc: 'Standard technical query and setup assistance' 
+  },
+  { 
+    id: 'PMP Member', 
+    label: 'PMP Member', 
+    badge: 'PMP Professional', 
+    icon: '⭐',
+    desc: 'Specialized project & business mentorship support' 
+  },
 ];
 
 export const PublicGateway: React.FC = () => {
@@ -63,8 +104,9 @@ export const PublicGateway: React.FC = () => {
     fullName: '',
     email: '',
     mobile: '',
+    city: '',
     userType: 'Student Pro',
-    membershipTier: 'Diamond Elite',
+    membershipTier: 'Diamond Member',
     ecosystem: 'Chakravyuh CRM',
     category: 'CRM & Lead Management',
     websiteUrl: '',
@@ -82,34 +124,56 @@ export const PublicGateway: React.FC = () => {
     return () => clearInterval(timer);
   }, []);
 
-  // WhatsApp Validation
+  // WhatsApp Validation: 10 Indian digits starting with 6-9
   const mobileDigits = formData.mobile.replace(/\D/g, '');
   const isMobileValid = /^[6-9]\d{9}$/.test(mobileDigits);
 
+  // Email Validation: valid email format
+  const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim());
+  const isGmail = formData.email.trim().toLowerCase().endsWith('@gmail.com');
+
   const validateForm = (): boolean => {
     const errs: Record<string, string> = {};
+    
     if (!formData.fullName.trim() || formData.fullName.trim().length < 2) {
-      errs.fullName = 'Please enter your full name (at least 2 characters).';
+      errs.fullName = 'Please enter your full name (minimum 2 characters).';
     }
+    
     if (!isMobileValid) {
-      errs.mobile = 'Enter a valid 10-digit Indian WhatsApp mobile number (starting with 6-9).';
+      errs.mobile = 'Please enter a valid 10-digit Indian WhatsApp mobile number (starting with 6-9).';
     }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) {
-      errs.email = 'Please enter a valid email address.';
+    
+    if (!formData.email.trim() || !isEmailValid) {
+      errs.email = 'Please enter a valid email address (e.g. yourname@gmail.com).';
     }
+
+    if (!formData.city.trim() || formData.city.trim().length < 2) {
+      errs.city = 'Please enter your city (e.g. Pune, Mumbai, Delhi).';
+    }
+    
     if (!formData.subject.trim() || formData.subject.trim().length < 4) {
-      errs.subject = 'Please enter a subject (at least 4 characters).';
+      errs.subject = 'Please enter an inquiry subject (minimum 4 characters).';
     }
+    
     if (!formData.description.trim() || formData.description.trim().length < 10) {
       errs.description = 'Please describe your query in detail (minimum 10 characters).';
     }
+
     setErrors(errs);
     return Object.keys(errs).length === 0;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validateForm()) return;
+    if (!validateForm()) {
+      // Scroll to first error
+      const firstErrorKey = Object.keys(errors)[0];
+      const element = document.querySelector(`[name="${firstErrorKey}"]`);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      return;
+    }
 
     setIsSubmitting(true);
     try {
@@ -122,12 +186,12 @@ export const PublicGateway: React.FC = () => {
 
       try {
         confetti({
-          particleCount: 80,
-          spread: 70,
+          particleCount: 100,
+          spread: 80,
           origin: { y: 0.6 },
-          colors: ['#6366F1', '#10B981', '#FF5500', '#A5B4FC'],
+          colors: ['#6366F1', '#10B981', '#F59E0B', '#8B5CF6'],
         });
-      } catch (e) {
+      } catch {
         // Safe fallback
       }
 
@@ -160,8 +224,9 @@ export const PublicGateway: React.FC = () => {
       fullName: '',
       email: '',
       mobile: '',
+      city: '',
       userType: 'Student Pro',
-      membershipTier: 'Diamond Elite',
+      membershipTier: 'Diamond Member',
       ecosystem: 'Chakravyuh CRM',
       category: 'CRM & Lead Management',
       websiteUrl: '',
@@ -203,12 +268,11 @@ export const PublicGateway: React.FC = () => {
       if (matched) {
         setTrackedTicket(matched);
       } else {
-        // Check if ID exists but phone doesn't match for security
         const idExists = allTickets.some(t => t.ticketId.toUpperCase() === cleanId);
         if (idExists) {
           setTrackError('Ticket ID found, but the mobile number does not match our records for this ticket. Please verify your 10-digit registered number.');
         } else {
-          setTrackError(`No record found for Ticket ID "${cleanId}". Please verify your ticket number or submit a new inquiry.`);
+          setTrackError(`No record found for Ticket ID "${cleanId}". Please verify your ticket ID or raise a new support query.`);
         }
       }
     } finally {
@@ -217,327 +281,499 @@ export const PublicGateway: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-void text-text-pure flex flex-col selection:bg-indigo-600 selection:text-white">
+    <div className="min-h-screen bg-void text-text-pure flex flex-col selection:bg-indigo-600 selection:text-white transition-colors duration-200">
       
-      {/* Clean Top Header (Public Branding ONLY) */}
-      <header className="h-20 border-b border-surface-border bg-surface/90 backdrop-blur-md sticky top-0 z-40 px-4 md:px-8 flex items-center justify-between">
+      {/* Top Navigation Bar */}
+      <header className="h-20 sm:h-22 border-b border-surface-border bg-surface/95 backdrop-blur-md sticky top-0 z-40 px-4 sm:px-8 flex items-center justify-between shadow-xs">
         
-        {/* Brand: Official Digital Azadi Logo */}
-        <div className="flex items-center gap-3.5">
+        {/* Brand: Official Digital Azadi Logo & Title */}
+        <div className="flex items-center gap-3.5 sm:gap-4">
           <BrandLogo size="md" showBadge={false} />
           <div className="hidden sm:block">
-            <span className="text-base font-bold text-text-pure tracking-tight block">
+            <span className="text-base sm:text-lg font-bold text-text-pure tracking-tight block leading-tight">
               Digital Azadi Support
             </span>
-            <p className="text-xs text-text-muted">
-              Student & Franchise Resolution Portal
+            <p className="text-xs text-text-muted font-medium">
+              Student & Franchise Resolution Center
             </p>
           </div>
         </div>
 
         {/* Right: Theme Toggle & Live IST Clock */}
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-3">
           <ThemeToggle showLabel />
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-surface-elevated border border-surface-border text-xs shadow-sm font-medium">
+          <div className="hidden xs:flex items-center gap-2 px-3.5 py-2 rounded-xl bg-surface-elevated border border-surface-border text-xs shadow-xs font-medium">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
             <Clock className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
-            <span className="font-bold text-text-pure font-mono">{istTime}</span>
-            <span className="text-[10px] text-text-muted">IST</span>
+            <span className="font-bold text-text-pure font-mono text-xs">{istTime}</span>
+            <span className="text-[11px] text-text-muted font-semibold uppercase">IST</span>
           </div>
         </div>
 
       </header>
 
-      {/* Main Content Area */}
-      <main className="flex-1 max-w-4xl w-full mx-auto px-4 py-8 md:py-10">
+      {/* Main Content Canvas */}
+      <main className="flex-1 max-w-4xl w-full mx-auto px-4 sm:px-6 py-8 sm:py-12">
         
-        {/* Portal Mode Switcher Pills (Submit New Ticket vs Track Ticket) */}
+        {/* Portal Navigation Pills (Submit vs Track) */}
         {!createdTicket && (
-          <div className="flex justify-center mb-8">
-            <div className="inline-flex p-1 rounded-2xl bg-surface border border-surface-border shadow-sm">
+          <div className="flex justify-center mb-8 sm:mb-10">
+            <div className="inline-flex p-1.5 rounded-2xl bg-surface border border-surface-border shadow-sm">
               <button
+                type="button"
                 onClick={() => { setActiveTab('submit'); setTrackError(null); }}
                 className={cn(
-                  'px-5 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 transition-all',
+                  'px-5 sm:px-7 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 sm:gap-2.5 transition-all duration-150',
                   activeTab === 'submit'
-                    ? 'bg-indigo-600 text-white shadow-sm'
+                    ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20'
                     : 'text-text-soft hover:text-text-pure hover:bg-surface-elevated'
                 )}
               >
-                <FileText className="w-4 h-4" />
-                <span>Submit Support Ticket</span>
+                <HelpCircle className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
+                <span>Raise Support Query</span>
               </button>
+              
               <button
+                type="button"
                 onClick={() => { setActiveTab('track'); setTrackError(null); }}
                 className={cn(
-                  'px-5 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 transition-all',
+                  'px-5 sm:px-7 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 sm:gap-2.5 transition-all duration-150',
                   activeTab === 'track'
-                    ? 'bg-indigo-600 text-white shadow-sm'
+                    ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20'
                     : 'text-text-soft hover:text-text-pure hover:bg-surface-elevated'
                 )}
               >
-                <Search className="w-4 h-4" />
+                <Search className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
                 <span>Track Your Ticket</span>
               </button>
             </div>
           </div>
         )}
 
-        {/* TAB 1: SUBMIT TICKET FORM */}
+        {/* TAB 1: RAISE SUPPORT QUERY FORM */}
         {activeTab === 'submit' && (
           <>
             {!createdTicket ? (
-              <div className="space-y-6">
+              <div className="space-y-8 animate-in fade-in duration-200">
                 
-                {/* Hero Banner */}
-                <div className="text-center space-y-2">
-                  <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-surface border border-surface-border text-xs text-text-muted shadow-sm">
-                    <span className="text-amber-500 font-bold">⚡</span>
-                    <span className="text-text-pure font-semibold">Digital Azadi Priority Desk</span>
+                {/* Hero Headline & Purpose */}
+                <div className="text-center space-y-3 max-w-2xl mx-auto">
+                  <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-surface-elevated border border-surface-border text-xs text-text-muted shadow-xs">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                    <span className="text-text-pure font-bold">Priority Operations Desk</span>
                     <span>•</span>
-                    <span className="text-emerald-600 dark:text-emerald-400 font-medium">Guaranteed IST Response</span>
+                    <span className="text-indigo-600 dark:text-indigo-400 font-semibold">Live Support in IST</span>
                   </div>
-                  <h1 className="text-2xl md:text-3xl font-extrabold text-text-pure tracking-tight">
-                    Raise a Support Inquiry
+
+                  <h1 className="text-3xl sm:text-4xl font-extrabold text-text-pure tracking-tight leading-tight">
+                    Raise a Support Query
                   </h1>
-                  <p className="text-xs md:text-sm text-text-muted max-w-lg mx-auto">
-                    Fill in your details below and our technical support team will assist you on priority.
+                  
+                  <p className="text-sm sm:text-base text-text-muted leading-relaxed">
+                    Have a technical question or issue with your LMS, Chakravyuh CRM, or WordPress setup? Fill out the form below and our technical engineers will resolve your query on priority.
                   </p>
                 </div>
 
-                {/* Support Form */}
-                <form onSubmit={handleSubmit} className="bg-surface border border-surface-border rounded-3xl p-6 md:p-8 space-y-6 shadow-sm">
+                {/* Main Form Container Card */}
+                <form 
+                  onSubmit={handleSubmit} 
+                  noValidate
+                  className="bg-surface border border-surface-border rounded-3xl p-6 sm:p-10 shadow-xl space-y-8 relative overflow-hidden"
+                >
                   
-                  {/* SECTION 1: Contact Details */}
-                  <div className="space-y-4">
-                    <div className="border-b border-surface-border pb-2.5">
-                      <h2 className="text-xs font-bold uppercase tracking-wider text-text-pure flex items-center gap-2">
-                        <User className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-                        1. Your Contact Information
-                      </h2>
-                    </div>
+                  {/* Subtle top ambient accent line */}
+                  <div className="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-600" />
 
-                    <div>
-                      <label className="block text-xs font-medium text-text-muted mb-1.5">
-                        Full Name <span className="text-red-500">*</span>
-                      </label>
-                      <div className="relative">
-                        <User className="w-4 h-4 text-text-muted absolute left-3.5 top-1/2 -translate-y-1/2" />
-                        <input
-                          type="text"
-                          value={formData.fullName}
-                          onChange={e => setFormData({ ...formData, fullName: e.target.value })}
-                          placeholder="e.g. Ramesh Kulkarni"
-                          className="w-full bg-surface-elevated text-text-pure rounded-xl border border-surface-border pl-10 pr-4 py-2.5 text-xs focus:border-indigo-500 focus:outline-none placeholder:text-text-faint transition"
-                        />
+                  {/* ============================================================== */}
+                  {/* SECTION 1: Personal & Contact Information */}
+                  {/* ============================================================== */}
+                  <div className="space-y-5">
+                    
+                    <div className="flex items-center gap-3 pb-3 border-b border-surface-border">
+                      <div className="w-9 h-9 rounded-xl bg-indigo-50 dark:bg-indigo-950/50 border border-indigo-200 dark:border-indigo-800/60 flex items-center justify-center text-indigo-600 dark:text-indigo-400 font-bold shrink-0">
+                        <User className="w-5 h-5" />
                       </div>
-                      {errors.fullName && <p className="text-xs text-red-500 mt-1 font-medium">{errors.fullName}</p>}
+                      <div>
+                        <h2 className="text-base sm:text-lg font-bold text-text-pure tracking-tight leading-snug">
+                          1. Contact Information
+                        </h2>
+                        <p className="text-xs sm:text-sm text-text-muted font-normal">
+                          Please provide your genuine details so our engineers can reach you with updates.
+                        </p>
+                      </div>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      {/* WhatsApp Mobile */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                      
+                      {/* Full Name */}
                       <div>
-                        <div className="flex items-center justify-between mb-1.5">
-                          <label className="text-xs font-medium text-text-muted">
-                            WhatsApp Mobile <span className="text-red-500">*</span>
+                        <label className="block text-sm font-semibold text-text-pure mb-2">
+                          Full Name <span className="text-red-500">*</span>
+                        </label>
+                        <div className="relative">
+                          <User className="w-5 h-5 text-text-muted absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                          <input
+                            type="text"
+                            name="fullName"
+                            required
+                            value={formData.fullName}
+                            onChange={e => setFormData({ ...formData, fullName: e.target.value })}
+                            placeholder="e.g. Ramesh Kulkarni"
+                            className={cn(
+                              'w-full h-12 bg-surface-elevated text-text-pure rounded-xl border pl-11 pr-4 text-sm sm:text-base font-medium',
+                              'transition-all duration-150 placeholder:text-text-faint focus:outline-none focus:ring-2',
+                              errors.fullName 
+                                ? 'border-red-400 focus:border-red-500 focus:ring-red-500/15' 
+                                : 'border-surface-border focus:border-indigo-500 focus:ring-indigo-500/15'
+                            )}
+                          />
+                        </div>
+                        {errors.fullName && (
+                          <p className="text-xs text-red-500 mt-1.5 font-medium flex items-center gap-1">
+                            <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                            <span>{errors.fullName}</span>
+                          </p>
+                        )}
+                      </div>
+
+                      {/* Contact Number (WhatsApp) */}
+                      <div>
+                        <div className="flex items-center justify-between mb-2">
+                          <label className="text-sm font-semibold text-text-pure">
+                            Contact Number (WhatsApp) <span className="text-red-500">*</span>
                           </label>
                           {isMobileValid && (
                             <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-md border border-emerald-200 dark:border-emerald-800">
                               <Check className="w-3 h-3" />
-                              Valid 10-Digit Mobile
+                              <span>Valid 10-Digit Mobile</span>
                             </span>
                           )}
                         </div>
                         <div className="relative">
-                          <span className="text-xs text-text-muted absolute left-3.5 top-1/2 -translate-y-1/2 font-semibold font-mono">
-                            +91
+                          <span className="text-sm text-text-muted absolute left-3.5 top-1/2 -translate-y-1/2 font-semibold font-mono pointer-events-none select-none">
+                            🇮🇳 +91
                           </span>
                           <input
                             type="tel"
+                            name="mobile"
+                            required
                             maxLength={10}
                             value={formData.mobile}
                             onChange={e => setFormData({ ...formData, mobile: e.target.value.replace(/\D/g, '') })}
                             placeholder="9823012345"
                             className={cn(
-                              'w-full bg-surface-elevated text-text-pure rounded-xl border pl-12 pr-4 py-2.5 text-xs font-mono focus:outline-none transition',
-                              isMobileValid ? 'border-emerald-400 focus:border-emerald-500' : 'border-surface-border focus:border-indigo-500'
+                              'w-full h-12 bg-surface-elevated text-text-pure rounded-xl border pl-19 pr-4 text-sm sm:text-base font-mono font-medium',
+                              'transition-all duration-150 focus:outline-none focus:ring-2',
+                              errors.mobile 
+                                ? 'border-red-400 focus:border-red-500 focus:ring-red-500/15' 
+                                : isMobileValid
+                                ? 'border-emerald-400 focus:border-emerald-500 focus:ring-emerald-500/15'
+                                : 'border-surface-border focus:border-indigo-500 focus:ring-indigo-500/15'
                             )}
                           />
                         </div>
-                        {errors.mobile && <p className="text-xs text-red-500 mt-1 font-medium">{errors.mobile}</p>}
+                        {errors.mobile ? (
+                          <p className="text-xs text-red-500 mt-1.5 font-medium flex items-center gap-1">
+                            <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                            <span>{errors.mobile}</span>
+                          </p>
+                        ) : (
+                          <p className="text-xs text-text-muted mt-1.5 font-normal">
+                            We will send ticket progress and WhatsApp support updates to this number.
+                          </p>
+                        )}
                       </div>
 
-                      {/* Email Address */}
+                      {/* Email Address (Gmail) */}
                       <div>
-                        <label className="block text-xs font-medium text-text-muted mb-1.5">
-                          Email Address <span className="text-red-500">*</span>
-                        </label>
+                        <div className="flex items-center justify-between mb-2">
+                          <label className="text-sm font-semibold text-text-pure">
+                            Email Address (Gmail) <span className="text-red-500">*</span>
+                          </label>
+                          {isGmail && (
+                            <span className="text-[11px] font-semibold text-indigo-700 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/40 px-2 py-0.5 rounded-md border border-indigo-200 dark:border-indigo-800">
+                              Gmail Verified
+                            </span>
+                          )}
+                        </div>
                         <div className="relative">
-                          <Mail className="w-4 h-4 text-text-muted absolute left-3.5 top-1/2 -translate-y-1/2" />
+                          <Mail className="w-5 h-5 text-text-muted absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                           <input
                             type="email"
+                            name="email"
+                            required
                             value={formData.email}
                             onChange={e => setFormData({ ...formData, email: e.target.value })}
-                            placeholder="ramesh@digitalazadi.com"
-                            className="w-full bg-surface-elevated text-text-pure rounded-xl border border-surface-border pl-10 pr-4 py-2.5 text-xs focus:border-indigo-500 focus:outline-none placeholder:text-text-faint transition"
+                            placeholder="yourname@gmail.com"
+                            className={cn(
+                              'w-full h-12 bg-surface-elevated text-text-pure rounded-xl border pl-11 pr-4 text-sm sm:text-base font-medium',
+                              'transition-all duration-150 placeholder:text-text-faint focus:outline-none focus:ring-2',
+                              errors.email 
+                                ? 'border-red-400 focus:border-red-500 focus:ring-red-500/15' 
+                                : 'border-surface-border focus:border-indigo-500 focus:ring-indigo-500/15'
+                            )}
                           />
                         </div>
-                        {errors.email && <p className="text-xs text-red-500 mt-1 font-medium">{errors.email}</p>}
+                        {errors.email ? (
+                          <p className="text-xs text-red-500 mt-1.5 font-medium flex items-center gap-1">
+                            <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                            <span>{errors.email}</span>
+                          </p>
+                        ) : (
+                          <p className="text-xs text-text-muted mt-1.5 font-normal">
+                            Gmail is preferred for Google Meet screen share and email receipts.
+                          </p>
+                        )}
                       </div>
+
+                      {/* City */}
+                      <div>
+                        <label className="block text-sm font-semibold text-text-pure mb-2">
+                          City <span className="text-red-500">*</span>
+                        </label>
+                        <div className="relative">
+                          <MapPin className="w-5 h-5 text-text-muted absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                          <input
+                            type="text"
+                            name="city"
+                            required
+                            value={formData.city}
+                            onChange={e => setFormData({ ...formData, city: e.target.value })}
+                            placeholder="e.g. Pune, Mumbai, Delhi, Nagpur"
+                            className={cn(
+                              'w-full h-12 bg-surface-elevated text-text-pure rounded-xl border pl-11 pr-4 text-sm sm:text-base font-medium',
+                              'transition-all duration-150 placeholder:text-text-faint focus:outline-none focus:ring-2',
+                              errors.city 
+                                ? 'border-red-400 focus:border-red-500 focus:ring-red-500/15' 
+                                : 'border-surface-border focus:border-indigo-500 focus:ring-indigo-500/15'
+                            )}
+                          />
+                        </div>
+                        {errors.city && (
+                          <p className="text-xs text-red-500 mt-1.5 font-medium flex items-center gap-1">
+                            <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                            <span>{errors.city}</span>
+                          </p>
+                        )}
+                      </div>
+
                     </div>
+
                   </div>
 
-                  {/* SECTION 2: User Category & Membership Selection */}
-                  <div className="space-y-4">
-                    <div className="border-b border-surface-border pb-2.5">
-                      <h2 className="text-xs font-bold uppercase tracking-wider text-text-pure flex items-center gap-2">
-                        <Sparkles className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-                        2. Classification & Membership
-                      </h2>
+                  {/* ============================================================== */}
+                  {/* SECTION 2: Membership Tier & Category */}
+                  {/* ============================================================== */}
+                  <div className="space-y-5 pt-3">
+                    
+                    <div className="flex items-center gap-3 pb-3 border-b border-surface-border">
+                      <div className="w-9 h-9 rounded-xl bg-purple-50 dark:bg-purple-950/50 border border-purple-200 dark:border-purple-800/60 flex items-center justify-center text-purple-600 dark:text-purple-400 font-bold shrink-0">
+                        <Award className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <h2 className="text-base sm:text-lg font-bold text-text-pure tracking-tight leading-snug">
+                          2. Membership Tier & Category
+                        </h2>
+                        <p className="text-xs sm:text-sm text-text-muted font-normal">
+                          Select your registered Digital Azadi membership level to apply corresponding priority.
+                        </p>
+                      </div>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      {/* User Type */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                      
+                      {/* Membership Tier Dropdown */}
                       <div>
-                        <label className="block text-xs font-medium text-text-muted mb-2">
-                          Category
+                        <label className="block text-sm font-semibold text-text-pure mb-2">
+                          Membership Tier <span className="text-red-500">*</span>
                         </label>
-                        <div className="grid grid-cols-2 gap-2.5">
+                        <div className="relative">
+                          <select
+                            name="membershipTier"
+                            value={formData.membershipTier}
+                            onChange={e => setFormData({ ...formData, membershipTier: e.target.value as MembershipTier })}
+                            className="w-full h-12 bg-surface-elevated text-text-pure rounded-xl border border-surface-border px-4 text-sm sm:text-base font-semibold focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/15 focus:outline-none transition cursor-pointer"
+                          >
+                            <option value="Diamond Member">💎 1. Diamond Member</option>
+                            <option value="Silver Member">🥈 2. Silver Member</option>
+                            <option value="Gold Member">🥇 3. Gold Member</option>
+                            <option value="PMP Member">⭐ 4. PMP Member</option>
+                          </select>
+                        </div>
+
+                        {/* Interactive Pill Selector for 1-click convenience */}
+                        <div className="grid grid-cols-2 gap-2 mt-2.5">
+                          {MEMBERSHIP_OPTIONS.map(opt => {
+                            const isSelected = formData.membershipTier === opt.id;
+                            return (
+                              <button
+                                type="button"
+                                key={opt.id}
+                                onClick={() => setFormData({ ...formData, membershipTier: opt.id })}
+                                className={cn(
+                                  'p-2.5 rounded-xl border text-left transition select-none flex items-center gap-2',
+                                  isSelected 
+                                    ? 'bg-indigo-50 dark:bg-indigo-950/50 border-indigo-500 text-indigo-700 dark:text-indigo-300 font-bold shadow-xs' 
+                                    : 'bg-surface-elevated border-surface-border text-text-soft hover:text-text-pure hover:border-surface-hover font-medium'
+                                )}
+                              >
+                                <span className="text-base">{opt.icon}</span>
+                                <span className="text-xs sm:text-sm font-semibold truncate">{opt.label}</span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {/* User Category (Student Pro vs Franchise Hub) */}
+                      <div>
+                        <label className="block text-sm font-semibold text-text-pure mb-2">
+                          Category <span className="text-red-500">*</span>
+                        </label>
+                        <div className="grid grid-cols-2 gap-3">
                           {[
-                            { id: 'Student Pro' as UserType, icon: '👨‍🎓', title: 'Student' },
-                            { id: 'Franchise Hub' as UserType, icon: '🏢', title: 'Franchise' },
+                            { 
+                              id: 'Student Pro' as UserType, 
+                              icon: GraduationCap, 
+                              title: 'Student Pro',
+                              desc: 'Enrolled in Digital Azadi Courses' 
+                            },
+                            { 
+                              id: 'Franchise Hub' as UserType, 
+                              icon: Building2, 
+                              title: 'Franchise Hub',
+                              desc: 'Authorized Franchise Partner' 
+                            },
                           ].map(item => {
                             const isSelected = formData.userType === item.id;
+                            const Icon = item.icon;
                             return (
                               <button
                                 type="button"
                                 key={item.id}
                                 onClick={() => setFormData({ ...formData, userType: item.id })}
                                 className={cn(
-                                  'p-3 rounded-xl border cursor-pointer transition select-none flex items-center justify-between text-left',
+                                  'p-3.5 rounded-2xl border text-left transition-all duration-150 select-none flex flex-col justify-between h-24',
                                   isSelected 
-                                    ? 'bg-indigo-50 dark:bg-indigo-950/40 border-indigo-500 text-indigo-700 dark:text-indigo-300 font-bold' 
+                                    ? 'bg-indigo-50 dark:bg-indigo-950/50 border-indigo-500 text-indigo-700 dark:text-indigo-300 font-bold shadow-xs' 
                                     : 'bg-surface-elevated border-surface-border text-text-pure hover:border-surface-hover font-medium'
                                 )}
                               >
-                                <span className="text-xs flex items-center gap-1.5">
-                                  <span>{item.icon}</span>
-                                  <span>{item.title}</span>
-                                </span>
-                                {isSelected && <Check className="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0" />}
+                                <div className="flex items-center justify-between w-full">
+                                  <Icon className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                                  {isSelected && <Check className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />}
+                                </div>
+                                <div>
+                                  <span className="text-xs sm:text-sm font-bold block">{item.title}</span>
+                                  <span className="text-[11px] text-text-muted font-normal block truncate">{item.desc}</span>
+                                </div>
                               </button>
                             );
                           })}
                         </div>
                       </div>
 
-                      {/* Membership Tier */}
-                      <div>
-                        <label className="block text-xs font-medium text-text-muted mb-2">
-                          Membership Tier
-                        </label>
-                        <div className="grid grid-cols-3 gap-2">
-                          {[
-                            { id: 'Diamond Elite' as MembershipTier, title: 'Diamond' },
-                            { id: 'Silver Pass' as MembershipTier, title: 'Silver' },
-                            { id: 'Other / Not Specified' as MembershipTier, title: 'Other' },
-                          ].map(item => {
-                            const isSelected = formData.membershipTier === item.id;
-                            return (
-                              <button
-                                type="button"
-                                key={item.id}
-                                onClick={() => setFormData({ ...formData, membershipTier: item.id })}
-                                className={cn(
-                                  'p-3 rounded-xl border cursor-pointer transition select-none text-center',
-                                  isSelected 
-                                    ? 'bg-indigo-50 dark:bg-indigo-950/40 border-indigo-500 text-indigo-700 dark:text-indigo-300 font-bold' 
-                                    : 'bg-surface-elevated border-surface-border text-text-pure hover:border-surface-hover font-medium'
-                                )}
-                              >
-                                <span className="text-xs block truncate">
-                                  {item.title}
-                                </span>
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </div>
                     </div>
+
                   </div>
 
+                  {/* ============================================================== */}
                   {/* SECTION 3: Technical Inquiry Specifications */}
-                  <div className="space-y-4">
-                    <div className="border-b border-surface-border pb-2.5">
-                      <h2 className="text-xs font-bold uppercase tracking-wider text-text-pure flex items-center gap-2">
-                        <FileText className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-                        3. Issue Details
-                      </h2>
+                  {/* ============================================================== */}
+                  <div className="space-y-5 pt-3">
+                    
+                    <div className="flex items-center gap-3 pb-3 border-b border-surface-border">
+                      <div className="w-9 h-9 rounded-xl bg-amber-50 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-800/60 flex items-center justify-center text-amber-600 dark:text-amber-400 font-bold shrink-0">
+                        <FileText className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <h2 className="text-base sm:text-lg font-bold text-text-pure tracking-tight leading-snug">
+                          3. Query Details & Technical Specifications
+                        </h2>
+                        <p className="text-xs sm:text-sm text-text-muted font-normal">
+                          Tell us about the issue you are facing so we can assign the most suitable technical specialist.
+                        </p>
+                      </div>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      {/* Ecosystem */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                      
+                      {/* Platform / Ecosystem */}
                       <div>
-                        <label className="block text-xs font-medium text-text-muted mb-1.5">
+                        <label className="block text-sm font-semibold text-text-pure mb-2">
                           Platform / Ecosystem <span className="text-red-500">*</span>
                         </label>
                         <select
                           value={formData.ecosystem}
                           onChange={e => setFormData({ ...formData, ecosystem: e.target.value as ProductEcosystem })}
-                          className="w-full bg-surface-elevated text-text-pure rounded-xl border border-surface-border px-3.5 py-2.5 text-xs focus:border-indigo-500 focus:outline-none"
+                          className="w-full h-12 bg-surface-elevated text-text-pure rounded-xl border border-surface-border px-4 text-sm sm:text-base font-medium focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/15 focus:outline-none transition cursor-pointer"
                         >
-                          <option value="Chakravyuh CRM">Chakravyuh CRM</option>
-                          <option value="Digital Azadi Hub">Digital Azadi Hub</option>
-                          <option value="WordPress & Hosting">WordPress & Hosting</option>
-                          <option value="Other">Other</option>
+                          <option value="Chakravyuh CRM">Chakravyuh CRM (Meta / WABA / Leads)</option>
+                          <option value="Digital Azadi Hub">Digital Azadi Hub (LMS / Course Portal)</option>
+                          <option value="WordPress & Hosting">WordPress & Hosting (cPanel / SSL / DNS)</option>
+                          <option value="Other">Other Technical Inquiries</option>
                         </select>
                       </div>
 
-                      {/* Category */}
+                      {/* Issue Category */}
                       <div>
-                        <label className="block text-xs font-medium text-text-muted mb-1.5">
+                        <label className="block text-sm font-semibold text-text-pure mb-2">
                           Issue Category <span className="text-red-500">*</span>
                         </label>
                         <select
                           value={formData.category}
                           onChange={e => setFormData({ ...formData, category: e.target.value })}
-                          className="w-full bg-surface-elevated text-text-pure rounded-xl border border-surface-border px-3.5 py-2.5 text-xs focus:border-indigo-500 focus:outline-none"
+                          className="w-full h-12 bg-surface-elevated text-text-pure rounded-xl border border-surface-border px-4 text-sm sm:text-base font-medium focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/15 focus:outline-none transition cursor-pointer"
                         >
                           <option value="CRM & Lead Management">CRM & Lead Management</option>
                           <option value="LMS & Course Access">LMS & Course Access</option>
-                          <option value="Domain & Hosting">Domain & Hosting</option>
-                          <option value="Membership & Tier">Membership & Tier</option>
+                          <option value="Domain & Hosting">Domain, Hosting & DNS</option>
+                          <option value="Membership & Tier">Membership & Tier Upgrades</option>
                           <option value="Account & Permissions">Account & Permissions</option>
                           <option value="Billing & Invoicing">Billing & Invoicing</option>
                           <option value="General Technical Support">General Technical Support</option>
                         </select>
                       </div>
+
                     </div>
 
-                    {/* Subject */}
+                    {/* Inquiry Subject */}
                     <div>
-                      <label className="block text-xs font-medium text-text-muted mb-1.5">
+                      <label className="block text-sm font-semibold text-text-pure mb-2">
                         Inquiry Subject <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="text"
+                        name="subject"
+                        required
                         value={formData.subject}
                         onChange={e => setFormData({ ...formData, subject: e.target.value })}
-                        placeholder="Brief summary of what you need help with..."
-                        className="w-full bg-surface-elevated text-text-pure rounded-xl border border-surface-border px-3.5 py-2.5 text-xs focus:border-indigo-500 focus:outline-none placeholder:text-text-faint transition"
+                        placeholder="e.g. WhatsApp WABA webhook integration failing on port 443"
+                        className={cn(
+                          'w-full h-12 bg-surface-elevated text-text-pure rounded-xl border px-4 text-sm sm:text-base font-medium',
+                          'transition-all duration-150 placeholder:text-text-faint focus:outline-none focus:ring-2',
+                          errors.subject 
+                            ? 'border-red-400 focus:border-red-500 focus:ring-red-500/15' 
+                            : 'border-surface-border focus:border-indigo-500 focus:ring-indigo-500/15'
+                        )}
                       />
-                      {errors.subject && <p className="text-xs text-red-500 mt-1 font-medium">{errors.subject}</p>}
+                      {errors.subject && (
+                        <p className="text-xs text-red-500 mt-1.5 font-medium flex items-center gap-1">
+                          <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                          <span>{errors.subject}</span>
+                        </p>
+                      )}
                     </div>
 
-                    {/* Issue Tags & Description */}
+                    {/* Quick Topic Chips */}
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
-                        <label className="text-xs font-medium text-text-muted">
+                        <label className="text-sm font-semibold text-text-pure">
                           Detailed Description <span className="text-red-500">*</span>
                         </label>
-                        <span className="text-[11px] text-indigo-600 dark:text-indigo-400 flex items-center gap-1 font-medium">
-                          <Tag className="w-3 h-3" />
-                          Click to insert context:
+                        <span className="text-xs text-indigo-600 dark:text-indigo-400 flex items-center gap-1 font-semibold">
+                          <Tag className="w-3.5 h-3.5" />
+                          <span>Click to auto-insert topic tag:</span>
                         </span>
                       </div>
 
@@ -547,54 +783,80 @@ export const PublicGateway: React.FC = () => {
                             type="button"
                             key={item.tag}
                             onClick={() => handleAppendIssueTag(item.append)}
-                            className="px-2.5 py-1 rounded-lg bg-surface-elevated hover:bg-surface-hover border border-surface-border text-xs text-text-soft hover:text-text-pure transition font-medium"
+                            className="px-3 py-1.5 rounded-xl bg-surface-elevated hover:bg-surface-hover border border-surface-border text-xs sm:text-sm text-text-soft hover:text-text-pure font-semibold transition active:scale-95"
                           >
                             {item.tag}
                           </button>
                         ))}
                       </div>
 
+                      {/* Textarea */}
                       <textarea
                         rows={5}
+                        name="description"
+                        required
                         value={formData.description}
                         onChange={e => setFormData({ ...formData, description: e.target.value })}
-                        placeholder="Please explain the details of your issue, what happened, and any steps to reproduce..."
-                        className="w-full bg-surface-elevated text-text-pure rounded-xl border border-surface-border p-3.5 text-xs focus:border-indigo-500 focus:outline-none placeholder:text-text-faint resize-none leading-relaxed transition"
+                        placeholder="Please explain the details of your issue, what happened, and any steps to reproduce so our engineers can resolve it quickly..."
+                        className={cn(
+                          'w-full p-4 bg-surface-elevated text-text-pure rounded-2xl border text-sm sm:text-base font-medium leading-relaxed resize-none',
+                          'transition-all duration-150 placeholder:text-text-faint focus:outline-none focus:ring-2',
+                          errors.description 
+                            ? 'border-red-400 focus:border-red-500 focus:ring-red-500/15' 
+                            : 'border-surface-border focus:border-indigo-500 focus:ring-indigo-500/15'
+                        )}
                       />
-                      {errors.description && <p className="text-xs text-red-500 mt-1 font-medium">{errors.description}</p>}
+                      {errors.description && (
+                        <p className="text-xs text-red-500 mt-1.5 font-medium flex items-center gap-1">
+                          <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                          <span>{errors.description}</span>
+                        </p>
+                      )}
                     </div>
 
-                    {/* Target Website URL */}
+                    {/* Target Website URL (Optional) */}
                     <div>
-                      <label className="block text-xs font-medium text-text-muted mb-1.5">
-                        Target Website / URL <span className="text-text-faint">(optional)</span>
+                      <label className="block text-sm font-semibold text-text-pure mb-2">
+                        Target Website URL <span className="text-text-muted text-xs font-normal">(Optional)</span>
                       </label>
                       <div className="relative">
-                        <Globe className="w-4 h-4 text-text-muted absolute left-3.5 top-1/2 -translate-y-1/2" />
+                        <Globe className="w-5 h-5 text-text-muted absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                         <input
-                          type="text"
+                          type="url"
                           value={formData.websiteUrl}
                           onChange={e => setFormData({ ...formData, websiteUrl: e.target.value })}
                           placeholder="https://yourwebsite.com"
-                          className="w-full bg-surface-elevated text-text-pure rounded-xl border border-surface-border pl-10 pr-4 py-2.5 text-xs focus:border-indigo-500 focus:outline-none placeholder:text-text-faint"
+                          className="w-full h-12 bg-surface-elevated text-text-pure rounded-xl border border-surface-border pl-11 pr-4 text-sm sm:text-base font-medium focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/15 focus:outline-none transition placeholder:text-text-faint"
                         />
                       </div>
                     </div>
+
                   </div>
 
-                  {/* Submission Button */}
-                  <div className="pt-2 border-t border-surface-border flex justify-end">
+                  {/* Submission Action Bar */}
+                  <div className="pt-4 border-t border-surface-border flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <p className="text-xs text-text-muted text-center sm:text-left font-medium">
+                      🔒 Your inquiry is logged securely in our centralized technical database.
+                    </p>
+
                     <button
                       type="submit"
                       disabled={isSubmitting}
-                      className="w-full sm:w-auto px-8 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white text-xs font-semibold flex items-center justify-center gap-2 shadow-sm transition"
+                      className={cn(
+                        'w-full sm:w-auto h-13 px-10 py-3.5 rounded-2xl text-base font-bold text-white shadow-lg transition-all',
+                        'bg-indigo-600 hover:bg-indigo-700 active:scale-[0.99] disabled:opacity-50 disabled:pointer-events-none',
+                        'flex items-center justify-center gap-2.5 shadow-indigo-600/25'
+                      )}
                     >
                       {isSubmitting ? (
-                        <span>Submitting Ticket...</span>
+                        <>
+                          <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                          <span>Submitting Support Query...</span>
+                        </>
                       ) : (
                         <>
-                          <Send className="w-4 h-4" />
-                          <span>Submit Support Ticket</span>
+                          <Send className="w-5 h-5" />
+                          <span>Submit Support Query</span>
                         </>
                       )}
                     </button>
@@ -602,122 +864,189 @@ export const PublicGateway: React.FC = () => {
 
                 </form>
 
+                {/* Trust & Guarantee Cards */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4">
+                  <div className="p-4 rounded-2xl bg-surface border border-surface-border flex items-start gap-3 shadow-xs">
+                    <div className="p-2 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 shrink-0">
+                      <Shield className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-bold text-text-pure">Secure & Confidential</h4>
+                      <p className="text-[11px] text-text-muted mt-0.5">Encrypted logging directly into Digital Azadi database.</p>
+                    </div>
+                  </div>
+
+                  <div className="p-4 rounded-2xl bg-surface border border-surface-border flex items-start gap-3 shadow-xs">
+                    <div className="p-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 shrink-0">
+                      <Zap className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-bold text-text-pure">Direct to Engineers</h4>
+                      <p className="text-[11px] text-text-muted mt-0.5">No bot loops. Handled by verified technical support staff.</p>
+                    </div>
+                  </div>
+
+                  <div className="p-4 rounded-2xl bg-surface border border-surface-border flex items-start gap-3 shadow-xs">
+                    <div className="p-2 rounded-xl bg-purple-50 dark:bg-purple-950/40 text-purple-600 dark:text-purple-400 shrink-0">
+                      <Clock className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-bold text-text-pure">Live IST Tracking</h4>
+                      <p className="text-[11px] text-text-muted mt-0.5">Real-time stopwatch sessions and WhatsApp updates.</p>
+                    </div>
+                  </div>
+                </div>
+
               </div>
             ) : (
-              /* CONFIRMATION STATE / DIGITAL TICKET RECEIPT */
-              <div className="max-w-xl mx-auto space-y-6">
+              /* ============================================================== */
+              /* SUCCESS STATE / DIGITAL TICKET CONFIRMATION RECEIPT */
+              /* ============================================================== */
+              <div className="max-w-2xl mx-auto space-y-6 animate-in zoom-in-95 duration-200">
                 
                 {/* Header Callout */}
-                <div className="text-center space-y-2">
-                  <div className="w-14 h-14 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800 flex items-center justify-center mx-auto shadow-sm">
-                    <CheckCircle className="w-7 h-7 text-emerald-600 dark:text-emerald-400" />
+                <div className="text-center space-y-3">
+                  <div className="w-16 h-16 rounded-3xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800 flex items-center justify-center mx-auto shadow-md">
+                    <CheckCircle className="w-8 h-8 text-emerald-600 dark:text-emerald-400" />
                   </div>
-                  <h2 className="text-2xl font-bold text-text-pure tracking-tight">
-                    Ticket Submitted Successfully
+                  <h2 className="text-2xl sm:text-3xl font-extrabold text-text-pure tracking-tight">
+                    Support Query Submitted Successfully!
                   </h2>
-                  <p className="text-xs text-text-muted">
-                    Your request has been logged. Keep your Ticket ID safe for tracking.
+                  <p className="text-sm sm:text-base text-text-muted max-w-md mx-auto">
+                    Your inquiry has been registered in the Digital Azadi Operations Queue. Please save your Ticket ID below.
                   </p>
                 </div>
 
-                {/* Ticket Receipt Card */}
-                <div className="bg-surface border border-surface-border rounded-3xl overflow-hidden shadow-sm">
+                {/* Digital Ticket Pass Card */}
+                <div className="bg-surface border border-surface-border rounded-3xl overflow-hidden shadow-xl">
                   
-                  <div className="h-1 w-full bg-indigo-600" />
+                  <div className="h-2 w-full bg-gradient-to-r from-emerald-500 via-indigo-600 to-purple-600" />
 
-                  {/* Header */}
-                  <div className="p-6 border-b border-surface-border flex items-start justify-between bg-surface-elevated/40">
+                  {/* Ticket Header */}
+                  <div className="p-6 sm:p-8 border-b border-surface-border flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-surface-elevated/40">
                     <div>
-                      <span className="text-[11px] font-semibold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider block">
-                        SUPPORT TICKET RECEIPT
+                      <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider block">
+                        OFFICIAL TICKET IDENTIFIER
                       </span>
-                      <div className="flex items-center gap-2.5 mt-1.5">
-                        <span className="text-2xl font-mono font-bold text-text-pure tracking-wider">
+                      <div className="flex items-center gap-3 mt-1.5">
+                        <span className="text-2xl sm:text-3xl font-mono font-extrabold text-text-pure tracking-wider">
                           {createdTicket.ticketId}
                         </span>
                         <button
+                          type="button"
                           onClick={handleCopyTicketId}
-                          className="p-1.5 rounded-lg bg-surface hover:bg-surface-elevated border border-surface-border text-text-muted hover:text-text-pure transition"
+                          className="px-3 py-1.5 rounded-xl bg-surface hover:bg-surface-elevated border border-surface-border text-xs font-semibold text-text-pure transition flex items-center gap-1.5"
                           title="Copy Ticket ID"
                         >
-                          {hasCopiedId ? <Check className="w-4 h-4 text-emerald-600 dark:text-emerald-400" /> : <Copy className="w-4 h-4" />}
+                          {hasCopiedId ? (
+                            <>
+                              <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                              <span className="text-emerald-700 dark:text-emerald-400">Copied!</span>
+                            </>
+                          ) : (
+                            <>
+                              <Copy className="w-3.5 h-3.5" />
+                              <span>Copy ID</span>
+                            </>
+                          )}
                         </button>
                       </div>
                     </div>
 
-                    <div className="text-right">
-                      <span className="px-3 py-1 rounded-full text-xs font-semibold bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800 inline-block">
+                    <div className="sm:text-right">
+                      <span className="px-3 py-1 rounded-full text-xs font-bold bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800 inline-block">
                         Logged in Queue
                       </span>
-                      <span className="block text-xs text-text-muted mt-1 font-medium">
+                      <span className="block text-xs font-semibold text-text-muted mt-1.5">
                         {createdTicket.membershipTier}
                       </span>
                     </div>
                   </div>
 
-                  {/* Body */}
-                  <div className="p-6 space-y-4 text-xs">
-                    <div className="grid grid-cols-2 gap-4 pb-4 border-b border-surface-border">
+                  {/* Ticket Body Summary */}
+                  <div className="p-6 sm:p-8 space-y-5 text-sm">
+                    
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pb-4 border-b border-surface-border">
                       <div>
-                        <span className="text-text-muted text-[11px] font-medium block">Requester</span>
-                        <span className="text-text-pure font-bold text-sm">{createdTicket.requesterName}</span>
-                        <span className="text-text-muted font-mono text-xs block">{createdTicket.requesterPhone}</span>
+                        <span className="text-text-muted text-xs font-medium block">Requester Name</span>
+                        <span className="text-text-pure font-bold text-base">{createdTicket.requesterName}</span>
+                        <span className="text-text-muted font-mono text-xs block mt-0.5">{createdTicket.requesterPhone}</span>
                       </div>
                       <div>
-                        <span className="text-text-muted text-[11px] font-medium block">Platform & Issue</span>
-                        <span className="text-text-pure font-semibold">{createdTicket.ecosystem}</span>
-                        <span className="text-indigo-600 dark:text-indigo-400 text-xs block truncate">{createdTicket.category}</span>
+                        <span className="text-text-muted text-xs font-medium block">Location / City</span>
+                        <span className="text-text-pure font-semibold text-base">{createdTicket.city || 'Not specified'}</span>
+                        <span className="text-text-muted text-xs block mt-0.5">{createdTicket.requesterEmail}</span>
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4 pb-4 border-b border-surface-border">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pb-4 border-b border-surface-border">
                       <div>
-                        <span className="text-text-muted text-[11px] font-medium block">Submitted At (IST)</span>
-                        <span className="text-text-pure font-mono">{formatToISTDateTimeString(createdTicket.createdAt)}</span>
+                        <span className="text-text-muted text-xs font-medium block">Platform & Category</span>
+                        <span className="text-text-pure font-semibold">{createdTicket.ecosystem}</span>
+                        <span className="text-indigo-600 dark:text-indigo-400 text-xs block font-medium mt-0.5">{createdTicket.category}</span>
                       </div>
                       <div>
-                        <span className="text-text-muted text-[11px] font-medium block">Status</span>
-                        <span className="text-emerald-700 dark:text-emerald-400 font-semibold">
-                          Under Support Review
-                        </span>
+                        <span className="text-text-muted text-xs font-medium block">Submission Time (IST)</span>
+                        <span className="text-text-pure font-mono text-xs font-semibold">{formatToISTDateTimeString(createdTicket.createdAt)}</span>
+                        <span className="text-emerald-700 dark:text-emerald-400 text-xs font-medium block mt-0.5">Assigned to Technical Queue</span>
                       </div>
                     </div>
 
                     <div>
-                      <span className="text-text-muted text-[11px] font-medium block mb-1">Subject</span>
-                      <p className="text-text-pure font-medium bg-surface-elevated p-3 rounded-xl border border-surface-border">
+                      <span className="text-text-muted text-xs font-medium block mb-1.5">Subject</span>
+                      <p className="text-text-pure font-semibold bg-surface-elevated p-3.5 rounded-xl border border-surface-border leading-relaxed">
                         {createdTicket.subject}
                       </p>
                     </div>
+
                   </div>
 
-                  {/* Direct WhatsApp Follow-up */}
-                  <div className="bg-surface-elevated p-5 border-t border-surface-border flex items-center justify-between gap-3">
-                    <div className="text-xs text-text-muted font-medium">
-                      Need instant update? Ping on WhatsApp:
+                  {/* WhatsApp Follow-up Banner */}
+                  <div className="bg-surface-elevated p-6 border-t border-surface-border flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div className="text-center sm:text-left">
+                      <span className="text-sm font-bold text-text-pure block">
+                        Need an immediate update or have urgent queries?
+                      </span>
+                      <p className="text-xs text-text-muted mt-0.5">
+                        Connect directly with our support helpdesk on WhatsApp.
+                      </p>
                     </div>
 
                     <a
-                      href={`https://wa.me/919823012345?text=${encodeURIComponent(`Hello Digital Azadi Support, I have submitted ticket ${createdTicket.ticketId} regarding "${createdTicket.subject}". Please assist.`)}`}
+                      href={`https://wa.me/91${createdTicket.requesterPhone}?text=${encodeURIComponent(`Hello Digital Azadi Support, I have submitted ticket ${createdTicket.ticketId} regarding "${createdTicket.subject}". Please assist.`)}`}
                       target="_blank"
                       rel="noreferrer"
-                      className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs flex items-center gap-1.5 shadow-sm transition"
+                      className="w-full sm:w-auto px-6 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-md shadow-emerald-600/20 transition-all shrink-0"
                     >
-                      <MessageCircle className="w-4 h-4" />
-                      <span>Ping Support</span>
+                      <MessageCircle className="w-4.5 h-4.5" />
+                      <span>Chat on WhatsApp</span>
                     </a>
                   </div>
 
                 </div>
 
-                {/* Reset / Submit Another Ticket */}
-                <div className="text-center pt-2">
+                {/* Bottom Actions */}
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
                   <button
-                    onClick={handleResetForm}
-                    className="px-5 py-2.5 rounded-xl bg-surface hover:bg-surface-elevated border border-surface-border text-xs font-semibold text-text-pure transition inline-flex items-center gap-2"
+                    type="button"
+                    onClick={() => {
+                      setTrackTicketId(createdTicket.ticketId);
+                      setTrackPhone(createdTicket.requesterPhone);
+                      setActiveTab('track');
+                    }}
+                    className="w-full sm:w-auto px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold transition inline-flex items-center justify-center gap-2 shadow-sm"
                   >
-                    <RotateCcw className="w-3.5 h-3.5" />
-                    <span>Submit Another Support Ticket</span>
+                    <Search className="w-4 h-4" />
+                    <span>Track Ticket Status</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleResetForm}
+                    className="w-full sm:w-auto px-6 py-3 rounded-xl bg-surface hover:bg-surface-elevated border border-surface-border text-sm font-semibold text-text-pure transition inline-flex items-center justify-center gap-2 shadow-xs"
+                  >
+                    <RotateCcw className="w-4 h-4" />
+                    <span>Raise Another Support Query</span>
                   </button>
                 </div>
 
@@ -726,63 +1055,68 @@ export const PublicGateway: React.FC = () => {
           </>
         )}
 
+        {/* ============================================================== */}
         {/* TAB 2: TRACK YOUR TICKET SECTION */}
+        {/* ============================================================== */}
         {activeTab === 'track' && (
-          <div className="max-w-2xl mx-auto space-y-6">
+          <div className="max-w-2xl mx-auto space-y-8 animate-in fade-in duration-200">
             
             {/* Header */}
-            <div className="text-center space-y-2">
-              <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800 flex items-center justify-center mx-auto text-indigo-600 dark:text-indigo-400">
-                <Search className="w-6 h-6" />
+            <div className="text-center space-y-3">
+              <div className="w-14 h-14 rounded-2xl bg-indigo-50 dark:bg-indigo-950/50 border border-indigo-200 dark:border-indigo-800/60 flex items-center justify-center mx-auto text-indigo-600 dark:text-indigo-400 shadow-sm">
+                <Search className="w-7 h-7" />
               </div>
-              <h1 className="text-2xl font-bold text-text-pure tracking-tight">
+              <h1 className="text-3xl font-extrabold text-text-pure tracking-tight">
                 Track Your Ticket Status
               </h1>
-              <p className="text-xs md:text-sm text-text-muted max-w-md mx-auto">
-                Enter your Ticket ID and your registered 10-digit mobile number to check real-time progress.
+              <p className="text-sm sm:text-base text-text-muted max-w-md mx-auto leading-relaxed">
+                Enter your Ticket ID and your registered 10-digit mobile number to check real-time progress and updates.
               </p>
             </div>
 
             {/* Tracking Search Card */}
-            <form onSubmit={handleTrackSearch} className="bg-surface border border-surface-border rounded-2xl p-6 space-y-4 shadow-sm">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <form onSubmit={handleTrackSearch} className="bg-surface border border-surface-border rounded-3xl p-6 sm:p-8 space-y-5 shadow-xl">
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div>
-                  <label className="block text-xs font-medium text-text-muted mb-1.5">
+                  <label className="block text-sm font-semibold text-text-pure mb-2">
                     Ticket ID <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
+                    required
                     value={trackTicketId}
                     onChange={e => setTrackTicketId(e.target.value.toUpperCase())}
                     placeholder="e.g. DA-2026-8941"
-                    className="w-full bg-surface-elevated text-text-pure font-mono rounded-xl border border-surface-border px-3.5 py-2.5 text-xs focus:border-indigo-500 focus:outline-none uppercase placeholder:normal-case placeholder:text-text-faint"
+                    className="w-full h-12 bg-surface-elevated text-text-pure font-mono font-semibold rounded-xl border border-surface-border px-4 text-sm sm:text-base focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/15 focus:outline-none uppercase placeholder:normal-case placeholder:text-text-faint transition"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-text-muted mb-1.5">
+                  <label className="block text-sm font-semibold text-text-pure mb-2">
                     Registered WhatsApp Number <span className="text-red-500">*</span>
                   </label>
                   <div className="relative">
-                    <span className="text-xs text-text-muted absolute left-3.5 top-1/2 -translate-y-1/2 font-mono font-semibold">
-                      +91
+                    <span className="text-sm text-text-muted absolute left-3.5 top-1/2 -translate-y-1/2 font-mono font-semibold pointer-events-none select-none">
+                      🇮🇳 +91
                     </span>
                     <input
                       type="tel"
+                      required
                       maxLength={10}
                       value={trackPhone}
                       onChange={e => setTrackPhone(e.target.value.replace(/\D/g, ''))}
                       placeholder="9823012345"
-                      className="w-full bg-surface-elevated text-text-pure font-mono rounded-xl border border-surface-border pl-12 pr-4 py-2.5 text-xs focus:border-indigo-500 focus:outline-none placeholder:text-text-faint"
+                      className="w-full h-12 bg-surface-elevated text-text-pure font-mono font-semibold rounded-xl border border-surface-border pl-19 pr-4 text-sm sm:text-base focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/15 focus:outline-none placeholder:text-text-faint transition"
                     />
                   </div>
                 </div>
               </div>
 
               {trackError && (
-                <div className="p-3 rounded-xl bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 text-xs text-red-700 dark:text-red-400 flex items-start gap-2">
-                  <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
-                  <span>{trackError}</span>
+                <div className="p-4 rounded-xl bg-red-50 dark:bg-red-950/25 border border-red-200 dark:border-red-800 text-xs sm:text-sm text-red-700 dark:text-red-400 flex items-start gap-2.5">
+                  <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
+                  <span className="font-medium">{trackError}</span>
                 </div>
               )}
 
@@ -790,93 +1124,97 @@ export const PublicGateway: React.FC = () => {
                 <button
                   type="submit"
                   disabled={isSearchingTrack}
-                  className="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white text-xs font-semibold flex items-center gap-2 shadow-sm transition"
+                  className="w-full sm:w-auto h-12 px-8 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white text-sm font-bold flex items-center justify-center gap-2 shadow-md shadow-indigo-600/20 transition-all"
                 >
                   <Search className="w-4 h-4" />
-                  <span>{isSearchingTrack ? 'Verifying...' : 'Check Status'}</span>
+                  <span>{isSearchingTrack ? 'Verifying Records...' : 'Check Status'}</span>
                 </button>
               </div>
+
             </form>
 
             {/* TRACKED TICKET RESULT CARD */}
             {trackedTicket && (
-              <div className="bg-surface border border-surface-border rounded-2xl overflow-hidden shadow-sm space-y-0">
-                <div className="h-1.5 w-full bg-indigo-600" />
+              <div className="bg-surface border border-surface-border rounded-3xl overflow-hidden shadow-xl animate-in fade-in duration-200">
+                <div className="h-2 w-full bg-indigo-600" />
 
                 {/* Header */}
-                <div className="p-5 border-b border-surface-border flex items-start justify-between bg-surface-elevated/40">
+                <div className="p-6 sm:p-8 border-b border-surface-border flex items-start justify-between gap-4 bg-surface-elevated/40">
                   <div>
-                    <span className="text-[11px] font-semibold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider block">
-                      TICKET STATUS
+                    <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider block">
+                      TICKET DOSSIER
                     </span>
-                    <div className="text-xl font-mono font-bold text-text-pure mt-1">
+                    <div className="text-2xl font-mono font-extrabold text-text-pure mt-1">
                       {trackedTicket.ticketId}
                     </div>
                   </div>
 
                   <div className="text-right">
                     <Badge variant="status" value={trackedTicket.status} size="md" />
-                    <span className="block text-xs text-text-muted mt-1 font-medium">
+                    <span className="block text-xs font-semibold text-text-muted mt-1.5">
                       {trackedTicket.membershipTier}
                     </span>
                   </div>
                 </div>
 
-                {/* Status Progress Guidance */}
-                <div className="p-5 border-b border-surface-border bg-indigo-50/50 dark:bg-indigo-950/20 text-xs">
-                  <div className="flex items-center gap-2 font-semibold text-indigo-900 dark:text-indigo-200">
-                    <Clock className="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0" />
+                {/* Status Guidance Banner */}
+                <div className="p-4 sm:p-5 border-b border-surface-border bg-indigo-50/50 dark:bg-indigo-950/20 text-xs sm:text-sm">
+                  <div className="flex items-center gap-2.5 font-semibold text-indigo-900 dark:text-indigo-200">
+                    <Clock className="w-4.5 h-4.5 text-indigo-600 dark:text-indigo-400 shrink-0" />
                     <span>
                       {trackedTicket.status === 'Resolved'
-                        ? '✅ This ticket has been resolved.'
+                        ? '✅ This support inquiry has been resolved.'
                         : trackedTicket.status === 'In Progress'
-                        ? '⚡ A support engineer is currently actively working on your issue.'
+                        ? '⚡ An engineer is actively resolving this support session.'
                         : trackedTicket.status === 'Waiting for User'
-                        ? '💬 Our team has requested information from you.'
-                        : '📋 Your ticket is safely logged in queue and awaiting assignment.'}
+                        ? '💬 Action required: Our support team has requested information from you.'
+                        : '📋 Ticket is safely logged in queue and awaiting specialist assignment.'}
                     </span>
                   </div>
                 </div>
 
                 {/* Details */}
-                <div className="p-5 space-y-4 text-xs">
-                  <div className="grid grid-cols-2 gap-4 pb-4 border-b border-surface-border">
+                <div className="p-6 sm:p-8 space-y-5 text-sm">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pb-4 border-b border-surface-border">
                     <div>
-                      <span className="text-text-muted text-[11px] font-medium block">Requester Name</span>
-                      <span className="text-text-pure font-bold">{trackedTicket.requesterName}</span>
+                      <span className="text-text-muted text-xs font-medium block">Requester Name</span>
+                      <span className="text-text-pure font-bold text-base">{trackedTicket.requesterName}</span>
+                      {trackedTicket.city && (
+                        <span className="text-text-muted text-xs block font-medium mt-0.5">City: {trackedTicket.city}</span>
+                      )}
                     </div>
                     <div>
-                      <span className="text-text-muted text-[11px] font-medium block">Platform</span>
-                      <span className="text-text-pure font-semibold">{trackedTicket.ecosystem}</span>
-                      <span className="text-indigo-600 dark:text-indigo-400 text-xs block">{trackedTicket.category}</span>
+                      <span className="text-text-muted text-xs font-medium block">Platform</span>
+                      <span className="text-text-pure font-semibold text-base">{trackedTicket.ecosystem}</span>
+                      <span className="text-indigo-600 dark:text-indigo-400 text-xs font-semibold block mt-0.5">{trackedTicket.category}</span>
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4 pb-4 border-b border-surface-border">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pb-4 border-b border-surface-border">
                     <div>
-                      <span className="text-text-muted text-[11px] font-medium block">Submitted Date (IST)</span>
-                      <span className="text-text-pure font-mono">{formatToISTDateTimeString(trackedTicket.createdAt)}</span>
+                      <span className="text-text-muted text-xs font-medium block">Submitted Date (IST)</span>
+                      <span className="text-text-pure font-mono text-xs font-semibold">{formatToISTDateTimeString(trackedTicket.createdAt)}</span>
                     </div>
                     <div>
-                      <span className="text-text-muted text-[11px] font-medium block">Last Updated (IST)</span>
-                      <span className="text-text-pure font-mono">{formatToISTDateTimeString(trackedTicket.updatedAt)}</span>
+                      <span className="text-text-muted text-xs font-medium block">Last Updated (IST)</span>
+                      <span className="text-text-pure font-mono text-xs font-semibold">{formatToISTDateTimeString(trackedTicket.updatedAt)}</span>
                     </div>
                   </div>
 
                   <div>
-                    <span className="text-text-muted text-[11px] font-medium block mb-1">Subject</span>
-                    <p className="text-text-pure font-medium bg-surface-elevated p-3 rounded-xl border border-surface-border">
+                    <span className="text-text-muted text-xs font-medium block mb-1.5">Subject</span>
+                    <p className="text-text-pure font-semibold bg-surface-elevated p-3.5 rounded-xl border border-surface-border leading-relaxed">
                       {trackedTicket.subject}
                     </p>
                   </div>
 
                   {/* Public Resolution Notes if resolved */}
                   {trackedTicket.resolutionNotes && (
-                    <div className="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800">
+                    <div className="p-4 sm:p-5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800">
                       <span className="text-xs font-bold text-emerald-800 dark:text-emerald-300 block mb-1">
                         Resolution Summary:
                       </span>
-                      <p className="text-xs text-text-pure leading-relaxed">
+                      <p className="text-xs sm:text-sm text-text-pure leading-relaxed">
                         {trackedTicket.resolutionNotes}
                       </p>
                     </div>
@@ -884,17 +1222,17 @@ export const PublicGateway: React.FC = () => {
                 </div>
 
                 {/* Actions */}
-                <div className="p-4 bg-surface-elevated border-t border-surface-border flex items-center justify-between gap-3">
-                  <span className="text-xs text-text-muted font-medium">
-                    Have more questions?
+                <div className="p-5 sm:p-6 bg-surface-elevated border-t border-surface-border flex flex-col sm:flex-row items-center justify-between gap-4">
+                  <span className="text-xs sm:text-sm text-text-muted font-medium text-center sm:text-left">
+                    Have additional questions regarding this ticket?
                   </span>
                   <a
-                    href={`https://wa.me/919823012345?text=${encodeURIComponent(`Hello Digital Azadi Support, checking on my ticket ${trackedTicket.ticketId} (${trackedTicket.subject}).`)}`}
+                    href={`https://wa.me/91${trackedTicket.requesterPhone}?text=${encodeURIComponent(`Hello Digital Azadi Support, checking on my ticket ${trackedTicket.ticketId} (${trackedTicket.subject}).`)}`}
                     target="_blank"
                     rel="noreferrer"
-                    className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold flex items-center gap-1.5 transition"
+                    className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition shadow-xs"
                   >
-                    <MessageCircle className="w-3.5 h-3.5" />
+                    <MessageCircle className="w-4 h-4" />
                     <span>Chat on WhatsApp</span>
                   </a>
                 </div>
@@ -907,9 +1245,19 @@ export const PublicGateway: React.FC = () => {
 
       </main>
 
-      {/* Footer */}
-      <footer className="border-t border-surface-border py-6 px-4 text-center text-xs text-text-muted">
-        <p>Digital Azadi Support • Asia/Kolkata (IST)</p>
+      {/* Trust Footer */}
+      <footer className="border-t border-surface-border py-8 px-4 text-center text-xs sm:text-sm text-text-muted bg-surface/50">
+        <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-2 font-medium">
+            <BrandLogo size="sm" showBadge={false} />
+            <span>Digital Azadi Support Center</span>
+          </div>
+          <div className="flex items-center gap-4 text-xs font-mono">
+            <span>Timezone: Asia/Kolkata (IST)</span>
+            <span>•</span>
+            <span className="text-emerald-600 dark:text-emerald-400 font-bold">Cloud Synced</span>
+          </div>
+        </div>
       </footer>
 
     </div>

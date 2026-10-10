@@ -128,9 +128,12 @@ export const FilterTray: React.FC<FilterTrayProps> = ({
             className="w-full bg-surface-elevated text-text-pure text-xs rounded-xl border border-surface-border px-2.5 py-1.5 focus:border-indigo-500 focus:outline-none truncate"
           >
             <option value="all">All Memberships</option>
-            <option value="Diamond Elite">Diamond Elite</option>
-            <option value="Silver Pass">Silver Pass</option>
-            <option value="Other / Not Specified">Other</option>
+            <option value="Diamond Member">Diamond Member</option>
+            <option value="Silver Member">Silver Member</option>
+            <option value="Gold Member">Gold Member</option>
+            <option value="PMP Member">PMP Member</option>
+            <option value="Diamond Elite">Diamond Elite (Legacy)</option>
+            <option value="Silver Pass">Silver Pass (Legacy)</option>
           </select>
         </div>
 

@@ -218,6 +218,13 @@ export const TicketDetailDrawer: React.FC<TicketDetailDrawerProps> = ({
                     {ticket.requesterEmail}
                   </a>
                 </div>
+
+                {ticket.city && (
+                  <div>
+                    <span className="block text-[11px] font-medium text-text-muted">City</span>
+                    <span className="font-semibold text-text-pure">{ticket.city}</span>
+                  </div>
+                )}
               </div>
             </div>
 

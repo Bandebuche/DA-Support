@@ -52,7 +52,9 @@ export const TicketTableView: React.FC<TicketTableViewProps> = ({
           </thead>
           <tbody className="divide-y divide-surface-border text-xs">
             {tickets.map(ticket => {
-              const isDiamond = ticket.membershipTier === 'Diamond Elite';
+              const isDiamond = ticket.membershipTier.includes('Diamond');
+              const isGold = ticket.membershipTier.includes('Gold');
+              const isPmp = ticket.membershipTier.includes('PMP');
               const isLive = ticket.status === 'In Progress' && !!ticket.supportStartedAt;
 
               return (
@@ -74,8 +76,18 @@ export const TicketTableView: React.FC<TicketTableViewProps> = ({
                       <div className="font-semibold text-text-pure flex items-center gap-1.5">
                         <span>{ticket.requesterName}</span>
                         {isDiamond && (
-                          <span className="text-[10px] px-1.5 py-0.2 rounded bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 font-medium">
+                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 font-semibold border border-indigo-200 dark:border-indigo-800">
                             DIAMOND
+                          </span>
+                        )}
+                        {isGold && (
+                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 font-semibold border border-amber-200 dark:border-amber-800">
+                            GOLD
+                          </span>
+                        )}
+                        {isPmp && (
+                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 font-semibold border border-purple-200 dark:border-purple-800">
+                            PMP
                           </span>
                         )}
                       </div>
