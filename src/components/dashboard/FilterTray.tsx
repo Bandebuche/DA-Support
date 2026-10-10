@@ -105,16 +105,16 @@ export const FilterTray: React.FC<FilterTrayProps> = ({
         {/* Specialist */}
         <div>
           <label className="block text-[11px] font-medium text-text-muted mb-1">
-            Specialist
+            Agents (Specialist)
           </label>
           <select
             value={filters.specialist}
             onChange={e => updateFilter('specialist', e.target.value)}
             className="w-full bg-surface-elevated text-text-pure text-xs rounded-xl border border-surface-border px-2.5 py-1.5 focus:border-indigo-500 focus:outline-none truncate"
           >
-            <option value="all">All Specialists</option>
-            <option value="Sachin Sir">Sachin Sir</option>
-            <option value="Omkar Kulkarni">Omkar Kulkarni</option>
+            <option value="all">All Agents</option>
+            <option value="Sachin Sir">Sachin Sir (All Other Ops)</option>
+            <option value="Omkar Kulkarni">Omkar Kulkarni (Meta Only)</option>
             <option value="General Support Desk">General Desk</option>
           </select>
         </div>

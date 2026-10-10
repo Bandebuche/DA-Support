@@ -267,8 +267,8 @@ export const TicketDetailDrawer: React.FC<TicketDetailDrawerProps> = ({
                 </span>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                   {[
-                    { id: 'Sachin Sir', label: 'Sachin Sir', badge: 'Meta & CRM' },
-                    { id: 'Omkar Kulkarni', label: 'Omkar Kulkarni', badge: 'WP & Hosting' },
+                    { id: 'Sachin Sir', label: 'Sachin Sir', badge: 'All Other Ops' },
+                    { id: 'Omkar Kulkarni', label: 'Omkar Kulkarni', badge: 'Meta Only' },
                     { id: 'General Support Desk', label: 'General Desk', badge: 'Triage' },
                   ].map(spec => {
                     const isCurrent = (ticket.assignedSpecialist || 'General Support Desk') === spec.id;
