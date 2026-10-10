@@ -24,28 +24,17 @@ import {
   Phone, 
   Globe, 
   FileText, 
-  Tag, 
   Search, 
   RotateCcw, 
   AlertCircle,
   MapPin,
   Award,
-  HelpCircle,
-  ExternalLink,
-  ChevronDown
+  HelpCircle
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { BrandLogo } from '../common/BrandLogo';
 import { ThemeToggle } from '../common/ThemeToggle';
 import { Badge } from '../ui/Badge';
-
-const ISSUE_TAGS = [
-  { tag: '+ WordPress/DNS', append: '[WordPress & DNS Error] ' },
-  { tag: '+ WhatsApp WABA', append: '[WhatsApp WABA API Integration] ' },
-  { tag: '+ Payment/SSL', append: '[Payment Gateway & SSL Issue] ' },
-  { tag: '+ Funnel/Login', append: '[LMS Funnel & Login Access] ' },
-  { tag: '+ CRM Lead Sync', append: '[Chakravyuh CRM Webhook Sync] ' },
-];
 
 const MEMBERSHIP_OPTIONS: { id: MembershipTier; label: string; badge: string; icon: string; desc: string }[] = [
   { 
@@ -63,11 +52,18 @@ const MEMBERSHIP_OPTIONS: { id: MembershipTier; label: string; badge: string; ic
     desc: 'Standard technical query and setup assistance' 
   },
   { 
-    id: 'Gold Member', 
-    label: 'Gold Member', 
-    badge: 'Gold Tier', 
-    icon: '🥇',
-    desc: 'Priority queue with fast technical turnaround' 
+    id: 'Chakravyuh Member', 
+    label: 'Chakravyuh Member', 
+    badge: 'Chakravyuh CRM', 
+    icon: '⚡',
+    desc: 'Chakravyuh CRM, Meta WABA & lead automation' 
+  },
+  { 
+    id: 'Franchise Member', 
+    label: 'Franchise Member', 
+    badge: 'Franchise Hub', 
+    icon: '🏢',
+    desc: 'Dedicated franchise partner priority desk' 
   },
   { 
     id: 'PMP Member', 
@@ -103,7 +99,7 @@ export const PublicGateway: React.FC = () => {
     userType: 'Student Pro',
     membershipTier: 'Diamond Member',
     ecosystem: 'Chakravyuh CRM',
-    category: 'CRM & Lead Management',
+    category: 'General Technical Support',
     websiteUrl: '',
     subject: '',
     description: '',
@@ -205,15 +201,6 @@ export const PublicGateway: React.FC = () => {
     setTimeout(() => setHasCopiedId(false), 2000);
   };
 
-  const handleAppendIssueTag = (snippet: string) => {
-    setFormData(prev => ({
-      ...prev,
-      description: prev.description.startsWith(snippet) 
-        ? prev.description 
-        : snippet + prev.description,
-    }));
-  };
-
   const handleResetForm = () => {
     setFormData({
       fullName: '',
@@ -223,7 +210,7 @@ export const PublicGateway: React.FC = () => {
       userType: 'Student Pro',
       membershipTier: 'Diamond Member',
       ecosystem: 'Chakravyuh CRM',
-      category: 'CRM & Lead Management',
+      category: 'General Technical Support',
       websiteUrl: '',
       subject: '',
       description: '',
@@ -317,7 +304,7 @@ export const PublicGateway: React.FC = () => {
             <span className="text-[10px] text-slate-500 dark:text-slate-400 uppercase font-semibold">IST</span>
           </div>
 
-          {/* Light / Dark Mode Icon Toggle ONLY (Admin Login Removed as requested) */}
+          {/* Light / Dark Mode Icon Toggle ONLY */}
           <ThemeToggle className="rounded-full w-10 h-10 p-0 flex items-center justify-center bg-white dark:bg-white/[0.08] border border-slate-200 dark:border-white/15 text-slate-800 dark:text-white shadow-sm hover:scale-105 active:scale-95 transition-all" />
 
         </div>
@@ -372,8 +359,8 @@ export const PublicGateway: React.FC = () => {
           {activeTab === 'submit' && !createdTicket && (
             <div>
               
-              {/* Form Card Header */}
-              <div className="text-center space-y-2.5 mb-8 max-w-xl mx-auto">
+              {/* Form Card Header (Screenshot 4 subtitle paragraph removed) */}
+              <div className="text-center space-y-2 mb-8 max-w-xl mx-auto">
                 <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800 text-xs text-purple-700 dark:text-purple-300 font-semibold shadow-xs">
                   <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                   <span>Priority Operations Desk Active</span>
@@ -384,10 +371,6 @@ export const PublicGateway: React.FC = () => {
                 <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
                   Raise a Support Query
                 </h1>
-                
-                <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-                  Have a technical question or issue with your LMS, Chakravyuh CRM, or WordPress setup? Fill out the details below and our technical engineers will resolve your query on priority.
-                </p>
               </div>
 
               {/* The Form */}
@@ -521,7 +504,7 @@ export const PublicGateway: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Row 3: Membership Tier (The 4 Options) */}
+                {/* Row 3: Membership Tier (Screenshot 1 dropdown removed, Gold replaced by Chakravyuh & Franchise added) */}
                 <div>
                   <div className="flex items-center justify-between mb-2">
                     <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
@@ -532,33 +515,24 @@ export const PublicGateway: React.FC = () => {
                     </span>
                   </div>
 
-                  {/* Dropdown */}
-                  <div className="relative mb-3">
-                    <select
-                      name="membershipTier"
-                      value={formData.membershipTier}
-                      onChange={e => setFormData({ ...formData, membershipTier: e.target.value as MembershipTier })}
-                      className="w-full h-12 rounded-2xl bg-slate-50/90 dark:bg-[#262A4D]/80 border border-slate-300 dark:border-white/15 text-slate-900 dark:text-white px-4 pr-10 text-sm font-semibold appearance-none focus:outline-none focus:ring-2 focus:border-purple-500 focus:ring-purple-500/25 transition cursor-pointer shadow-inner"
-                    >
-                      <option value="Diamond Member" className="bg-white dark:bg-[#1C203E] text-slate-900 dark:text-white">💎 1. Diamond Member (Highest Priority SLA)</option>
-                      <option value="Silver Member" className="bg-white dark:bg-[#1C203E] text-slate-900 dark:text-white">🥈 2. Silver Member (Standard Technical)</option>
-                      <option value="Gold Member" className="bg-white dark:bg-[#1C203E] text-slate-900 dark:text-white">🥇 3. Gold Member (Priority Technical)</option>
-                      <option value="PMP Member" className="bg-white dark:bg-[#1C203E] text-slate-900 dark:text-white">⭐ 4. PMP Member (Project Mentorship)</option>
-                    </select>
-                    <ChevronDown className="w-4 h-4 text-slate-400 absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none" />
-                  </div>
-
-                  {/* 4 Clickable Tier Cards */}
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                  {/* 5 Selectable Cards (Diamond, Silver, Chakravyuh, Franchise, PMP) */}
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5">
                     {MEMBERSHIP_OPTIONS.map(opt => {
                       const isSelected = formData.membershipTier === opt.id;
                       return (
                         <button
                           type="button"
                           key={opt.id}
-                          onClick={() => setFormData({ ...formData, membershipTier: opt.id })}
+                          onClick={() => {
+                            setFormData(prev => ({
+                              ...prev,
+                              membershipTier: opt.id,
+                              userType: opt.id === 'Franchise Member' ? 'Franchise Hub' : 'Student Pro',
+                              ecosystem: opt.id === 'Chakravyuh Member' ? 'Chakravyuh CRM' : prev.ecosystem,
+                            }));
+                          }}
                           className={cn(
-                            'p-3 rounded-2xl border text-left transition-all duration-150 select-none flex flex-col justify-between h-20 shadow-xs',
+                            'p-3 rounded-2xl border text-left transition-all duration-150 select-none flex flex-col justify-between min-h-[5.5rem] shadow-xs cursor-pointer',
                             isSelected 
                               ? 'bg-purple-50 dark:bg-purple-600/20 border-purple-500 text-purple-700 dark:text-purple-300 ring-2 ring-purple-500/25 font-bold' 
                               : 'bg-white dark:bg-[#262A4D]/60 border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-white/20 font-medium'
@@ -600,7 +574,7 @@ export const PublicGateway: React.FC = () => {
                       type="button"
                       onClick={() => setFormData({ ...formData, assignedSpecialist: 'Sachin Sir' })}
                       className={cn(
-                        'p-4 rounded-2xl border text-left transition-all duration-150 select-none flex flex-col justify-between shadow-xs',
+                        'p-4 rounded-2xl border text-left transition-all duration-150 select-none flex flex-col justify-between shadow-xs cursor-pointer',
                         formData.assignedSpecialist === 'Sachin Sir'
                           ? 'bg-purple-50 dark:bg-purple-600/20 border-purple-500 text-purple-700 dark:text-purple-300 ring-2 ring-purple-500/25 font-bold'
                           : 'bg-white dark:bg-[#262A4D]/60 border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-white/20 font-medium'
@@ -639,7 +613,7 @@ export const PublicGateway: React.FC = () => {
                       type="button"
                       onClick={() => setFormData({ ...formData, assignedSpecialist: 'Onkar Kulkarni' })}
                       className={cn(
-                        'p-4 rounded-2xl border text-left transition-all duration-150 select-none flex flex-col justify-between shadow-xs',
+                        'p-4 rounded-2xl border text-left transition-all duration-150 select-none flex flex-col justify-between shadow-xs cursor-pointer',
                         formData.assignedSpecialist === 'Onkar Kulkarni'
                           ? 'bg-purple-50 dark:bg-purple-600/20 border-purple-500 text-purple-700 dark:text-purple-300 ring-2 ring-purple-500/25 font-bold'
                           : 'bg-white dark:bg-[#262A4D]/60 border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-white/20 font-medium'
@@ -675,66 +649,40 @@ export const PublicGateway: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Row 5: Platform & Inquiry Subject */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-                      Platform / Ecosystem <span className="text-pink-500">*</span>
-                    </label>
-                    <select
-                      value={formData.ecosystem}
-                      onChange={e => setFormData({ ...formData, ecosystem: e.target.value as ProductEcosystem })}
-                      className="w-full h-12 rounded-2xl bg-slate-50/90 dark:bg-[#262A4D]/80 border border-slate-300 dark:border-white/15 text-slate-900 dark:text-white px-4 text-sm font-medium focus:outline-none focus:ring-2 focus:border-purple-500 focus:ring-purple-500/25 transition cursor-pointer shadow-inner"
-                    >
-                      <option value="Chakravyuh CRM" className="bg-white dark:bg-[#1C203E]">Chakravyuh CRM (Meta / WABA / Leads)</option>
-                      <option value="Digital Azadi Hub" className="bg-white dark:bg-[#1C203E]">Digital Azadi Hub (LMS / Course Portal)</option>
-                      <option value="WordPress & Hosting" className="bg-white dark:bg-[#1C203E]">WordPress & Hosting (cPanel / SSL / DNS)</option>
-                      <option value="Other" className="bg-white dark:bg-[#1C203E]">Other Technical Inquiries</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-                      Inquiry Subject <span className="text-pink-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      name="subject"
-                      required
-                      value={formData.subject}
-                      onChange={e => setFormData({ ...formData, subject: e.target.value })}
-                      placeholder="e.g. WordPress DNS & SSL Error*"
-                      className={cn(
-                        'w-full h-12 rounded-2xl border px-4 text-sm font-medium transition-all shadow-inner',
-                        'bg-slate-50/90 dark:bg-[#262A4D]/80 text-slate-900 dark:text-white placeholder-slate-400',
-                        'focus:outline-none focus:ring-2 focus:border-purple-500 focus:bg-white dark:focus:bg-[#2C315B]',
-                        errors.subject 
-                          ? 'border-red-500 focus:ring-red-500/25' 
-                          : 'border-slate-300 dark:border-white/15 focus:ring-purple-500/25'
-                      )}
-                    />
-                    {errors.subject && (
-                      <p className="text-[11px] text-red-500 mt-1 font-medium">{errors.subject}</p>
+                {/* Row 5: Inquiry Subject (Screenshot 2 Platform dropdown removed) */}
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                    Inquiry Subject <span className="text-pink-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="subject"
+                    required
+                    value={formData.subject}
+                    onChange={e => setFormData({ ...formData, subject: e.target.value })}
+                    placeholder="e.g. WordPress DNS & SSL Error or LMS Access Issue*"
+                    className={cn(
+                      'w-full h-12 rounded-2xl border px-4 text-sm font-medium transition-all shadow-inner',
+                      'bg-slate-50/90 dark:bg-[#262A4D]/80 text-slate-900 dark:text-white placeholder-slate-400',
+                      'focus:outline-none focus:ring-2 focus:border-purple-500 focus:bg-white dark:focus:bg-[#2C315B]',
+                      errors.subject 
+                        ? 'border-red-500 focus:ring-red-500/25' 
+                        : 'border-slate-300 dark:border-white/15 focus:ring-purple-500/25'
                     )}
-                  </div>
+                  />
+                  {errors.subject && (
+                    <p className="text-[11px] text-red-500 mt-1 font-medium">{errors.subject}</p>
+                  )}
                 </div>
 
-                {/* Row 6: Detailed Message / Description */}
+                {/* Row 6: Detailed Message / Description (Screenshot 3 tag chips removed) */}
                 <div>
-                  <div className="flex items-center justify-between mb-1.5">
-                    <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                      Write your message / Detailed Description <span className="text-pink-500">*</span>
-                    </label>
-                    <span className="text-[11px] text-purple-600 dark:text-purple-400 font-bold flex items-center gap-1">
-                      <Tag className="w-3 h-3" />
-                      <span>Click tag to insert prefix:</span>
-                    </span>
-                  </div>
-
-                  {/* Textarea */}
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                    Write your message / Detailed Description <span className="text-pink-500">*</span>
+                  </label>
                   <div className="relative">
                     <textarea
-                      rows={4}
+                      rows={5}
                       name="description"
                       required
                       value={formData.description}
@@ -753,20 +701,6 @@ export const PublicGateway: React.FC = () => {
                   {errors.description && (
                     <p className="text-[11px] text-red-500 mt-1 font-medium">{errors.description}</p>
                   )}
-
-                  {/* Quick Clickable Issue Tags */}
-                  <div className="flex flex-wrap gap-1.5 mt-2">
-                    {ISSUE_TAGS.map(item => (
-                      <button
-                        type="button"
-                        key={item.tag}
-                        onClick={() => handleAppendIssueTag(item.append)}
-                        className="px-2.5 py-1 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-white/[0.06] dark:hover:bg-white/[0.12] border border-slate-200 dark:border-white/10 text-[11px] text-slate-700 dark:text-slate-300 font-medium transition active:scale-95"
-                      >
-                        {item.tag}
-                      </button>
-                    ))}
-                  </div>
                 </div>
 
                 {/* Row 7: Target Website URL (Optional) */}

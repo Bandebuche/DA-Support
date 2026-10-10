@@ -150,8 +150,10 @@ export const FilterTray: React.FC<FilterTrayProps> = ({
             <option value="all">All Memberships</option>
             <option value="Diamond Member">Diamond Member</option>
             <option value="Silver Member">Silver Member</option>
-            <option value="Gold Member">Gold Member</option>
+            <option value="Chakravyuh Member">Chakravyuh Member</option>
+            <option value="Franchise Member">Franchise Member</option>
             <option value="PMP Member">PMP Member</option>
+            <option value="Gold Member">Gold Member (Legacy)</option>
             <option value="Diamond Elite">Diamond Elite (Legacy)</option>
             <option value="Silver Pass">Silver Pass (Legacy)</option>
           </select>

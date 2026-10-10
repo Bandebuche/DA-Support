@@ -3,8 +3,10 @@ export type UserType = 'Student Pro' | 'Franchise Hub';
 export type MembershipTier = 
   | 'Diamond Member' 
   | 'Silver Member' 
-  | 'Gold Member' 
+  | 'Chakravyuh Member'
+  | 'Franchise Member'
   | 'PMP Member' 
+  | 'Gold Member' 
   | 'Diamond Elite' 
   | 'Silver Pass' 
   | 'Other / Not Specified';
