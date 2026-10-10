@@ -16,7 +16,9 @@ import {
   History, 
   Cloud, 
   FileText,
-  Sliders
+  Sliders,
+  Trash2,
+  UserCheck
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
@@ -29,6 +31,8 @@ interface TicketDetailDrawerProps {
   onStatusChange: (ticketId: string, newStatus: TicketStatus) => void;
   onAddInternalNote: (ticketId: string, content: string) => void;
   onOpenManualOverride: (ticket: Ticket) => void;
+  onDeleteTicket?: (ticketId: string) => void;
+  onReassignSpecialist?: (ticketId: string, specialist: string) => void;
 }
 
 export const TicketDetailDrawer: React.FC<TicketDetailDrawerProps> = ({
@@ -40,6 +44,8 @@ export const TicketDetailDrawer: React.FC<TicketDetailDrawerProps> = ({
   onStatusChange,
   onAddInternalNote,
   onOpenManualOverride,
+  onDeleteTicket,
+  onReassignSpecialist,
 }) => {
   const [newNote, setNewNote] = useState('');
   const [isSubmittingNote, setIsSubmittingNote] = useState(false);
@@ -112,6 +118,22 @@ export const TicketDetailDrawer: React.FC<TicketDetailDrawerProps> = ({
               >
                 <Sliders className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
               </button>
+
+              {onDeleteTicket && (
+                <button
+                  onClick={() => {
+                    if (window.confirm(`Delete ticket ${ticket.ticketId}? This action cannot be undone.`)) {
+                      onDeleteTicket(ticket.ticketId);
+                      onClose();
+                    }
+                  }}
+                  className="p-2 rounded-xl bg-surface-elevated hover:bg-red-50 dark:hover:bg-red-950/40 border border-surface-border hover:border-red-200 dark:hover:border-red-800 text-text-muted hover:text-red-600 dark:hover:text-red-400 transition"
+                  title="Delete Ticket"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              )}
+
               <button
                 onClick={onClose}
                 className="p-2 rounded-xl bg-surface-elevated hover:bg-surface-hover border border-surface-border text-text-soft hover:text-text-pure transition"
@@ -225,6 +247,54 @@ export const TicketDetailDrawer: React.FC<TicketDetailDrawerProps> = ({
                     <span className="font-semibold text-text-pure">{ticket.city}</span>
                   </div>
                 )}
+              </div>
+            </div>
+
+            {/* Specialist Assignment & Re-route */}
+            <div className="bg-surface border border-surface-border rounded-2xl p-4 space-y-3 shadow-sm">
+              <div className="flex items-center justify-between border-b border-surface-border pb-2.5">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-text-pure flex items-center gap-1.5">
+                  <UserCheck className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                  Assigned Specialist
+                </h4>
+                <span className="text-xs font-bold px-2 py-0.5 rounded-md bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
+                  {ticket.assignedSpecialist || 'General Support Desk'}
+                </span>
+              </div>
+              <div className="space-y-1.5">
+                <span className="block text-[11px] font-medium text-text-muted">
+                  Reassign to Specialist:
+                </span>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  {[
+                    { id: 'Sachin Sir', label: 'Sachin Sir', badge: 'Meta & CRM' },
+                    { id: 'Omkar Kulkarni', label: 'Omkar Kulkarni', badge: 'WP & Hosting' },
+                    { id: 'General Support Desk', label: 'General Desk', badge: 'Triage' },
+                  ].map(spec => {
+                    const isCurrent = (ticket.assignedSpecialist || 'General Support Desk') === spec.id;
+                    return (
+                      <button
+                        key={spec.id}
+                        type="button"
+                        onClick={() => onReassignSpecialist?.(ticket.ticketId, spec.id)}
+                        className={cn(
+                          'p-2 rounded-xl text-left border transition flex flex-col justify-between text-xs font-semibold',
+                          isCurrent
+                            ? 'bg-indigo-600 text-white border-indigo-600 shadow-xs'
+                            : 'bg-surface-elevated text-text-soft border-surface-border hover:text-text-pure hover:border-slate-300 dark:hover:border-slate-700'
+                        )}
+                      >
+                        <span className="block truncate">{spec.label}</span>
+                        <span className={cn(
+                          'text-[10px] font-normal block mt-0.5 truncate',
+                          isCurrent ? 'text-indigo-100' : 'text-text-muted'
+                        )}>
+                          {spec.badge}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             </div>
 

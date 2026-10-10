@@ -49,8 +49,12 @@ export async function syncTicketCreateToSheets(ticket: Ticket): Promise<SyncResp
     currentStatus: ticket.status,
     supportStartTime: '',
     supportEndTime: '',
-    totalTimeTaken: '',
-    remarks: ticket.city ? `City: ${ticket.city}` : '',
+    remarks: [
+      ticket.assignedSpecialist ? `Specialist: ${ticket.assignedSpecialist}` : '',
+      ticket.city ? `City: ${ticket.city}` : ''
+    ].filter(Boolean).join(' | '),
+    assignedSpecialist: ticket.assignedSpecialist || ticket.assignedAgent || '',
+    assignedAgent: ticket.assignedSpecialist || ticket.assignedAgent || '',
     lastUpdated: formatISTFull(ticket.updatedAt),
   };
 

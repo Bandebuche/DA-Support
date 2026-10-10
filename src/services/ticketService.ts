@@ -3,6 +3,9 @@ import {
   loadStoredTickets, 
   saveStoredTickets, 
   upsertStoredTicket, 
+  deleteStoredTicket,
+  deleteStoredTickets,
+  clearAllStoredTickets,
   generateDATicketId 
 } from '../lib/storage';
 import { computeElapsedSeconds } from '../lib/stopwatch';
@@ -53,6 +56,8 @@ export const ticketService = {
       websiteUrl: data.websiteUrl?.trim() || undefined,
       status: 'New',
       priority: (data.membershipTier === 'Diamond Member' || data.membershipTier === 'Diamond Elite' || data.membershipTier === 'PMP Member') ? 'High' : 'Normal',
+      assignedSpecialist: data.assignedSpecialist || (data.ecosystem === 'WordPress & Hosting' ? 'Omkar Kulkarni' : 'Sachin Sir'),
+      assignedAgent: data.assignedSpecialist || (data.ecosystem === 'WordPress & Hosting' ? 'Omkar Kulkarni' : 'Sachin Sir'),
       createdAt: nowIso,
       updatedAt: nowIso,
       activeDurationSeconds: 0,
@@ -237,6 +242,55 @@ export const ticketService = {
           action: 'Manual Timing / Record Override Applied',
           timestamp: nowIso,
           performedBy: data.agentName,
+        },
+      ],
+    };
+
+    upsertStoredTicket(updatedTicket);
+    return updatedTicket;
+  },
+
+  /**
+   * Delete a single ticket
+   */
+  deleteTicket(ticketId: string): void {
+    deleteStoredTicket(ticketId);
+  },
+
+  /**
+   * Bulk delete tickets
+   */
+  deleteTickets(ticketIds: string[]): void {
+    deleteStoredTickets(ticketIds);
+  },
+
+  /**
+   * Reset / clear all tickets
+   */
+  clearAllTickets(): void {
+    clearAllStoredTickets();
+  },
+
+  /**
+   * Reassign ticket specialist
+   */
+  async reassignSpecialist(ticketId: string, specialist: string, agentName: string = 'Admin'): Promise<Ticket> {
+    const ticket = this.getTicketById(ticketId);
+    if (!ticket) throw new Error(`Ticket ${ticketId} not found`);
+
+    const nowIso = new Date().toISOString();
+    const updatedTicket: Ticket = {
+      ...ticket,
+      assignedSpecialist: specialist,
+      assignedAgent: specialist,
+      updatedAt: nowIso,
+      auditHistory: [
+        ...(ticket.auditHistory || []),
+        {
+          id: `audit-${Date.now()}`,
+          action: `Reassigned to ${specialist}`,
+          timestamp: nowIso,
+          performedBy: agentName,
         },
       ],
     };

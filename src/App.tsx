@@ -130,6 +130,7 @@ function AppContent() {
     membershipTier: 'all',
     priority: 'all',
     category: 'all',
+    specialist: 'all',
     dateRange: 'all',
     sortBy: 'newest',
   });
@@ -282,6 +283,91 @@ function AppContent() {
     setIsDrawerOpen(true);
   };
 
+  const handleDeleteTicket = (ticketId: string) => {
+    try {
+      ticketService.deleteTicket(ticketId);
+      refreshTickets();
+      if (selectedTicket?.ticketId === ticketId) {
+        setSelectedTicket(null);
+        setIsDrawerOpen(false);
+      }
+      toast({
+        title: 'Ticket Deleted',
+        description: `Ticket ${ticketId} was successfully removed`,
+        type: 'info',
+      });
+    } catch (err: any) {
+      toast({
+        title: 'Error Deleting Ticket',
+        description: err.message,
+        type: 'error',
+      });
+    }
+  };
+
+  const handleDeleteTickets = (ticketIds: string[]) => {
+    try {
+      ticketService.deleteTickets(ticketIds);
+      refreshTickets();
+      if (selectedTicket && ticketIds.includes(selectedTicket.ticketId)) {
+        setSelectedTicket(null);
+        setIsDrawerOpen(false);
+      }
+      toast({
+        title: 'Tickets Deleted',
+        description: `Successfully removed ${ticketIds.length} ticket(s)`,
+        type: 'info',
+      });
+    } catch (err: any) {
+      toast({
+        title: 'Error Deleting Tickets',
+        description: err.message,
+        type: 'error',
+      });
+    }
+  };
+
+  const handleResetAllTickets = () => {
+    try {
+      ticketService.clearAllTickets();
+      refreshTickets();
+      setSelectedTicket(null);
+      setIsDrawerOpen(false);
+      toast({
+        title: 'All Tickets Cleared',
+        description: 'Operations database was reset successfully',
+        type: 'success',
+      });
+    } catch (err: any) {
+      toast({
+        title: 'Error Resetting Tickets',
+        description: err.message,
+        type: 'error',
+      });
+    }
+  };
+
+  const handleReassignSpecialist = async (ticketId: string, specialist: string) => {
+    try {
+      const updated = await ticketService.reassignSpecialist(ticketId, specialist, 'Admin');
+      refreshTickets();
+      if (selectedTicket?.ticketId === ticketId) {
+        setSelectedTicket(updated);
+      }
+      toast({
+        title: 'Specialist Reassigned',
+        description: `Assigned to ${specialist}`,
+        type: 'success',
+      });
+    } catch (err: any) {
+      toast({
+        title: 'Error Reassigning Specialist',
+        description: err.message,
+        type: 'error',
+      });
+    }
+  };
+
   // Nav counts
   const ticketCounts = useMemo(() => {
     return {
@@ -333,7 +419,13 @@ function AppContent() {
       // 6. Category
       if (filters.category !== 'all' && t.category !== filters.category) return false;
 
-      // 7. Date range (IST)
+      // 7. Assigned Specialist
+      if (filters.specialist !== 'all') {
+        const currentSpec = t.assignedSpecialist || 'General Support Desk';
+        if (currentSpec !== filters.specialist) return false;
+      }
+
+      // 8. Date range (IST)
       if (filters.dateRange === 'today' && !isTodayInIST(t.createdAt)) return false;
       if (filters.dateRange === 'week') {
         const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
@@ -415,7 +507,7 @@ function AppContent() {
         <TopCommandBar
           title={
             currentTab === 'overview'
-              ? 'Operations Command Deck'
+              ? 'Operations Dashboard'
               : currentTab === 'analytics'
               ? 'SLA Analytics Deck'
               : currentTab === 'active'
@@ -506,6 +598,9 @@ function AppContent() {
                   onStartSupport={handleStartSupport}
                   onResolveTicket={handleOpenResolveModal}
                   onStatusChange={handleStatusChange}
+                  onDeleteTicket={handleDeleteTicket}
+                  onDeleteTickets={handleDeleteTickets}
+                  onResetAllTickets={handleResetAllTickets}
                 />
               )}
             </>
@@ -531,6 +626,8 @@ function AppContent() {
           setOverrideTicket(t);
           setIsOverrideModalOpen(true);
         }}
+        onDeleteTicket={handleDeleteTicket}
+        onReassignSpecialist={handleReassignSpecialist}
       />
 
       {/* Resolve Modal */}

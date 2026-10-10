@@ -5,7 +5,8 @@ import {
   UserType, 
   MembershipTier, 
   ProductEcosystem, 
-  Ticket 
+  Ticket,
+  SupportSpecialist
 } from '../../types/ticket';
 import { ticketService } from '../../services/ticketService';
 import { loadStoredTickets } from '../../lib/storage';
@@ -112,6 +113,7 @@ export const PublicGateway: React.FC = () => {
     websiteUrl: '',
     subject: '',
     description: '',
+    assignedSpecialist: 'Sachin Sir',
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -232,6 +234,7 @@ export const PublicGateway: React.FC = () => {
       websiteUrl: '',
       subject: '',
       description: '',
+      assignedSpecialist: 'Sachin Sir',
     });
     setCreatedTicket(null);
     setErrors({});
@@ -700,6 +703,88 @@ export const PublicGateway: React.FC = () => {
                         </div>
                       </div>
 
+                      {/* Specialist Routing / Support Engineer Selection */}
+                      <div>
+                        <div className="flex items-center justify-between mb-2.5">
+                          <label className="text-sm sm:text-base font-semibold text-slate-900 dark:text-slate-100">
+                            Assign Support Specialist <span className="text-xs text-slate-500 font-normal">(किसे असाइन करनी है यह टिकट?)</span>
+                          </label>
+                          <span className="text-xs text-indigo-600 dark:text-indigo-400 font-bold">
+                            Selected: {formData.assignedSpecialist}
+                          </span>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                          {[
+                            {
+                              id: 'Sachin Sir' as SupportSpecialist,
+                              name: 'Sachin Sir',
+                              role: 'Meta Ads & CRM Integrations',
+                              desc: 'Specialist for Chakravyuh CRM, Meta Ads, WhatsApp WABA API & Lead Webhooks',
+                              badge: 'CRM & Automation',
+                              badgeColor: 'bg-blue-100 text-blue-700 dark:bg-blue-950/70 dark:text-blue-300',
+                              avatarBg: 'bg-blue-600 text-white',
+                              initials: 'SS',
+                            },
+                            {
+                              id: 'Omkar Kulkarni' as SupportSpecialist,
+                              name: 'Omkar Kulkarni',
+                              role: 'WordPress & Hosting Specialist',
+                              desc: 'Specialist for WordPress themes, cPanel, SSL certificates, DNS settings & Web Dev',
+                              badge: 'WordPress & Web',
+                              badgeColor: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/70 dark:text-emerald-300',
+                              avatarBg: 'bg-emerald-600 text-white',
+                              initials: 'OK',
+                            },
+                          ].map(spec => {
+                            const isSelected = formData.assignedSpecialist === spec.id;
+                            return (
+                              <button
+                                type="button"
+                                key={spec.id}
+                                onClick={() => setFormData({ ...formData, assignedSpecialist: spec.id })}
+                                className={cn(
+                                  'p-4 rounded-2xl border text-left transition-all duration-150 select-none flex flex-col justify-between shadow-xs',
+                                  isSelected
+                                    ? 'bg-indigo-50 dark:bg-indigo-950/60 border-indigo-600 dark:border-indigo-500 text-indigo-700 dark:text-indigo-300 ring-2 ring-indigo-600/20 font-bold'
+                                    : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-700 font-medium'
+                                )}
+                              >
+                                <div>
+                                  <div className="flex items-start justify-between w-full mb-2.5">
+                                    <div className="flex items-center gap-3">
+                                      <div className={cn('w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm shadow-xs shrink-0', spec.avatarBg)}>
+                                        {spec.initials}
+                                      </div>
+                                      <div>
+                                        <span className="text-base font-bold text-slate-900 dark:text-white block leading-tight">
+                                          {spec.name}
+                                        </span>
+                                        <span className="text-xs text-slate-500 dark:text-slate-400 block mt-0.5">
+                                          {spec.role}
+                                        </span>
+                                      </div>
+                                    </div>
+                                    {isSelected && (
+                                      <span className="w-6 h-6 rounded-full bg-indigo-600 text-white flex items-center justify-center shrink-0">
+                                        <Check className="w-4 h-4" />
+                                      </span>
+                                    )}
+                                  </div>
+                                  <p className="text-xs text-slate-600 dark:text-slate-400 font-normal leading-relaxed mb-3">
+                                    {spec.desc}
+                                  </p>
+                                </div>
+                                <div>
+                                  <span className={cn('text-[11px] font-bold px-2.5 py-1 rounded-lg inline-block', spec.badgeColor)}>
+                                    {spec.badge}
+                                  </span>
+                                </div>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+
                     </div>
 
                   </div>
@@ -1015,7 +1100,12 @@ export const PublicGateway: React.FC = () => {
                       <div>
                         <span className="text-text-muted text-xs font-medium block">Submission Time (IST)</span>
                         <span className="text-text-pure font-mono text-xs font-semibold">{formatToISTDateTimeString(createdTicket.createdAt)}</span>
-                        <span className="text-emerald-700 dark:text-emerald-400 text-xs font-medium block mt-0.5">Assigned to Technical Queue</span>
+                        <div className="flex items-center gap-1.5 mt-1">
+                          <span className="text-xs font-semibold text-text-muted">Assigned Specialist:</span>
+                          <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400">
+                            {createdTicket.assignedSpecialist || 'General Support Desk'}
+                          </span>
+                        </div>
                       </div>
                     </div>
 
@@ -1223,8 +1313,10 @@ export const PublicGateway: React.FC = () => {
                       <span className="text-text-pure font-mono text-xs font-semibold">{formatToISTDateTimeString(trackedTicket.createdAt)}</span>
                     </div>
                     <div>
-                      <span className="text-text-muted text-xs font-medium block">Last Updated (IST)</span>
-                      <span className="text-text-pure font-mono text-xs font-semibold">{formatToISTDateTimeString(trackedTicket.updatedAt)}</span>
+                      <span className="text-text-muted text-xs font-medium block">Assigned Specialist</span>
+                      <span className="text-indigo-600 dark:text-indigo-400 font-bold text-sm block">
+                        {trackedTicket.assignedSpecialist || 'General Support Desk'}
+                      </span>
                     </div>
                   </div>
 

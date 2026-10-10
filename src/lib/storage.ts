@@ -71,6 +71,35 @@ export function upsertStoredTicket(ticket: Ticket): Ticket[] {
 }
 
 /**
+ * Delete a single ticket by ID
+ */
+export function deleteStoredTicket(ticketId: string): Ticket[] {
+  const current = loadStoredTickets();
+  const filtered = current.filter(t => t.id !== ticketId && t.ticketId.toUpperCase() !== ticketId.toUpperCase());
+  saveStoredTickets(filtered);
+  return filtered;
+}
+
+/**
+ * Bulk delete tickets by IDs
+ */
+export function deleteStoredTickets(ticketIds: string[]): Ticket[] {
+  const set = new Set(ticketIds.map(id => id.toUpperCase()));
+  const current = loadStoredTickets();
+  const filtered = current.filter(t => !set.has(t.id.toUpperCase()) && !set.has(t.ticketId.toUpperCase()));
+  saveStoredTickets(filtered);
+  return filtered;
+}
+
+/**
+ * Reset / Clear all tickets
+ */
+export function clearAllStoredTickets(): Ticket[] {
+  saveStoredTickets([]);
+  return [];
+}
+
+/**
  * Get configured Google Apps Script Webhook URL
  */
 export function getSavedAppsScriptUrl(): string {

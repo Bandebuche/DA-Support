@@ -116,10 +116,10 @@ export const TopCommandBar: React.FC<TopCommandBarProps> = ({
                     ? 'bg-indigo-600 text-white shadow-sm'
                     : 'text-text-soft hover:text-text-pure hover:bg-surface'
                 )}
-                title="Kanban Board View"
+                title="Board Pipeline View"
               >
                 <Kanban className="w-3.5 h-3.5" />
-                <span className="text-xs hidden xl:inline">Kanban</span>
+                <span className="text-xs hidden md:inline font-semibold">Board View</span>
               </button>
               <button
                 onClick={() => onViewModeChange('cards')}
@@ -129,10 +129,10 @@ export const TopCommandBar: React.FC<TopCommandBarProps> = ({
                     ? 'bg-indigo-600 text-white shadow-sm'
                     : 'text-text-soft hover:text-text-pure hover:bg-surface'
                 )}
-                title="Card Grid View"
+                title="Cards Grid View"
               >
                 <LayoutGrid className="w-3.5 h-3.5" />
-                <span className="text-xs hidden xl:inline">Cards</span>
+                <span className="text-xs hidden md:inline font-semibold">Cards View</span>
               </button>
               <button
                 onClick={() => onViewModeChange('table')}
@@ -142,10 +142,10 @@ export const TopCommandBar: React.FC<TopCommandBarProps> = ({
                     ? 'bg-indigo-600 text-white shadow-sm'
                     : 'text-text-soft hover:text-text-pure hover:bg-surface'
                 )}
-                title="Table View"
+                title="Data Table View"
               >
                 <Table className="w-3.5 h-3.5" />
-                <span className="text-xs hidden xl:inline">Table</span>
+                <span className="text-xs hidden md:inline font-semibold">Table View</span>
               </button>
             </div>
 

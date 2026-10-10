@@ -38,6 +38,11 @@ export interface TicketAuditEvent {
   performedBy: string;
 }
 
+export type SupportSpecialist = 
+  | 'Sachin Sir' 
+  | 'Omkar Kulkarni' 
+  | 'General Support Desk';
+
 export interface Ticket {
   id: string;
   ticketId: string; // e.g. DA-2026-8941
@@ -56,6 +61,7 @@ export interface Ticket {
   status: TicketStatus;
   priority: TicketPriority;
   assignedAgent?: string;
+  assignedSpecialist?: SupportSpecialist | string;
   
   // Authoritative Timestamps in UTC
   createdAt: string;
@@ -89,4 +95,5 @@ export interface TicketFormData {
   websiteUrl?: string;
   subject: string;
   description: string;
+  assignedSpecialist?: SupportSpecialist | string;
 }

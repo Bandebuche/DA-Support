@@ -12,6 +12,7 @@ export interface FilterState {
   membershipTier: MembershipTier | 'all';
   priority: TicketPriority | 'all';
   category: string;
+  specialist: string | 'all';
   dateRange: 'all' | 'today' | 'week' | 'month';
   sortBy: 'newest' | 'oldest' | 'priority' | 'duration';
 }
@@ -44,6 +45,7 @@ export const FilterTray: React.FC<FilterTrayProps> = ({
       membershipTier: 'all',
       priority: 'all',
       category: 'all',
+      specialist: 'all',
       dateRange: 'all',
       sortBy: 'newest',
     });
@@ -54,6 +56,7 @@ export const FilterTray: React.FC<FilterTrayProps> = ({
     filters.membershipTier !== 'all' ||
     filters.priority !== 'all' ||
     filters.category !== 'all' ||
+    filters.specialist !== 'all' ||
     filters.dateRange !== 'all' ||
     filters.sortBy !== 'newest';
 
@@ -98,7 +101,24 @@ export const FilterTray: React.FC<FilterTrayProps> = ({
       </div>
 
       {/* Filter Selectors Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2.5 pt-1">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 pt-1">
+        {/* Specialist */}
+        <div>
+          <label className="block text-[11px] font-medium text-text-muted mb-1">
+            Specialist
+          </label>
+          <select
+            value={filters.specialist}
+            onChange={e => updateFilter('specialist', e.target.value)}
+            className="w-full bg-surface-elevated text-text-pure text-xs rounded-xl border border-surface-border px-2.5 py-1.5 focus:border-indigo-500 focus:outline-none truncate"
+          >
+            <option value="all">All Specialists</option>
+            <option value="Sachin Sir">Sachin Sir</option>
+            <option value="Omkar Kulkarni">Omkar Kulkarni</option>
+            <option value="General Support Desk">General Desk</option>
+          </select>
+        </div>
+
         {/* Ecosystem */}
         <div>
           <label className="block text-[11px] font-medium text-text-muted mb-1">
