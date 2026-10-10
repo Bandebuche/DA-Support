@@ -167,18 +167,27 @@ function AppContent() {
 
   const refreshTickets = useCallback(() => {
     setIsRefreshing(true);
-    const fresh = ticketService.getAllTickets();
-    setTickets(fresh);
-
-    if (selectedTicket) {
-      const updated = fresh.find(t => t.ticketId === selectedTicket.ticketId);
-      if (updated) setSelectedTicket(updated);
-    }
-
-    setTimeout(() => {
+    ticketService.fetchCloudTickets().then(fresh => {
+      setTickets(fresh);
+      if (selectedTicket) {
+        const updated = fresh.find(t => t.ticketId === selectedTicket.ticketId);
+        if (updated) setSelectedTicket(updated);
+      }
       setIsRefreshing(false);
-    }, 400);
+    }).catch(() => {
+      const fallback = ticketService.getAllTickets();
+      setTickets(fallback);
+      setIsRefreshing(false);
+    });
   }, [selectedTicket]);
+
+  // Initial fetch from cloud database on load to sync cross-device submissions
+  useEffect(() => {
+    ticketService.fetchCloudTickets().then(cloudTickets => {
+      setTickets(cloudTickets);
+      setKnownTicketIds(new Set(cloudTickets.map(t => t.ticketId)));
+    }).catch(console.warn);
+  }, []);
 
   // Real-time audio alerts & Cross-tab notifications listener
   useEffect(() => {
@@ -237,43 +246,50 @@ function AppContent() {
     };
     window.addEventListener('storage', handleStorage);
 
-    // Polling interval (every 4 seconds) to auto-detect incoming tickets from sheets/other tabs
-    const pollTimer = setInterval(() => {
-      const latest = ticketService.getAllTickets();
-      setKnownTicketIds(prevIds => {
-        const newArrivals = latest.filter(t => !prevIds.has(t.ticketId));
-        if (newArrivals.length > 0) {
-          newArrivals.forEach(newTicket => {
-            const isMetaTicket = 
-              (newTicket.assignedSpecialist || '').toLowerCase().includes('onkar') ||
-              (newTicket.category || '').toLowerCase().includes('meta') ||
-              (newTicket.subject || '').toLowerCase().includes('meta');
+    // Polling interval (every 3.5 seconds) to auto-detect incoming tickets from Cloud / Mobile / Other tabs
+    const pollTimer = setInterval(async () => {
+      try {
+        const latest = await ticketService.fetchCloudTickets();
+        setKnownTicketIds(prevIds => {
+          const newArrivals = latest.filter(t => !prevIds.has(t.ticketId));
+          if (newArrivals.length > 0) {
+            newArrivals.forEach(newTicket => {
+              const isMetaTicket = 
+                (newTicket.assignedSpecialist || '').toLowerCase().includes('onkar') ||
+                (newTicket.category || '').toLowerCase().includes('meta') ||
+                (newTicket.subject || '').toLowerCase().includes('meta');
 
-            if (currentUser?.role === 'meta_lead' && !isMetaTicket) return;
+              if (currentUser?.role === 'meta_lead' && !isMetaTicket) return;
 
-            audioNotification.playNewTicketChime();
-            toast({
-              title: `🔔 New Query: ${newTicket.ticketId}`,
-              description: `From ${newTicket.requesterName} • ${newTicket.subject}`,
-              type: 'info',
+              audioNotification.playNewTicketChime();
+              toast({
+                title: `🔔 New Query: ${newTicket.ticketId}`,
+                description: `From ${newTicket.requesterName} • ${newTicket.subject}`,
+                type: 'info',
+              });
+              setNotifications(prev => [
+                {
+                  id: `notif-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+                  ticketId: newTicket.ticketId,
+                  title: newTicket.subject,
+                  requesterName: newTicket.requesterName,
+                  time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                },
+                ...prev,
+              ]);
             });
-            setNotifications(prev => [
-              {
-                id: `notif-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
-                ticketId: newTicket.ticketId,
-                title: newTicket.subject,
-                requesterName: newTicket.requesterName,
-                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-              },
-              ...prev,
-            ]);
-          });
-          setTickets(latest);
-          return new Set(latest.map(t => t.ticketId));
-        }
-        return prevIds;
-      });
-    }, 4000);
+            setTickets(latest);
+            return new Set(latest.map(t => t.ticketId));
+          } else {
+            // Keep ticket state in sync in case status, deletion or notes changed in cloud
+            setTickets(latest);
+          }
+          return prevIds;
+        });
+      } catch {
+        // Safe silent fallback
+      }
+    }, 3500);
 
     return () => {
       window.removeEventListener('click', handleUserInteraction);

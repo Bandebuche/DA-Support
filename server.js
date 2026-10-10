@@ -31,6 +31,122 @@ const server = http.createServer((req, res) => {
   // Parse clean URL pathname
   let reqPath = req.url.split('?')[0];
 
+  // Handle /api/tickets REST API
+  if (reqPath.startsWith('/api/tickets')) {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    res.setHeader('Content-Type', 'application/json; charset=UTF-8');
+
+    if (req.method === 'OPTIONS') {
+      res.writeHead(200);
+      res.end();
+      return;
+    }
+
+    const dataDir = path.join(ROOT_DIR, 'data');
+    const dataFile = path.join(dataDir, 'tickets.json');
+
+    const readLocalDb = () => {
+      try {
+        if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
+        if (!fs.existsSync(dataFile)) {
+          fs.writeFileSync(dataFile, '[]', 'utf8');
+          return [];
+        }
+        return JSON.parse(fs.readFileSync(dataFile, 'utf8') || '[]');
+      } catch {
+        return [];
+      }
+    };
+
+    const writeLocalDb = (data) => {
+      try {
+        if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
+        fs.writeFileSync(dataFile, JSON.stringify(data, null, 2), 'utf8');
+      } catch (err) {
+        console.error('Failed to write tickets.json:', err);
+      }
+    };
+
+    if (req.method === 'GET') {
+      const tickets = readLocalDb();
+      res.writeHead(200);
+      res.end(JSON.stringify({ success: true, count: tickets.length, tickets }));
+      return;
+    }
+
+    if (req.method === 'POST') {
+      let bodyStr = '';
+      req.on('data', chunk => { bodyStr += chunk; });
+      req.on('end', () => {
+        try {
+          const body = JSON.parse(bodyStr || '{}');
+          let tickets = readLocalDb();
+          const action = body.action || 'sync';
+
+          if (action === 'createTicket') {
+            const newTicket = body.ticket || body;
+            const idx = tickets.findIndex(t => t.ticketId === newTicket.ticketId);
+            if (idx >= 0) tickets[idx] = newTicket;
+            else tickets.unshift(newTicket);
+            writeLocalDb(tickets);
+            res.writeHead(200);
+            res.end(JSON.stringify({ success: true, ticket: newTicket, count: tickets.length }));
+            return;
+          }
+
+          if (action === 'update' || action === 'updateTicket') {
+            const updateTicket = body.ticket || body;
+            const idx = tickets.findIndex(t => t.ticketId === updateTicket.ticketId);
+            if (idx >= 0) {
+              tickets[idx] = { ...tickets[idx], ...updateTicket };
+              writeLocalDb(tickets);
+            }
+            res.writeHead(200);
+            res.end(JSON.stringify({ success: true, ticket: tickets[idx] }));
+            return;
+          }
+
+          if (action === 'delete') {
+            const delIds = new Set((body.ticketIds || [body.ticketId]).map(String));
+            tickets = tickets.filter(t => !delIds.has(String(t.ticketId)));
+            writeLocalDb(tickets);
+            res.writeHead(200);
+            res.end(JSON.stringify({ success: true, count: tickets.length, tickets }));
+            return;
+          }
+
+          if (action === 'clearAll') {
+            writeLocalDb([]);
+            res.writeHead(200);
+            res.end(JSON.stringify({ success: true, count: 0, tickets: [] }));
+            return;
+          }
+
+          if (action === 'sync') {
+            const incoming = Array.isArray(body.tickets) ? body.tickets : [];
+            const map = new Map();
+            tickets.forEach(t => map.set(t.ticketId, t));
+            incoming.forEach(t => map.set(t.ticketId, { ...(map.get(t.ticketId) || {}), ...t }));
+            tickets = Array.from(map.values());
+            writeLocalDb(tickets);
+            res.writeHead(200);
+            res.end(JSON.stringify({ success: true, count: tickets.length, tickets }));
+            return;
+          }
+
+          res.writeHead(400);
+          res.end(JSON.stringify({ success: false, error: 'Unknown action' }));
+        } catch (e) {
+          res.writeHead(500);
+          res.end(JSON.stringify({ success: false, error: e.message }));
+        }
+      });
+      return;
+    }
+  }
+
   // Route aliases
   if (reqPath === '/' || reqPath === '') {
     reqPath = '/index.html';

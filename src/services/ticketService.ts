@@ -15,9 +15,30 @@ import {
   syncResolveToSheets 
 } from './sheetsSync';
 
+// Helper to push cloud operations asynchronously without blocking UI
+async function pushToCloudApi(body: any): Promise<any> {
+  try {
+    const res = await fetch('/api/tickets', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) {
+      console.warn(`[Cloud Sync] API responded with HTTP ${res.status}`);
+      return null;
+    }
+    return await res.json();
+  } catch (err: any) {
+    console.warn('[Cloud Sync] Deferred sync error (offline or local mode):', err.message);
+    return null;
+  }
+}
+
 export const ticketService = {
   /**
-   * Fetch all tickets sorted latest first
+   * Fetch all tickets from local storage (immediate render)
    */
   getAllTickets(): Ticket[] {
     const list = loadStoredTickets();
@@ -25,16 +46,89 @@ export const ticketService = {
   },
 
   /**
-   * Find single ticket by public ticketId
+   * Synchronize tickets with centralized Cloud Storage (Vercel Blob & Backend)
+   * Ensures mobile submissions and laptop admin deck are 100% in sync
+   */
+  async fetchCloudTickets(): Promise<Ticket[]> {
+    try {
+      const res = await fetch(`/api/tickets?_t=${Date.now()}`, {
+        method: 'GET',
+        cache: 'no-store',
+        headers: {
+          'Pragma': 'no-cache',
+          'Cache-Control': 'no-cache',
+        },
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.success && Array.isArray(data.tickets)) {
+          const cloudTickets: Ticket[] = data.tickets;
+          const localList = loadStoredTickets();
+          const cloudIdSet = new Set(cloudTickets.map(t => (t.ticketId || '').toUpperCase()));
+
+          // Identify any tickets created locally while offline
+          const unsyncedLocal = localList.filter(
+            t => !cloudIdSet.has((t.ticketId || '').toUpperCase())
+          );
+
+          if (unsyncedLocal.length > 0) {
+            // Push unsynced local tickets to cloud in background
+            pushToCloudApi({ action: 'sync', tickets: unsyncedLocal }).catch(console.warn);
+          }
+
+          // Merge cloud & unsynced, sorted latest first
+          const merged = [...cloudTickets, ...unsyncedLocal].sort(
+            (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          );
+
+          saveStoredTickets(merged);
+          return merged;
+        }
+      }
+    } catch (err: any) {
+      console.warn('[Cloud Sync] Failed to fetch cloud tickets, using local fallback:', err.message);
+    }
+
+    return this.getAllTickets();
+  },
+
+  /**
+   * Find single ticket by public ticketId (local + cloud lookup)
    */
   getTicketById(ticketId: string): Ticket | undefined {
     const clean = ticketId.trim().toUpperCase();
     const list = loadStoredTickets();
-    return list.find(t => t.ticketId.toUpperCase() === clean);
+    return list.find(t => (t.ticketId || '').toUpperCase() === clean);
   },
 
   /**
-   * Create new support ticket from public form
+   * Fetch single ticket authoritative from cloud (useful for public tracking)
+   */
+  async fetchTicketById(ticketId: string): Promise<Ticket | undefined> {
+    const clean = ticketId.trim().toUpperCase();
+    const local = this.getTicketById(clean);
+
+    try {
+      const res = await fetch(`/api/tickets?ticketId=${encodeURIComponent(clean)}&_t=${Date.now()}`, {
+        cache: 'no-store',
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.success && data.ticket) {
+          upsertStoredTicket(data.ticket);
+          return data.ticket;
+        }
+      }
+    } catch {
+      // Return local fallback
+    }
+
+    return local;
+  },
+
+  /**
+   * Create new support ticket from public form (Multi-Device Cloud Synchronized)
    */
   async submitTicket(data: TicketFormData): Promise<Ticket> {
     const nowIso = new Date().toISOString();
@@ -71,10 +165,20 @@ export const ticketService = {
       ],
     };
 
-    // Store locally with zero-duplicate guarantee
+    // 1. Store locally for instant offline reliability
     upsertStoredTicket(newTicket);
 
-    // Sync to Google Sheets in background
+    // 2. Synchronously push to Cloud Database so Laptop Admin Deck detects it immediately
+    try {
+      await pushToCloudApi({
+        action: 'createTicket',
+        ticket: newTicket,
+      });
+    } catch (err: any) {
+      console.warn('Deferred cloud push:', err.message);
+    }
+
+    // 3. Sync to Google Sheets in background
     syncTicketCreateToSheets(newTicket).catch(err => {
       console.warn('Deferred sheets sync:', err);
     });
@@ -83,7 +187,7 @@ export const ticketService = {
   },
 
   /**
-   * Start Support Session (Authoritative Stopwatch)
+   * Start Support Session (Authoritative Stopwatch & Cloud Synced)
    */
   async startSupport(ticketId: string, agentName: string): Promise<Ticket> {
     const ticket = this.getTicketById(ticketId);
@@ -109,6 +213,9 @@ export const ticketService = {
     };
 
     upsertStoredTicket(updatedTicket);
+
+    // Push update to cloud
+    pushToCloudApi({ action: 'update', ticket: updatedTicket }).catch(console.warn);
 
     // Sync to Google Sheets
     syncStartSupportToSheets(ticketId, nowIso).catch(console.warn);
@@ -154,6 +261,9 @@ export const ticketService = {
 
     upsertStoredTicket(updatedTicket);
 
+    // Push update to cloud
+    pushToCloudApi({ action: 'update', ticket: updatedTicket }).catch(console.warn);
+
     // Sync to Google Sheets
     syncResolveToSheets(updatedTicket, resolutionNotes, nowIso).catch(console.warn);
 
@@ -184,6 +294,7 @@ export const ticketService = {
     };
 
     upsertStoredTicket(updatedTicket);
+    pushToCloudApi({ action: 'update', ticket: updatedTicket }).catch(console.warn);
     return updatedTicket;
   },
 
@@ -209,6 +320,7 @@ export const ticketService = {
     };
 
     upsertStoredTicket(updatedTicket);
+    pushToCloudApi({ action: 'update', ticket: updatedTicket }).catch(console.warn);
     return updatedTicket;
   },
 
@@ -247,28 +359,32 @@ export const ticketService = {
     };
 
     upsertStoredTicket(updatedTicket);
+    pushToCloudApi({ action: 'update', ticket: updatedTicket }).catch(console.warn);
     return updatedTicket;
   },
 
   /**
-   * Delete a single ticket
+   * Delete a single ticket (Locally and from Cloud)
    */
   deleteTicket(ticketId: string): void {
     deleteStoredTicket(ticketId);
+    pushToCloudApi({ action: 'delete', ticketIds: [ticketId] }).catch(console.warn);
   },
 
   /**
-   * Bulk delete tickets
+   * Bulk delete tickets (Locally and from Cloud)
    */
   deleteTickets(ticketIds: string[]): void {
     deleteStoredTickets(ticketIds);
+    pushToCloudApi({ action: 'delete', ticketIds }).catch(console.warn);
   },
 
   /**
-   * Reset / clear all tickets
+   * Reset / clear all tickets (Locally and from Cloud)
    */
   clearAllTickets(): void {
     clearAllStoredTickets();
+    pushToCloudApi({ action: 'clearAll' }).catch(console.warn);
   },
 
   /**
@@ -296,6 +412,7 @@ export const ticketService = {
     };
 
     upsertStoredTicket(updatedTicket);
+    pushToCloudApi({ action: 'update', ticket: updatedTicket }).catch(console.warn);
     return updatedTicket;
   },
 };

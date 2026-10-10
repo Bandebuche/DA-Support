@@ -220,8 +220,8 @@ export const PublicGateway: React.FC = () => {
     setErrors({});
   };
 
-  // Ticket Tracker Search with Phone Verification
-  const handleTrackSearch = (e: React.FormEvent) => {
+  // Ticket Tracker Search with Phone Verification (Cross-Device Cloud Synced)
+  const handleTrackSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     setTrackError(null);
     setTrackedTicket(null);
@@ -241,17 +241,18 @@ export const PublicGateway: React.FC = () => {
     setIsSearchingTrack(true);
 
     try {
-      const allTickets = loadStoredTickets();
+      // First fetch latest from cloud to ensure cross-device tracking (mobile <-> laptop)
+      const allTickets = await ticketService.fetchCloudTickets();
       const matched = allTickets.find(t => {
-        const matchesId = t.ticketId.toUpperCase() === cleanId;
-        const matchesPhone = t.requesterPhone.replace(/\D/g, '').endsWith(cleanPhone.slice(-10));
+        const matchesId = (t.ticketId || '').toUpperCase() === cleanId;
+        const matchesPhone = (t.requesterPhone || '').replace(/\D/g, '').endsWith(cleanPhone.slice(-10));
         return matchesId && matchesPhone;
       });
 
       if (matched) {
         setTrackedTicket(matched);
       } else {
-        const idExists = allTickets.some(t => t.ticketId.toUpperCase() === cleanId);
+        const idExists = allTickets.some(t => (t.ticketId || '').toUpperCase() === cleanId);
         if (idExists) {
           setTrackError('Ticket ID found, but the mobile number does not match our records for this ticket. Please verify your 10-digit registered number.');
         } else {
