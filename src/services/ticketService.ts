@@ -30,23 +30,56 @@ function getApiEndpoint(endpoint: string): string {
   return `${CLOUD_FALLBACK_BASE}${endpoint}`;
 }
 
-// Helper to push cloud operations asynchronously without blocking UI
+// Multi-tab BroadcastChannel & window CustomEvent for zero-latency local sync
+let broadcastChan: BroadcastChannel | null = null;
+try {
+  if (typeof window !== 'undefined' && 'BroadcastChannel' in window) {
+    broadcastChan = new BroadcastChannel('DA_CLOUD_SYNC');
+  }
+} catch {
+  broadcastChan = null;
+}
+
+export function notifyTicketSync(action: 'create' | 'update' | 'delete' | 'clearAll', data: any) {
+  try {
+    if (broadcastChan) {
+      broadcastChan.postMessage({ type: 'TICKET_SYNC', action, data });
+    }
+  } catch {
+    // Ignore BroadcastChannel errors in restrictive environments
+  }
+  try {
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('DA_TICKET_SYNC', { detail: { action, data } }));
+    }
+  } catch {
+    // Ignore CustomEvent errors
+  }
+}
+
+// Helper to push cloud operations with timeout protection
 async function pushToCloudApi(body: any): Promise<any> {
   try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 3500);
+
     const res = await fetch(getApiEndpoint('/api/tickets'), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(body),
+      signal: controller.signal,
     });
+    clearTimeout(timeoutId);
+
     if (!res.ok) {
       console.warn(`[Cloud Sync] API responded with HTTP ${res.status}`);
       return null;
     }
     return await res.json();
   } catch (err: any) {
-    console.warn('[Cloud Sync] Deferred sync error (offline or local mode):', err.message);
+    console.warn('[Cloud Sync] Cloud push notice:', err.message);
     return null;
   }
 }
@@ -62,7 +95,7 @@ export const ticketService = {
 
   /**
    * Synchronize tickets with centralized Cloud Storage (Vercel Blob & Backend)
-   * Ensures mobile submissions and laptop admin deck are 100% in sync
+   * Uses bidirectional timestamp reconciliation so neither mobile nor desktop overwrites newer work.
    */
   async fetchCloudTickets(): Promise<Ticket[]> {
     try {
@@ -71,7 +104,7 @@ export const ticketService = {
         cache: 'no-store',
         headers: {
           'Pragma': 'no-cache',
-          'Cache-Control': 'no-cache',
+          'Cache-Control': 'no-cache, no-store',
         },
       });
 
@@ -80,20 +113,52 @@ export const ticketService = {
         if (data && data.success && Array.isArray(data.tickets)) {
           const cloudTickets: Ticket[] = data.tickets;
           const localList = loadStoredTickets();
-          const cloudIdSet = new Set(cloudTickets.map(t => (t.ticketId || '').toUpperCase()));
 
-          // Identify any tickets created locally while offline
-          const unsyncedLocal = localList.filter(
-            t => !cloudIdSet.has((t.ticketId || '').toUpperCase())
-          );
-
-          if (unsyncedLocal.length > 0) {
-            // Push unsynced local tickets to cloud in background
-            pushToCloudApi({ action: 'sync', tickets: unsyncedLocal }).catch(console.warn);
+          const localMap = new Map<string, Ticket>();
+          for (const lt of localList) {
+            if (lt.ticketId) localMap.set(lt.ticketId.toUpperCase(), lt);
+            if (lt.id) localMap.set(lt.id.toUpperCase(), lt);
           }
 
-          // Merge cloud & unsynced, sorted latest first
-          const merged = [...cloudTickets, ...unsyncedLocal].sort(
+          const localTicketsToPush: Ticket[] = [];
+          const mergedMap = new Map<string, Ticket>();
+
+          // Process cloud tickets against local copies using authoritative timestamps
+          for (const ct of cloudTickets) {
+            const key = (ct.ticketId || ct.id || '').toUpperCase();
+            if (!key) continue;
+            const lt = localMap.get(key);
+            if (!lt) {
+              mergedMap.set(key, ct);
+            } else {
+              const cloudTime = new Date(ct.updatedAt || ct.createdAt || 0).getTime();
+              const localTime = new Date(lt.updatedAt || lt.createdAt || 0).getTime();
+
+              // If local copy is newer than cloud by > 500ms, prioritize local and push it to cloud
+              if (localTime > cloudTime + 500) {
+                mergedMap.set(key, lt);
+                localTicketsToPush.push(lt);
+              } else {
+                mergedMap.set(key, ct);
+              }
+            }
+          }
+
+          // Retain any locally created tickets that have not yet reached the cloud
+          for (const lt of localList) {
+            const key = (lt.ticketId || lt.id || '').toUpperCase();
+            if (key && !mergedMap.has(key)) {
+              mergedMap.set(key, lt);
+              localTicketsToPush.push(lt);
+            }
+          }
+
+          // Push any newer local tickets to cloud in background
+          if (localTicketsToPush.length > 0) {
+            pushToCloudApi({ action: 'sync', tickets: localTicketsToPush }).catch(console.warn);
+          }
+
+          const merged = Array.from(mergedMap.values()).sort(
             (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
           );
 
@@ -180,8 +245,9 @@ export const ticketService = {
       ],
     };
 
-    // 1. Store locally for instant offline reliability
+    // 1. Store locally for instant UI update
     upsertStoredTicket(newTicket);
+    notifyTicketSync('create', newTicket);
 
     // 2. Synchronously push to Cloud Database so Laptop Admin Deck detects it immediately
     try {
@@ -227,12 +293,14 @@ export const ticketService = {
       ],
     };
 
+    // 1. Store locally & notify multi-tab
     upsertStoredTicket(updatedTicket);
+    notifyTicketSync('update', updatedTicket);
 
-    // Push update to cloud
-    pushToCloudApi({ action: 'update', ticket: updatedTicket }).catch(console.warn);
+    // 2. Push update to cloud (awaited for immediate cross-device consistency)
+    await pushToCloudApi({ action: 'update', ticket: updatedTicket });
 
-    // Sync to Google Sheets
+    // 3. Sync to Google Sheets
     syncStartSupportToSheets(ticketId, nowIso).catch(console.warn);
 
     return updatedTicket;
@@ -274,12 +342,14 @@ export const ticketService = {
       ],
     };
 
+    // 1. Store locally & notify multi-tab
     upsertStoredTicket(updatedTicket);
+    notifyTicketSync('update', updatedTicket);
 
-    // Push update to cloud
-    pushToCloudApi({ action: 'update', ticket: updatedTicket }).catch(console.warn);
+    // 2. Push update to cloud (awaited for immediate cross-device consistency)
+    await pushToCloudApi({ action: 'update', ticket: updatedTicket });
 
-    // Sync to Google Sheets
+    // 3. Sync to Google Sheets
     syncResolveToSheets(updatedTicket, resolutionNotes, nowIso).catch(console.warn);
 
     return updatedTicket;
@@ -309,7 +379,8 @@ export const ticketService = {
     };
 
     upsertStoredTicket(updatedTicket);
-    pushToCloudApi({ action: 'update', ticket: updatedTicket }).catch(console.warn);
+    notifyTicketSync('update', updatedTicket);
+    await pushToCloudApi({ action: 'update', ticket: updatedTicket });
     return updatedTicket;
   },
 
@@ -335,7 +406,8 @@ export const ticketService = {
     };
 
     upsertStoredTicket(updatedTicket);
-    pushToCloudApi({ action: 'update', ticket: updatedTicket }).catch(console.warn);
+    notifyTicketSync('update', updatedTicket);
+    await pushToCloudApi({ action: 'update', ticket: updatedTicket });
     return updatedTicket;
   },
 
@@ -374,32 +446,36 @@ export const ticketService = {
     };
 
     upsertStoredTicket(updatedTicket);
-    pushToCloudApi({ action: 'update', ticket: updatedTicket }).catch(console.warn);
+    notifyTicketSync('update', updatedTicket);
+    await pushToCloudApi({ action: 'update', ticket: updatedTicket });
     return updatedTicket;
   },
 
   /**
    * Delete a single ticket (Locally and from Cloud)
    */
-  deleteTicket(ticketId: string): void {
+  async deleteTicket(ticketId: string): Promise<void> {
     deleteStoredTicket(ticketId);
-    pushToCloudApi({ action: 'delete', ticketIds: [ticketId] }).catch(console.warn);
+    notifyTicketSync('delete', [ticketId]);
+    await pushToCloudApi({ action: 'delete', ticketIds: [ticketId] });
   },
 
   /**
    * Bulk delete tickets (Locally and from Cloud)
    */
-  deleteTickets(ticketIds: string[]): void {
+  async deleteTickets(ticketIds: string[]): Promise<void> {
     deleteStoredTickets(ticketIds);
-    pushToCloudApi({ action: 'delete', ticketIds }).catch(console.warn);
+    notifyTicketSync('delete', ticketIds);
+    await pushToCloudApi({ action: 'delete', ticketIds });
   },
 
   /**
    * Reset / clear all tickets (Locally and from Cloud)
    */
-  clearAllTickets(): void {
+  async clearAllTickets(): Promise<void> {
     clearAllStoredTickets();
-    pushToCloudApi({ action: 'clearAll' }).catch(console.warn);
+    notifyTicketSync('clearAll', null);
+    await pushToCloudApi({ action: 'clearAll' });
   },
 
   /**
@@ -427,7 +503,8 @@ export const ticketService = {
     };
 
     upsertStoredTicket(updatedTicket);
-    pushToCloudApi({ action: 'update', ticket: updatedTicket }).catch(console.warn);
+    notifyTicketSync('update', updatedTicket);
+    await pushToCloudApi({ action: 'update', ticket: updatedTicket });
     return updatedTicket;
   },
 };

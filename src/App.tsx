@@ -238,6 +238,65 @@ function AppContent() {
 
     window.addEventListener('DA_NEW_TICKET', handleNewTicketEvent);
 
+    // Multi-tab BroadcastChannel for 0ms cross-tab and cross-window sync
+    let syncChannel: BroadcastChannel | null = null;
+    try {
+      if (typeof window !== 'undefined' && 'BroadcastChannel' in window) {
+        syncChannel = new BroadcastChannel('DA_CLOUD_SYNC');
+        syncChannel.onmessage = (event) => {
+          const { type, action, data } = event.data || {};
+          if (type === 'TICKET_SYNC') {
+            if (action === 'delete') {
+              const deleteSet = new Set((Array.isArray(data) ? data : [data]).map((id: string) => String(id).toUpperCase()));
+              setTickets(prev => prev.filter(t => !deleteSet.has(t.ticketId.toUpperCase())));
+              setSelectedTicket(prev => prev && deleteSet.has(prev.ticketId.toUpperCase()) ? null : prev);
+            } else if (action === 'clearAll') {
+              setTickets([]);
+              setSelectedTicket(null);
+            } else if (data) {
+              const updatedTicket: Ticket = data;
+              setTickets(prev => {
+                const idx = prev.findIndex(t => t.ticketId.toUpperCase() === updatedTicket.ticketId.toUpperCase());
+                if (idx >= 0) {
+                  const copy = [...prev];
+                  copy[idx] = updatedTicket;
+                  return copy;
+                }
+                return [updatedTicket, ...prev];
+              });
+              setSelectedTicket(prev => prev && prev.ticketId.toUpperCase() === updatedTicket.ticketId.toUpperCase() ? updatedTicket : prev);
+            }
+          }
+        };
+      }
+    } catch {}
+
+    // CustomEvent listener for same-window updates
+    const handleTicketSyncWindow = (e: any) => {
+      const { action, data } = e.detail || {};
+      if (action === 'delete') {
+        const deleteSet = new Set((Array.isArray(data) ? data : [data]).map((id: string) => String(id).toUpperCase()));
+        setTickets(prev => prev.filter(t => !deleteSet.has(t.ticketId.toUpperCase())));
+        setSelectedTicket(prev => prev && deleteSet.has(prev.ticketId.toUpperCase()) ? null : prev);
+      } else if (action === 'clearAll') {
+        setTickets([]);
+        setSelectedTicket(null);
+      } else if (data) {
+        const updatedTicket: Ticket = data;
+        setTickets(prev => {
+          const idx = prev.findIndex(t => t.ticketId.toUpperCase() === updatedTicket.ticketId.toUpperCase());
+          if (idx >= 0) {
+            const copy = [...prev];
+            copy[idx] = updatedTicket;
+            return copy;
+          }
+          return [updatedTicket, ...prev];
+        });
+        setSelectedTicket(prev => prev && prev.ticketId.toUpperCase() === updatedTicket.ticketId.toUpperCase() ? updatedTicket : prev);
+      }
+    };
+    window.addEventListener('DA_TICKET_SYNC', handleTicketSyncWindow);
+
     // Cross-tab storage change listener
     const handleStorage = (e: StorageEvent) => {
       if (e.key === 'DA_SUPPORT_TICKETS_V2') {
@@ -246,10 +305,30 @@ function AppContent() {
     };
     window.addEventListener('storage', handleStorage);
 
-    // Polling interval (every 3.5 seconds) to auto-detect incoming tickets from Cloud / Mobile / Other tabs
+    // Polling interval (every 1.5 seconds) for real-time, on-time mobile and laptop cross-device synchronization
     const pollTimer = setInterval(async () => {
       try {
         const latest = await ticketService.fetchCloudTickets();
+        setTickets(latest);
+
+        // Authoritative drawer sync: keeps active stopwatch and resolved state identical across mobile and desktop
+        setSelectedTicket(prevSelected => {
+          if (!prevSelected) return null;
+          const freshSelected = latest.find(t => (t.ticketId || '').toUpperCase() === (prevSelected.ticketId || '').toUpperCase());
+          if (!freshSelected) return prevSelected;
+          if (
+            freshSelected.status !== prevSelected.status ||
+            freshSelected.updatedAt !== prevSelected.updatedAt ||
+            freshSelected.activeDurationSeconds !== prevSelected.activeDurationSeconds ||
+            freshSelected.supportStartedAt !== prevSelected.supportStartedAt ||
+            (freshSelected.internalNotes?.length || 0) !== (prevSelected.internalNotes?.length || 0)
+          ) {
+            return freshSelected;
+          }
+          return prevSelected;
+        });
+
+        // Detect new tickets and chime
         setKnownTicketIds(prevIds => {
           const newArrivals = latest.filter(t => !prevIds.has(t.ticketId));
           if (newArrivals.length > 0) {
@@ -278,23 +357,21 @@ function AppContent() {
                 ...prev,
               ]);
             });
-            setTickets(latest);
             return new Set(latest.map(t => t.ticketId));
-          } else {
-            // Keep ticket state in sync in case status, deletion or notes changed in cloud
-            setTickets(latest);
           }
           return prevIds;
         });
       } catch {
         // Safe silent fallback
       }
-    }, 3500);
+    }, 1500);
 
     return () => {
       window.removeEventListener('click', handleUserInteraction);
       window.removeEventListener('DA_NEW_TICKET', handleNewTicketEvent);
+      window.removeEventListener('DA_TICKET_SYNC', handleTicketSyncWindow);
       window.removeEventListener('storage', handleStorage);
+      if (syncChannel) syncChannel.close();
       clearInterval(pollTimer);
     };
   }, [currentUser, toast, refreshTickets]);
