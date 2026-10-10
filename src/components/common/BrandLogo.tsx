@@ -7,7 +7,7 @@ const resolveAsset = (filename: string) => {
   if (typeof window !== 'undefined' && window.location.pathname.toLowerCase().startsWith('/support')) {
     return `/support/${filename}`;
   }
-  return `./${filename}`;
+  return `/${filename}`;
 };
 
 interface BrandLogoProps {
