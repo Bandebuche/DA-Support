@@ -163,7 +163,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
   );
 
   const renderBottomActions = (isMobile: boolean = false) => (
-    <div className={cn('p-4 border-t border-white/15 space-y-2', collapsed && !isMobile ? 'overflow-visible' : '')}>
+    <div className={cn('p-4 border-t border-white/15 space-y-2 rounded-bl-2xl sm:rounded-bl-3xl lg:rounded-bl-[32px]', collapsed && !isMobile ? 'overflow-visible' : '')}>
       {/* Public Portal Link */}
       <button
         onClick={() => {
@@ -230,11 +230,12 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
         className={cn(
           'hidden md:flex flex-col shrink-0 transition-all duration-300 z-30 select-none relative',
           'bg-gradient-to-b from-[#1877F2] via-[#1E6BFF] to-[#1456CC] text-white shadow-xl',
+          'rounded-l-2xl sm:rounded-l-3xl lg:rounded-l-[32px] overflow-hidden',
           collapsed ? 'w-20 overflow-visible' : 'w-64'
         )}
       >
         {/* Brand Header */}
-        <div className="h-20 flex items-center justify-between px-5 border-b border-white/15">
+        <div className="h-20 flex items-center justify-between px-5 border-b border-white/15 rounded-tl-2xl sm:rounded-tl-3xl lg:rounded-tl-[32px]">
           <div className="flex items-center gap-3 overflow-hidden">
             <div className="w-9 h-9 rounded-xl bg-white text-blue-600 flex items-center justify-center font-black text-base shadow-md shrink-0">
               DA

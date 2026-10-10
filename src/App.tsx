@@ -723,8 +723,8 @@ function AppContent() {
 
   // 3. Admin Operations Deck (Authenticated)
   return (
-    <div className="min-h-screen bg-[#F0F4FA] dark:bg-slate-950 text-slate-800 dark:text-slate-100 flex p-0 lg:p-4 justify-center items-stretch antialiased selection:bg-blue-600 selection:text-white">
-      <div className="w-full max-w-[1750px] bg-white dark:bg-slate-900 rounded-none lg:rounded-[32px] shadow-2xl shadow-blue-900/10 border-0 lg:border border-slate-200/80 dark:border-slate-800 flex flex-row relative">
+    <div className="min-h-screen bg-[#EEF2F8] dark:bg-slate-950 text-slate-800 dark:text-slate-100 flex p-2 sm:p-3 md:p-4 justify-center items-stretch antialiased selection:bg-blue-600 selection:text-white">
+      <div className="w-full max-w-[1750px] bg-white dark:bg-slate-900 rounded-2xl sm:rounded-3xl lg:rounded-[32px] overflow-hidden shadow-2xl shadow-blue-900/10 border border-slate-200/80 dark:border-slate-800 flex flex-row relative h-[calc(100dvh-1rem)] sm:h-[calc(100dvh-1.5rem)] md:h-[calc(100dvh-2rem)]">
         
         {/* Left Collapsible Sidebar */}
         <AdminSidebar
@@ -753,7 +753,7 @@ function AppContent() {
         />
 
         {/* Main Command Center Deck */}
-        <div className="flex-1 flex flex-col min-w-0 h-[100dvh] lg:h-[calc(100vh-2rem)] overflow-hidden bg-white dark:bg-slate-900 relative">
+        <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden bg-white dark:bg-slate-900 relative rounded-r-2xl sm:rounded-r-3xl lg:rounded-r-[32px]">
           
           {/* Sticky Top Command Bar */}
           <TopCommandBar

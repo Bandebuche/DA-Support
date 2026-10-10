@@ -126,7 +126,7 @@ export const TopCommandBar: React.FC<TopCommandBarProps> = ({
   const avatarInitials = currentUser?.avatar || (isMetaLead ? 'OK' : 'SS');
 
   return (
-    <header className="sticky top-0 z-30 shrink-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-100 dark:border-slate-800/80 px-4 sm:px-8 py-3.5 select-none transition-colors">
+    <header className="sticky top-0 z-30 shrink-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-100 dark:border-slate-800/80 px-4 sm:px-8 py-3.5 select-none transition-colors rounded-t-2xl sm:rounded-t-3xl md:rounded-tl-none md:rounded-tr-2xl lg:rounded-tr-[32px]">
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 sm:gap-4">
         
         {/* Left: Section Title & Count Subtitle */}

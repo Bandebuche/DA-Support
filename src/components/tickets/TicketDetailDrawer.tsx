@@ -90,7 +90,7 @@ export const TicketDetailDrawer: React.FC<TicketDetailDrawerProps> = ({
 
       {/* Slide-over panel */}
       <div className="fixed inset-y-0 right-0 max-w-full flex pl-10">
-        <div className="w-screen max-w-2xl bg-surface border-l border-surface-border shadow-2xl flex flex-col h-full">
+        <div className="w-screen max-w-2xl bg-surface border-l border-surface-border shadow-2xl flex flex-col h-full rounded-l-3xl overflow-hidden">
           
           {/* Header */}
           <div className="p-6 border-b border-surface-border flex items-start justify-between bg-surface-elevated/40">
