@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Ticket } from '../../types/ticket';
 import { 
   CheckCircle2, 
@@ -76,9 +76,9 @@ export const KPICards: React.FC<KPICardsProps> = ({ tickets }) => {
 
       let heightPct = 10;
       if (count > 0) {
-        heightPct = Math.min(95, Math.max(25, Math.round((count / maxCount) * 85 + 10)));
+        heightPct = Math.min(85, Math.max(22, Math.round((count / maxCount) * 75 + 10)));
       } else if (isToday) {
-        heightPct = 18;
+        heightPct = 16;
       }
 
       return {
@@ -94,6 +94,16 @@ export const KPICards: React.FC<KPICardsProps> = ({ tickets }) => {
   }, [tickets, currentYear, currentMonth, daysInCurrentMonth, currentDay]);
 
   const todayCount = dailyData[currentDay - 1]?.count || 0;
+  const [hoveredDay, setHoveredDay] = useState<typeof dailyData[0] | null>(null);
+  const activeViewDay = hoveredDay || dailyData[currentDay - 1] || {
+    day: currentDay,
+    count: 0,
+    inProgress: 0,
+    resolved: 0,
+    isToday: true,
+    isFuture: false,
+    heightPct: 16,
+  };
 
   return (
     <div className="bg-surface border border-surface-border rounded-3xl p-5 sm:p-8 shadow-sm space-y-6">
@@ -166,7 +176,7 @@ export const KPICards: React.FC<KPICardsProps> = ({ tickets }) => {
 
       </div>
 
-      {/* Dynamic Daily Intake Activity Histogram (Matching User Request) */}
+      {/* Dynamic Daily Intake Activity Histogram */}
       <div className="pt-5 border-t border-surface-border space-y-3">
         
         {/* Chart Title & Live IST Legend */}
@@ -188,19 +198,50 @@ export const KPICards: React.FC<KPICardsProps> = ({ tickets }) => {
           </div>
         </div>
 
-        {/* Dynamic Histogram Bars Container (Full Responsive with Smooth Horizontal Scroll on Mobile) */}
+        {/* Interactive Live Date Activity Banner (Clear, unclipped inspection card) */}
+        <div className="p-3.5 rounded-2xl bg-slate-50/90 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/60 flex flex-wrap items-center justify-between gap-2.5 text-xs transition-colors shadow-2xs">
+          <div className="flex items-center gap-2">
+            <span className={cn('w-2.5 h-2.5 rounded-full', activeViewDay.isToday ? 'bg-blue-600 animate-pulse' : 'bg-slate-400')} />
+            <span className="font-extrabold text-slate-900 dark:text-white">
+              {activeViewDay.day} {currentMonthName} {currentYear}
+            </span>
+            {activeViewDay.isToday && (
+              <span className="px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 font-mono text-[10px] font-extrabold border border-blue-200 dark:border-blue-800">
+                TODAY
+              </span>
+            )}
+          </div>
+
+          <div className="flex items-center gap-3 text-xs font-semibold">
+            <span className="text-slate-600 dark:text-slate-300">
+              Total Queries: <strong className="text-blue-600 dark:text-blue-400 font-mono text-sm">{activeViewDay.count}</strong>
+            </span>
+            {activeViewDay.count > 0 && (
+              <span className="text-slate-500 dark:text-slate-400 text-[11px]">
+                ({activeViewDay.inProgress} In Progress • {activeViewDay.resolved} Resolved)
+              </span>
+            )}
+            <span className="text-[10px] text-slate-400 hidden sm:inline">
+              {hoveredDay ? '(Inspecting date)' : '(Hover on any day below to inspect)'}
+            </span>
+          </div>
+        </div>
+
+        {/* Dynamic Histogram Bars Container with Generous Headroom (ZERO Clipping) */}
         <div className="overflow-x-auto pb-2 -mx-2 sm:mx-0 px-2 sm:px-0">
-          <div className="h-32 sm:h-36 min-w-[620px] flex items-end justify-between gap-1 sm:gap-1.5 pt-6 pb-2 px-1">
+          <div className="h-44 sm:h-48 min-w-[640px] flex items-end justify-between gap-1 sm:gap-1.5 pt-16 pb-2 px-1">
             {dailyData.map(dayItem => {
               const { day, count, isToday, isFuture, heightPct } = dayItem;
 
               return (
                 <div 
                   key={day} 
+                  onMouseEnter={() => setHoveredDay(dayItem)}
+                  onMouseLeave={() => setHoveredDay(null)}
                   className="flex-1 flex flex-col items-center justify-end h-full group relative cursor-pointer select-none"
                 >
-                  {/* Floating Smooth Hover Tooltip */}
-                  <div className="absolute bottom-full mb-2 opacity-0 group-hover:opacity-100 transition-all duration-150 pointer-events-none z-30 scale-95 group-hover:scale-100 flex flex-col items-center">
+                  {/* Floating Smooth Hover Tooltip (Positioned in Headroom: Never Clipped) */}
+                  <div className="absolute top-2 opacity-0 group-hover:opacity-100 transition-all duration-150 pointer-events-none z-30 scale-95 group-hover:scale-100 flex flex-col items-center">
                     <div className="px-2.5 py-1.5 rounded-xl bg-slate-900/95 dark:bg-slate-800/95 backdrop-blur-md text-white text-[11px] font-bold shadow-xl border border-slate-700 whitespace-nowrap text-center">
                       <div className="flex items-center gap-1.5 justify-center">
                         <span>{day} {currentMonthName}</span>
