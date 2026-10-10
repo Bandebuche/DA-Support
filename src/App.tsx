@@ -502,9 +502,9 @@ function AppContent() {
         />
 
         {/* Main Command Center Deck */}
-        <div className="flex-1 flex flex-col min-w-0 h-[100dvh] lg:h-[calc(100vh-2rem)] overflow-y-auto bg-white dark:bg-slate-900">
+        <div className="flex-1 flex flex-col min-w-0 h-[100dvh] lg:h-[calc(100vh-2rem)] overflow-hidden bg-white dark:bg-slate-900 relative">
           
-          {/* Top Command Bar */}
+          {/* Sticky Top Command Bar */}
           <TopCommandBar
             title={
               currentTab === 'overview'
@@ -528,8 +528,11 @@ function AppContent() {
             onOpenMobileNav={() => setIsMobileNavOpen(true)}
           />
 
-        {/* Global Page Directory Trigger */}
-        <div className="px-6 pt-3 flex items-center justify-between">
+          {/* Scrollable Content Container (Below Sticky Header) */}
+          <div className="flex-1 overflow-y-auto min-h-0 flex flex-col">
+
+            {/* Global Page Directory Trigger */}
+            <div className="px-4 sm:px-6 pt-3 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-2">
             <button
               onClick={() => setIsLinksModalOpen(true)}
@@ -551,7 +554,7 @@ function AppContent() {
         </div>
 
         {/* Deck Content Canvas */}
-        <main className="flex-1 p-6 space-y-6 max-w-7xl w-full mx-auto">
+        <main className="flex-1 p-3.5 sm:p-6 space-y-6 max-w-7xl w-full mx-auto pb-12">
           
           {/* Top 4 KPI Summary Modules (Overview or All) */}
           {currentTab !== 'analytics' && (
@@ -609,8 +612,8 @@ function AppContent() {
           )}
 
         </main>
-
-      </div>
+          </div>
+        </div>
 
       {/* Slide-over Detail Drawer */}
       <TicketDetailDrawer

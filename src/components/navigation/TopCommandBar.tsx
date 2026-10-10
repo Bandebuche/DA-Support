@@ -69,8 +69,8 @@ export const TopCommandBar: React.FC<TopCommandBarProps> = ({
   }, []);
 
   return (
-    <header className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-100 dark:border-slate-800/80 px-6 sm:px-8 py-4 select-none transition-colors">
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+    <header className="sticky top-0 z-30 shrink-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-100 dark:border-slate-800/80 px-4 sm:px-8 py-3.5 select-none transition-colors">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 sm:gap-4">
         
         {/* Left: Section Title & Count Subtitle (Matching Reference Screenshot) */}
         <div className="flex items-center gap-3">
@@ -86,7 +86,7 @@ export const TopCommandBar: React.FC<TopCommandBarProps> = ({
           )}
 
           <div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight">
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight">
               {title}
             </h1>
             <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">
@@ -96,10 +96,10 @@ export const TopCommandBar: React.FC<TopCommandBarProps> = ({
         </div>
 
         {/* Right Controls: Search, View Switcher, Notification, Theme, User Chip */}
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
           
           {/* Search Input Bar (Sleek rounded input) */}
-          <div className="relative min-w-[220px] sm:min-w-[280px]">
+          <div className="relative flex-1 sm:flex-initial min-w-[170px] sm:min-w-[280px]">
             <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
               ref={searchInputRef}

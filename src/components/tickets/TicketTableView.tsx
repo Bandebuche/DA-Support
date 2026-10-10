@@ -22,6 +22,7 @@ import {
   User
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
+import { DeleteConfirmModal } from '../modals/DeleteConfirmModal';
 
 interface TicketTableViewProps {
   tickets: Ticket[];
@@ -96,30 +97,65 @@ export const TicketTableView: React.FC<TicketTableViewProps> = ({
     setSelectedIds(next);
   };
 
+  const [deleteModal, setDeleteModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    description: string;
+    confirmLabel?: string;
+    cancelLabel?: string;
+    onConfirm: () => void;
+  }>({
+    isOpen: false,
+    title: '',
+    description: '',
+    onConfirm: () => {},
+  });
+
   const handleDeleteSelected = () => {
     if (selectedIds.size === 0) return;
     const count = selectedIds.size;
-    if (window.confirm(`Are you sure you want to delete ${count} selected ticket(s)? This action cannot be undone.`)) {
-      onDeleteTickets?.(Array.from(selectedIds));
-      setSelectedIds(new Set());
-    }
+    setDeleteModal({
+      isOpen: true,
+      title: `Delete ${count} Selected Ticket${count > 1 ? 's' : ''}?`,
+      description: `Do you want to permanently delete ${count} ticket(s) from the operations dashboard and storage? Or keep them saved in your records?`,
+      confirmLabel: `Delete ${count} Ticket${count > 1 ? 's' : ''}`,
+      cancelLabel: 'Keep Saved / Cancel',
+      onConfirm: () => {
+        onDeleteTickets?.(Array.from(selectedIds));
+        setSelectedIds(new Set());
+      },
+    });
   };
 
   const handleResetAll = () => {
-    if (window.confirm('⚠️ WARNING: Are you sure you want to RESET and DELETE ALL tickets? All logged records will be permanently erased.')) {
-      onResetAllTickets?.();
-      setSelectedIds(new Set());
-    }
+    setDeleteModal({
+      isOpen: true,
+      title: 'Reset & Delete ALL Tickets?',
+      description: '⚠️ Are you sure you want to permanently erase and delete ALL tickets from the operations dashboard and storage? All ticket history, stopwatch sessions, and notes will be permanently cleared.',
+      confirmLabel: 'Permanently Erase All',
+      cancelLabel: 'Keep All / Cancel',
+      onConfirm: () => {
+        onResetAllTickets?.();
+        setSelectedIds(new Set());
+      },
+    });
   };
 
   const handleSingleDelete = (ticketId: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    if (window.confirm(`Delete ticket ${ticketId}?`)) {
-      onDeleteTicket?.(ticketId);
-      const next = new Set(selectedIds);
-      next.delete(ticketId);
-      setSelectedIds(next);
-    }
+    setDeleteModal({
+      isOpen: true,
+      title: `Delete Ticket ${ticketId}?`,
+      description: `Do you want to permanently delete ticket ${ticketId}? All active logs and stopwatch timers for this ticket will be removed from your dashboard and local cloud records.`,
+      confirmLabel: 'Permanently Delete',
+      cancelLabel: 'Keep Ticket / Cancel',
+      onConfirm: () => {
+        onDeleteTicket?.(ticketId);
+        const next = new Set(selectedIds);
+        next.delete(ticketId);
+        setSelectedIds(next);
+      },
+    });
   };
 
   // Avatar Initials
@@ -221,8 +257,8 @@ export const TicketTableView: React.FC<TicketTableViewProps> = ({
           </p>
         </div>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-separate border-spacing-y-2">
+        <div className="overflow-x-auto -mx-2 sm:mx-0">
+          <table className="w-full min-w-[860px] text-left border-separate border-spacing-y-2">
             <thead>
               <tr className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider select-none px-4">
                 <th className="py-2.5 px-3 w-10 text-center">
@@ -575,6 +611,17 @@ export const TicketTableView: React.FC<TicketTableViewProps> = ({
         </div>
 
       </div>
+
+      {/* Delete Confirmation Dialog Modal */}
+      <DeleteConfirmModal
+        isOpen={deleteModal.isOpen}
+        onClose={() => setDeleteModal(prev => ({ ...prev, isOpen: false }))}
+        onConfirm={deleteModal.onConfirm}
+        title={deleteModal.title}
+        description={deleteModal.description}
+        confirmLabel={deleteModal.confirmLabel}
+        cancelLabel={deleteModal.cancelLabel}
+      />
 
     </div>
   );

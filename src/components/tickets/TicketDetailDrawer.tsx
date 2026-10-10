@@ -21,6 +21,7 @@ import {
   UserCheck
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
+import { DeleteConfirmModal } from '../modals/DeleteConfirmModal';
 
 interface TicketDetailDrawerProps {
   ticket: Ticket | null;
@@ -49,6 +50,7 @@ export const TicketDetailDrawer: React.FC<TicketDetailDrawerProps> = ({
 }) => {
   const [newNote, setNewNote] = useState('');
   const [isSubmittingNote, setIsSubmittingNote] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   // Close on Escape
   useEffect(() => {
@@ -121,12 +123,8 @@ export const TicketDetailDrawer: React.FC<TicketDetailDrawerProps> = ({
 
               {onDeleteTicket && (
                 <button
-                  onClick={() => {
-                    if (window.confirm(`Delete ticket ${ticket.ticketId}? This action cannot be undone.`)) {
-                      onDeleteTicket(ticket.ticketId);
-                      onClose();
-                    }
-                  }}
+                  type="button"
+                  onClick={() => setIsDeleteModalOpen(true)}
                   className="p-2 rounded-xl bg-surface-elevated hover:bg-red-50 dark:hover:bg-red-950/40 border border-surface-border hover:border-red-200 dark:hover:border-red-800 text-text-muted hover:text-red-600 dark:hover:text-red-400 transition"
                   title="Delete Ticket"
                 >
@@ -457,6 +455,21 @@ export const TicketDetailDrawer: React.FC<TicketDetailDrawerProps> = ({
 
         </div>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      <DeleteConfirmModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={() => {
+          onDeleteTicket?.(ticket.ticketId);
+          setIsDeleteModalOpen(false);
+          onClose();
+        }}
+        title={`Delete Ticket ${ticket.ticketId}?`}
+        description="Do you want to permanently delete this ticket? All stopwatch sessions, internal notes, and audit history will be permanently erased from your operations database and local storage."
+        confirmLabel="Permanently Delete"
+        cancelLabel="Keep Ticket / Cancel"
+      />
     </div>
   );
 };

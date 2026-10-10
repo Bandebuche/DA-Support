@@ -25,16 +25,16 @@ export function loadStoredTickets(): Ticket[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEY_TICKETS);
     if (!raw) {
-      saveStoredTickets(INITIAL_TICKETS);
-      return INITIAL_TICKETS;
+      saveStoredTickets([]);
+      return [];
     }
     const parsed = JSON.parse(raw);
-    if (Array.isArray(parsed) && parsed.length > 0) {
+    if (Array.isArray(parsed)) {
       return parsed;
     }
-    return INITIAL_TICKETS;
+    return [];
   } catch {
-    return INITIAL_TICKETS;
+    return [];
   }
 }
 
