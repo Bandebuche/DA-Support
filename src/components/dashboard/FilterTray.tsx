@@ -114,7 +114,7 @@ export const FilterTray: React.FC<FilterTrayProps> = ({
           >
             <option value="all">All Agents</option>
             <option value="Sachin Sir">Sachin Sir (All Other Ops)</option>
-            <option value="Omkar Kulkarni">Omkar Kulkarni (Meta Only)</option>
+            <option value="Onkar Kulkarni">Onkar Kulkarni (Meta Only)</option>
             <option value="General Support Desk">General Desk</option>
           </select>
         </div>

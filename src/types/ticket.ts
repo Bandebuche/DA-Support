@@ -40,7 +40,7 @@ export interface TicketAuditEvent {
 
 export type SupportSpecialist = 
   | 'Sachin Sir' 
-  | 'Omkar Kulkarni' 
+  | 'Onkar Kulkarni' 
   | 'General Support Desk';
 
 export interface Ticket {

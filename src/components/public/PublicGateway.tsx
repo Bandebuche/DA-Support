@@ -726,8 +726,8 @@ export const PublicGateway: React.FC = () => {
                               initials: 'SS',
                             },
                             {
-                              id: 'Omkar Kulkarni' as SupportSpecialist,
-                              name: 'Omkar Kulkarni',
+                              id: 'Onkar Kulkarni' as SupportSpecialist,
+                              name: 'Onkar Kulkarni',
                               role: 'Meta Related Specialist (Meta Only)',
                               desc: 'Exclusively for Meta Ads, Facebook & Instagram Campaigns, Meta Pixel, Ad Accounts & Meta Webhooks',
                               badge: 'Only Meta Related',

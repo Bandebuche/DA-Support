@@ -228,7 +228,7 @@ export const TicketTableView: React.FC<TicketTableViewProps> = ({
 
                   const specialist = ticket.assignedSpecialist || 'General Support Desk';
                   const isSachin = specialist === 'Sachin Sir';
-                  const isOmkar = specialist === 'Omkar Kulkarni';
+                  const isOnkar = specialist === 'Onkar Kulkarni';
 
                   return (
                     <tr
@@ -349,14 +349,14 @@ export const TicketTableView: React.FC<TicketTableViewProps> = ({
                         </span>
                       </td>
 
-                      {/* Assignee (Sachin Sir / Omkar Kulkarni) */}
+                      {/* Assignee (Sachin Sir / Onkar Kulkarni) */}
                       <td className="py-4 px-4 whitespace-nowrap">
                         <div className="flex items-center gap-2">
                           <div className={cn(
                             'w-6 h-6 rounded-lg flex items-center justify-center font-bold text-[10px] shrink-0 text-white',
-                            isSachin ? 'bg-emerald-600' : isOmkar ? 'bg-indigo-600' : 'bg-slate-600'
+                            isSachin ? 'bg-emerald-600' : isOnkar ? 'bg-indigo-600' : 'bg-slate-600'
                           )}>
-                            {isSachin ? 'SS' : isOmkar ? 'OK' : 'GD'}
+                            {isSachin ? 'SS' : isOnkar ? 'OK' : 'GD'}
                           </div>
                           <div>
                             <span className="font-bold text-xs text-text-pure block leading-tight">
@@ -366,11 +366,11 @@ export const TicketTableView: React.FC<TicketTableViewProps> = ({
                               'text-[10px] font-semibold block',
                               isSachin 
                                 ? 'text-emerald-600 dark:text-emerald-400' 
-                                : isOmkar 
+                                : isOnkar 
                                 ? 'text-indigo-600 dark:text-indigo-400' 
                                 : 'text-text-muted'
                             )}>
-                              {isSachin ? 'All Other Ops' : isOmkar ? 'Meta Related' : 'Triage Desk'}
+                              {isSachin ? 'All Other Ops' : isOnkar ? 'Meta Related' : 'Triage Desk'}
                             </span>
                           </div>
                         </div>
