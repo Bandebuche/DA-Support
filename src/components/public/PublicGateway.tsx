@@ -38,7 +38,15 @@ import {
   Layers,
   ArrowRight,
   Shield,
-  Zap
+  Zap,
+  Home,
+  Headphones,
+  Instagram,
+  Linkedin,
+  Youtube,
+  Facebook,
+  Twitter,
+  ChevronDown
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { BrandLogo } from '../common/BrandLogo';
@@ -62,18 +70,18 @@ const MEMBERSHIP_OPTIONS: { id: MembershipTier; label: string; badge: string; ic
     desc: 'Highest priority SLA with direct engineer review' 
   },
   { 
-    id: 'Gold Member', 
-    label: 'Gold Member', 
-    badge: 'Gold Tier', 
-    icon: '🥇',
-    desc: 'Priority queue with fast technical turnaround' 
-  },
-  { 
     id: 'Silver Member', 
     label: 'Silver Member', 
     badge: 'Silver Tier', 
     icon: '🥈',
     desc: 'Standard technical query and setup assistance' 
+  },
+  { 
+    id: 'Gold Member', 
+    label: 'Gold Member', 
+    badge: 'Gold Tier', 
+    icon: '🥇',
+    desc: 'Priority queue with fast technical turnaround' 
   },
   { 
     id: 'PMP Member', 
@@ -168,7 +176,6 @@ export const PublicGateway: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateForm()) {
-      // Scroll to first error
       const firstErrorKey = Object.keys(errors)[0];
       const element = document.querySelector(`[name="${firstErrorKey}"]`);
       if (element) {
@@ -191,7 +198,7 @@ export const PublicGateway: React.FC = () => {
           particleCount: 100,
           spread: 80,
           origin: { y: 0.6 },
-          colors: ['#6366F1', '#10B981', '#F59E0B', '#8B5CF6'],
+          colors: ['#6366F1', '#EC4899', '#8B5CF6', '#10B981'],
         });
       } catch {
         // Safe fallback
@@ -278,184 +285,265 @@ export const PublicGateway: React.FC = () => {
           setTrackError(`No record found for Ticket ID "${cleanId}". Please verify your ticket ID or raise a new support query.`);
         }
       }
+    } catch (err: any) {
+      setTrackError('Error checking records: ' + err.message);
     } finally {
       setIsSearchingTrack(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-void text-text-pure flex flex-col selection:bg-indigo-600 selection:text-white transition-colors duration-200">
+    <div className="min-h-screen bg-[#0A0D1B] text-slate-100 flex flex-col justify-between selection:bg-pink-500 selection:text-white relative overflow-hidden font-sans">
       
-      {/* Top Navigation Bar */}
-      <header className="h-20 sm:h-22 border-b border-surface-border bg-surface/95 backdrop-blur-md sticky top-0 z-40 px-4 sm:px-8 flex items-center justify-between shadow-xs">
-        
-        {/* Brand: Official Digital Azadi Logo & Title */}
-        <div className="flex items-center gap-3.5 sm:gap-4">
+      {/* Ambient Cosmic Glow Backdrops */}
+      <div className="absolute -top-40 left-1/4 w-[600px] h-[600px] bg-indigo-600/15 rounded-full blur-[140px] pointer-events-none" />
+      <div className="absolute top-1/3 -right-40 w-[550px] h-[550px] bg-purple-600/15 rounded-full blur-[140px] pointer-events-none" />
+      <div className="absolute -bottom-40 left-1/3 w-[650px] h-[650px] bg-pink-600/10 rounded-full blur-[160px] pointer-events-none" />
+
+      {/* Sleek Top Navigation Header */}
+      <header className="relative z-20 w-full max-w-7xl mx-auto px-4 sm:px-6 pt-5 pb-3 flex items-center justify-between">
+        {/* Brand Identity */}
+        <div className="flex items-center gap-3">
           <BrandLogo size="md" showBadge={false} />
-          <div className="hidden sm:block">
-            <span className="text-base sm:text-lg font-bold text-text-pure tracking-tight block leading-tight">
-              Digital Azadi Support
-            </span>
-            <p className="text-xs text-text-muted font-medium">
-              Student & Franchise Resolution Center
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="font-extrabold text-base sm:text-lg tracking-tight text-white">
+                Digital Azadi Support
+              </span>
+              <span className="hidden sm:inline-block px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase bg-gradient-to-r from-purple-500/20 to-pink-500/20 text-purple-300 border border-purple-500/30">
+                Official Helpdesk
+              </span>
+            </div>
+            <p className="text-[11px] text-slate-400 font-medium hidden sm:block">
+              Student & Franchise Resolution Center • Live in IST
             </p>
           </div>
         </div>
 
-        {/* Right: Theme Toggle & Live IST Clock */}
+        {/* Center/Right Nav Controls */}
         <div className="flex items-center gap-3">
-          <ThemeToggle showLabel />
-          <div className="hidden xs:flex items-center gap-2 px-3.5 py-2 rounded-xl bg-surface-elevated border border-surface-border text-xs shadow-xs font-medium">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <Clock className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
-            <span className="font-bold text-text-pure font-mono text-xs">{istTime}</span>
-            <span className="text-[11px] text-text-muted font-semibold uppercase">IST</span>
+          
+          {/* Live IST Clock */}
+          <div className="hidden sm:flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.05] border border-white/10 backdrop-blur-md text-xs font-mono shadow-inner">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="text-white font-bold">{istTime}</span>
+            <span className="text-[10px] text-slate-400 uppercase font-semibold">IST</span>
           </div>
-        </div>
 
+          {/* Admin Login Link */}
+          <a
+            href="/admin"
+            className="px-4 py-1.5 rounded-full bg-white/[0.07] hover:bg-white/[0.12] border border-white/15 text-xs font-semibold text-slate-200 hover:text-white transition-all backdrop-blur-md shadow-xs flex items-center gap-1.5"
+          >
+            <ShieldCheck className="w-3.5 h-3.5 text-purple-400" />
+            <span>Admin Login</span>
+          </a>
+        </div>
       </header>
 
-      {/* Main Content Canvas */}
-      <main className="flex-1 max-w-4xl w-full mx-auto px-4 sm:px-6 py-8 sm:py-12">
+      {/* Main Master Card Shell (Exact Floating Container from Image) */}
+      <main className="relative z-10 flex-1 w-full max-w-6xl mx-auto px-4 sm:px-6 py-4 sm:py-6 flex flex-col justify-center">
         
-        {/* Portal Navigation Pills (Submit vs Track) */}
-        {!createdTicket && (
-          <div className="flex justify-center mb-8 sm:mb-10">
-            <div className="inline-flex p-1.5 rounded-2xl bg-surface border border-surface-border shadow-sm">
+        {/* Rounded Glassmorphic Master Window Container */}
+        <div className="w-full bg-[#11142A]/85 backdrop-blur-2xl border border-white/10 rounded-[32px] sm:rounded-[42px] p-5 sm:p-9 lg:p-11 shadow-[0_25px_80px_rgba(0,0,0,0.75)] relative overflow-hidden">
+          
+          {/* Subtle Top Glowing Flare Bar */}
+          <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-purple-400/70 to-transparent shadow-[0_0_15px_#C084FC]" />
+
+          {/* Tab Switcher Pills (Raise Support Query vs Track Your Ticket) */}
+          <div className="flex justify-center mb-8">
+            <div className="inline-flex p-1 rounded-full bg-white/[0.05] border border-white/10 backdrop-blur-md shadow-inner">
               <button
                 type="button"
                 onClick={() => { setActiveTab('submit'); setTrackError(null); }}
                 className={cn(
-                  'px-5 sm:px-7 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 sm:gap-2.5 transition-all duration-150',
+                  'px-6 py-2.5 rounded-full text-xs sm:text-sm font-bold transition-all duration-200 flex items-center gap-2',
                   activeTab === 'submit'
-                    ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20'
-                    : 'text-text-soft hover:text-text-pure hover:bg-surface-elevated'
+                    ? 'bg-gradient-to-r from-[#5B4DF6] to-[#A855F7] text-white shadow-lg shadow-purple-500/25'
+                    : 'text-slate-400 hover:text-white hover:bg-white/[0.05]'
                 )}
               >
-                <HelpCircle className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
-                <span>Raise Support Query</span>
+                <HelpCircle className="w-4 h-4" />
+                <span>Raise a Support Query</span>
               </button>
               
               <button
                 type="button"
                 onClick={() => { setActiveTab('track'); setTrackError(null); }}
                 className={cn(
-                  'px-5 sm:px-7 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 sm:gap-2.5 transition-all duration-150',
+                  'px-6 py-2.5 rounded-full text-xs sm:text-sm font-bold transition-all duration-200 flex items-center gap-2',
                   activeTab === 'track'
-                    ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20'
-                    : 'text-text-soft hover:text-text-pure hover:bg-surface-elevated'
+                    ? 'bg-gradient-to-r from-[#5B4DF6] to-[#A855F7] text-white shadow-lg shadow-purple-500/25'
+                    : 'text-slate-400 hover:text-white hover:bg-white/[0.05]'
                 )}
               >
-                <Search className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
+                <Search className="w-4 h-4" />
                 <span>Track Your Ticket</span>
               </button>
             </div>
           </div>
-        )}
 
-        {/* TAB 1: RAISE SUPPORT QUERY FORM */}
-        {activeTab === 'submit' && (
-          <>
-            {!createdTicket ? (
-              <div className="space-y-8 animate-in fade-in duration-200">
-                
-                {/* Hero Headline & Purpose */}
-                <div className="text-center space-y-3 max-w-2xl mx-auto">
-                  <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-surface-elevated border border-surface-border text-xs text-text-muted shadow-xs">
-                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                    <span className="text-text-pure font-bold">Priority Operations Desk</span>
-                    <span>•</span>
-                    <span className="text-indigo-600 dark:text-indigo-400 font-semibold">Live Support in IST</span>
-                  </div>
-
-                  <h1 className="text-3xl sm:text-4xl font-extrabold text-text-pure tracking-tight leading-tight">
-                    Raise a Support Query
-                  </h1>
-                  
-                  <p className="text-sm sm:text-base text-text-muted leading-relaxed">
-                    Have a technical question or issue with your LMS, Chakravyuh CRM, or WordPress setup? Fill out the form below and our technical engineers will resolve your query on priority.
-                  </p>
+          {/* ============================================================== */}
+          {/* TAB 1: RAISE SUPPORT QUERY (DUAL GLASS CARDS FROM SCREENSHOT) */}
+          {/* ============================================================== */}
+          {activeTab === 'submit' && !createdTicket && (
+            <div>
+              
+              {/* Section Headers as in Screenshot */}
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 mb-3">
+                <div className="lg:col-span-5 text-center">
+                  <span className="text-xs font-semibold text-slate-400 uppercase tracking-widest block">
+                    Contact Info Section
+                  </span>
                 </div>
+                <div className="lg:col-span-7 text-center">
+                  <span className="text-xs font-semibold text-slate-400 uppercase tracking-widest block">
+                    Contact Form
+                  </span>
+                </div>
+              </div>
 
-                {/* Main Form Container Card */}
-                <form 
-                  onSubmit={handleSubmit} 
-                  noValidate
-                  className="bg-surface border border-surface-border rounded-3xl p-6 sm:p-10 shadow-xl space-y-8 relative overflow-hidden"
-                >
+              {/* Dual Glass Cards Grid */}
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-stretch">
+                
+                {/* -------------------------------------------------------- */}
+                {/* LEFT CARD: Contact Info Section (from Screenshot) */}
+                {/* -------------------------------------------------------- */}
+                <div className="lg:col-span-5 relative rounded-3xl bg-gradient-to-br from-white/[0.07] to-white/[0.02] backdrop-blur-xl border border-white/15 p-6 sm:p-8 flex flex-col justify-between overflow-hidden shadow-2xl shadow-black/40">
                   
-                  {/* Subtle top ambient accent line */}
-                  <div className="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-600" />
+                  {/* Glowing Corner Light Flare Reflections */}
+                  <div className="absolute -top-12 -right-12 w-44 h-44 bg-purple-500/25 rounded-full blur-2xl pointer-events-none" />
+                  <div className="absolute -bottom-12 -left-12 w-44 h-44 bg-blue-500/20 rounded-full blur-2xl pointer-events-none" />
+                  <div className="absolute inset-0 rounded-3xl pointer-events-none border border-white/15 shadow-[inset_0_1px_1px_rgba(255,255,255,0.25)]" />
 
-                  {/* ============================================================== */}
-                  {/* SECTION 1: Personal & Contact Information */}
-                  {/* ============================================================== */}
-                  <div className="space-y-6">
-                    
-                    <div className="flex items-center gap-3.5 pb-3 border-b border-surface-border">
-                      <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800 flex items-center justify-center text-indigo-600 dark:text-indigo-400 font-bold shrink-0 shadow-xs">
-                        <User className="w-5 h-5" />
+                  <div className="relative z-10 space-y-6">
+                    {/* Hero Heading */}
+                    <div>
+                      <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight leading-tight">
+                        Get in Touch
+                      </h2>
+                      <p className="text-slate-300 text-sm sm:text-base leading-relaxed mt-3">
+                        We're here to assist you with your learning, technical issues, and mentorship queries with priority turnaround.
+                      </p>
+                    </div>
+
+                    {/* Contact Details List (Exact Icons & Layout from Screenshot) */}
+                    <div className="space-y-4 pt-2">
+                      
+                      {/* Email */}
+                      <div className="flex items-center gap-3.5 group">
+                        <div className="w-10 h-10 rounded-xl bg-white/[0.07] border border-white/15 flex items-center justify-center text-purple-300 group-hover:bg-purple-500/20 group-hover:border-purple-500/40 transition-all shrink-0">
+                          <Mail className="w-4.5 h-4.5" />
+                        </div>
+                        <div>
+                          <span className="text-[11px] text-slate-400 block font-medium">Support Email</span>
+                          <a href="mailto:support@digitalazadi.com" className="text-sm font-semibold text-white hover:text-purple-300 transition-colors">
+                            support@digitalazadi.com
+                          </a>
+                        </div>
                       </div>
-                      <div>
-                        <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white tracking-tight leading-snug">
-                          1. Your Contact Information
-                        </h2>
-                        <p className="text-sm text-slate-600 dark:text-slate-400 font-normal">
-                          Provide your registered name, WhatsApp number, Gmail, and city for priority resolution.
-                        </p>
+
+                      {/* Location */}
+                      <div className="flex items-center gap-3.5 group">
+                        <div className="w-10 h-10 rounded-xl bg-white/[0.07] border border-white/15 flex items-center justify-center text-purple-300 group-hover:bg-purple-500/20 group-hover:border-purple-500/40 transition-all shrink-0">
+                          <Home className="w-4.5 h-4.5" />
+                        </div>
+                        <div>
+                          <span className="text-[11px] text-slate-400 block font-medium">Campus & Headquarters</span>
+                          <span className="text-sm font-semibold text-white">
+                            Digital Azadi Campus, Sector 14, Pune, India
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Phone / WhatsApp */}
+                      <div className="flex items-center gap-3.5 group">
+                        <div className="w-10 h-10 rounded-xl bg-white/[0.07] border border-white/15 flex items-center justify-center text-purple-300 group-hover:bg-purple-500/20 group-hover:border-purple-500/40 transition-all shrink-0">
+                          <Phone className="w-4.5 h-4.5" />
+                        </div>
+                        <div>
+                          <span className="text-[11px] text-slate-400 block font-medium">Official Helpline & WhatsApp</span>
+                          <a href="tel:+919370872911" className="text-sm font-semibold text-white hover:text-purple-300 transition-colors">
+                            +91 93708 72911
+                          </a>
+                        </div>
+                      </div>
+
+                    </div>
+
+                    {/* Operational Specialist Routing Notice */}
+                    <div className="p-4 rounded-2xl bg-white/[0.04] border border-white/10 space-y-2 mt-4">
+                      <span className="text-xs font-bold text-purple-300 uppercase tracking-wider block">
+                        Specialist Routing System
+                      </span>
+                      <div className="text-xs text-slate-300 space-y-1.5 font-medium">
+                        <div className="flex items-center justify-between">
+                          <span>• <strong>Onkar Kulkarni</strong>:</span>
+                          <span className="text-purple-300 font-semibold text-[11px]">Meta Only</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span>• <strong>Sachin Sir</strong>:</span>
+                          <span className="text-emerald-300 font-semibold text-[11px]">All Other Operations</span>
+                        </div>
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-6">
-                      
-                      {/* Full Name */}
+                  </div>
+
+                  {/* Left Card Bottom Live SLA Badge */}
+                  <div className="relative z-10 pt-6 mt-6 border-t border-white/10 flex items-center justify-between text-xs text-slate-400">
+                    <span className="flex items-center gap-1.5 text-emerald-400 font-semibold">
+                      <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+                      Live IST Desk
+                    </span>
+                    <span>Average SLA: &lt; 30 Mins</span>
+                  </div>
+
+                </div>
+
+                {/* -------------------------------------------------------- */}
+                {/* RIGHT CARD: Contact Form (from Screenshot) */}
+                {/* -------------------------------------------------------- */}
+                <form 
+                  onSubmit={handleSubmit}
+                  noValidate
+                  className="lg:col-span-7 relative rounded-3xl bg-gradient-to-br from-white/[0.07] to-white/[0.02] backdrop-blur-xl border border-white/15 p-6 sm:p-8 flex flex-col justify-between overflow-hidden shadow-2xl shadow-black/40"
+                >
+                  {/* Glowing Corner Light Flare */}
+                  <div className="absolute -top-12 -right-12 w-44 h-44 bg-purple-500/25 rounded-full blur-2xl pointer-events-none" />
+                  <div className="absolute inset-0 rounded-3xl pointer-events-none border border-white/15 shadow-[inset_0_1px_1px_rgba(255,255,255,0.25)]" />
+
+                  <div className="relative z-10 space-y-4">
+                    
+                    {/* Row 1: Full Name & WhatsApp Number */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {/* Name */}
                       <div>
-                        <label className="block text-sm sm:text-base font-semibold text-slate-900 dark:text-slate-100 mb-2">
-                          Full Name <span className="text-red-500">*</span>
-                        </label>
                         <div className="relative">
-                          <User className="w-5 h-5 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none" />
                           <input
                             type="text"
                             name="fullName"
                             required
                             value={formData.fullName}
                             onChange={e => setFormData({ ...formData, fullName: e.target.value })}
-                            placeholder="e.g. Ramesh Kulkarni"
+                            placeholder="Your Name*"
                             className={cn(
-                              'w-full h-13 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-xl border pl-12 pr-4 text-base font-medium',
-                              'transition-all duration-150 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 shadow-xs',
+                              'w-full h-12 rounded-2xl bg-[#262A4D]/80 border text-white placeholder-slate-400 px-4 text-sm font-medium transition-all shadow-inner',
+                              'focus:outline-none focus:ring-2 focus:border-purple-400 focus:bg-[#2C315B]',
                               errors.fullName 
-                                ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20' 
-                                : 'border-slate-300 dark:border-slate-700 focus:border-indigo-600 focus:ring-indigo-600/20'
+                                ? 'border-red-500 focus:ring-red-500/30' 
+                                : 'border-white/15 focus:ring-purple-500/25'
                             )}
                           />
                         </div>
                         {errors.fullName && (
-                          <p className="text-xs sm:text-sm text-red-600 dark:text-red-400 mt-1.5 font-medium flex items-center gap-1">
-                            <AlertCircle className="w-4 h-4 shrink-0" />
-                            <span>{errors.fullName}</span>
-                          </p>
+                          <p className="text-[11px] text-red-400 mt-1 font-medium">{errors.fullName}</p>
                         )}
                       </div>
 
-                      {/* Contact Number (WhatsApp) */}
+                      {/* WhatsApp Mobile */}
                       <div>
-                        <div className="flex items-center justify-between mb-2">
-                          <label className="text-sm sm:text-base font-semibold text-slate-900 dark:text-slate-100">
-                            Contact Number (WhatsApp) <span className="text-red-500">*</span>
-                          </label>
-                          {isMobileValid && (
-                            <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 px-2 py-0.5 rounded-md border border-emerald-300 dark:border-emerald-800">
-                              <Check className="w-3.5 h-3.5" />
-                              <span>Valid Mobile</span>
-                            </span>
-                          )}
-                        </div>
                         <div className="relative">
-                          <span className="text-sm sm:text-base text-slate-600 dark:text-slate-400 absolute left-4 top-1/2 -translate-y-1/2 font-bold font-mono pointer-events-none select-none">
-                            🇮🇳 +91
-                          </span>
                           <input
                             type="tel"
                             name="mobile"
@@ -463,512 +551,259 @@ export const PublicGateway: React.FC = () => {
                             maxLength={10}
                             value={formData.mobile}
                             onChange={e => setFormData({ ...formData, mobile: e.target.value.replace(/\D/g, '') })}
-                            placeholder="9823012345"
+                            placeholder="WhatsApp Number (10 Digits)*"
                             className={cn(
-                              'w-full h-13 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-xl border pl-20 pr-4 text-base font-mono font-medium',
-                              'transition-all duration-150 focus:outline-none focus:ring-2 shadow-xs',
+                              'w-full h-12 rounded-2xl bg-[#262A4D]/80 border text-white font-mono placeholder:font-sans placeholder-slate-400 px-4 text-sm font-medium transition-all shadow-inner',
+                              'focus:outline-none focus:ring-2 focus:border-purple-400 focus:bg-[#2C315B]',
                               errors.mobile 
-                                ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20' 
+                                ? 'border-red-500 focus:ring-red-500/30' 
                                 : isMobileValid
-                                ? 'border-emerald-500 focus:border-emerald-500 focus:ring-emerald-500/20'
-                                : 'border-slate-300 dark:border-slate-700 focus:border-indigo-600 focus:ring-indigo-600/20'
+                                ? 'border-emerald-500/70 focus:ring-emerald-500/25'
+                                : 'border-white/15 focus:ring-purple-500/25'
                             )}
                           />
-                        </div>
-                        {errors.mobile ? (
-                          <p className="text-xs sm:text-sm text-red-600 dark:text-red-400 mt-1.5 font-medium flex items-center gap-1">
-                            <AlertCircle className="w-4 h-4 shrink-0" />
-                            <span>{errors.mobile}</span>
-                          </p>
-                        ) : (
-                          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1.5 font-normal">
-                            Direct updates and WhatsApp resolution will be sent to this number.
-                          </p>
-                        )}
-                      </div>
-
-                      {/* Email Address (Gmail) */}
-                      <div>
-                        <div className="flex items-center justify-between mb-2">
-                          <label className="text-sm sm:text-base font-semibold text-slate-900 dark:text-slate-100">
-                            Email Address (Gmail) <span className="text-red-500">*</span>
-                          </label>
-                          {isGmail && (
-                            <span className="text-xs font-semibold text-indigo-700 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/50 px-2 py-0.5 rounded-md border border-indigo-200 dark:border-indigo-800">
-                              Gmail Verified
-                            </span>
+                          {isMobileValid && (
+                            <Check className="w-4 h-4 text-emerald-400 absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none" />
                           )}
                         </div>
+                        {errors.mobile && (
+                          <p className="text-[11px] text-red-400 mt-1 font-medium">{errors.mobile}</p>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Row 2: Email Address & City */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {/* Email */}
+                      <div>
                         <div className="relative">
-                          <Mail className="w-5 h-5 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none" />
                           <input
                             type="email"
                             name="email"
                             required
                             value={formData.email}
                             onChange={e => setFormData({ ...formData, email: e.target.value })}
-                            placeholder="yourname@gmail.com"
+                            placeholder="Email Address (Gmail)*"
                             className={cn(
-                              'w-full h-13 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-xl border pl-12 pr-4 text-base font-medium',
-                              'transition-all duration-150 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 shadow-xs',
+                              'w-full h-12 rounded-2xl bg-[#262A4D]/80 border text-white placeholder-slate-400 px-4 pr-10 text-sm font-medium transition-all shadow-inner',
+                              'focus:outline-none focus:ring-2 focus:border-purple-400 focus:bg-[#2C315B]',
                               errors.email 
-                                ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20' 
-                                : 'border-slate-300 dark:border-slate-700 focus:border-indigo-600 focus:ring-indigo-600/20'
+                                ? 'border-red-500 focus:ring-red-500/30' 
+                                : 'border-white/15 focus:ring-purple-500/25'
                             )}
                           />
+                          <Mail className="w-4 h-4 text-slate-400 absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none" />
                         </div>
-                        {errors.email ? (
-                          <p className="text-xs sm:text-sm text-red-600 dark:text-red-400 mt-1.5 font-medium flex items-center gap-1">
-                            <AlertCircle className="w-4 h-4 shrink-0" />
-                            <span>{errors.email}</span>
-                          </p>
-                        ) : (
-                          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1.5 font-normal">
-                            Used for email receipts and Google Meet screen share requests.
-                          </p>
+                        {errors.email && (
+                          <p className="text-[11px] text-red-400 mt-1 font-medium">{errors.email}</p>
                         )}
                       </div>
 
                       {/* City */}
                       <div>
-                        <label className="block text-sm sm:text-base font-semibold text-slate-900 dark:text-slate-100 mb-2">
-                          City <span className="text-red-500">*</span>
-                        </label>
                         <div className="relative">
-                          <MapPin className="w-5 h-5 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none" />
                           <input
                             type="text"
                             name="city"
                             required
                             value={formData.city}
                             onChange={e => setFormData({ ...formData, city: e.target.value })}
-                            placeholder="e.g. Pune, Mumbai, Delhi, Nagpur"
+                            placeholder="Your City* (e.g. Pune, Mumbai)"
                             className={cn(
-                              'w-full h-13 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-xl border pl-12 pr-4 text-base font-medium',
-                              'transition-all duration-150 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 shadow-xs',
+                              'w-full h-12 rounded-2xl bg-[#262A4D]/80 border text-white placeholder-slate-400 px-4 text-sm font-medium transition-all shadow-inner',
+                              'focus:outline-none focus:ring-2 focus:border-purple-400 focus:bg-[#2C315B]',
                               errors.city 
-                                ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20' 
-                                : 'border-slate-300 dark:border-slate-700 focus:border-indigo-600 focus:ring-indigo-600/20'
+                                ? 'border-red-500 focus:ring-red-500/30' 
+                                : 'border-white/15 focus:ring-purple-500/25'
                             )}
                           />
                         </div>
                         {errors.city && (
-                          <p className="text-xs sm:text-sm text-red-600 dark:text-red-400 mt-1.5 font-medium flex items-center gap-1">
-                            <AlertCircle className="w-4 h-4 shrink-0" />
-                            <span>{errors.city}</span>
-                          </p>
+                          <p className="text-[11px] text-red-400 mt-1 font-medium">{errors.city}</p>
                         )}
                       </div>
-
                     </div>
 
-                  </div>
-
-                  {/* ============================================================== */}
-                  {/* SECTION 2: Membership Tier & Category */}
-                  {/* ============================================================== */}
-                  <div className="space-y-6 pt-3">
-                    
-                    <div className="flex items-center gap-3.5 pb-3 border-b border-surface-border">
-                      <div className="w-10 h-10 rounded-xl bg-purple-50 dark:bg-purple-950/60 border border-purple-200 dark:border-purple-800 flex items-center justify-center text-purple-600 dark:text-purple-400 font-bold shrink-0 shadow-xs">
-                        <Award className="w-5 h-5" />
-                      </div>
-                      <div>
-                        <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white tracking-tight leading-snug">
-                          2. Classification & Membership
-                        </h2>
-                        <p className="text-sm text-slate-600 dark:text-slate-400 font-normal">
-                          Choose your exact membership tier (Diamond, Silver, Gold, or PMP) and category.
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="space-y-6">
-                      
-                      {/* Membership Tier */}
-                      <div>
-                        <div className="flex items-center justify-between mb-2.5">
-                          <label className="text-sm sm:text-base font-semibold text-slate-900 dark:text-slate-100">
-                            Membership Tier <span className="text-red-500">*</span>
-                          </label>
-                          <span className="text-xs text-indigo-600 dark:text-indigo-400 font-bold">
-                            Selected: {formData.membershipTier}
-                          </span>
-                        </div>
-
-                        {/* Dropdown for Accessibility */}
-                        <div className="relative mb-3">
-                          <select
-                            name="membershipTier"
-                            value={formData.membershipTier}
-                            onChange={e => setFormData({ ...formData, membershipTier: e.target.value as MembershipTier })}
-                            className="w-full h-13 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-xl border border-slate-300 dark:border-slate-700 px-4 text-base font-semibold focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/20 focus:outline-none transition cursor-pointer shadow-xs"
-                          >
-                            <option value="Diamond Member">💎 1. Diamond Member</option>
-                            <option value="Silver Member">🥈 2. Silver Member</option>
-                            <option value="Gold Member">🥇 3. Gold Member</option>
-                            <option value="PMP Member">⭐ 4. PMP Member</option>
-                          </select>
-                        </div>
-
-                        {/* Prominent 4 Tier Cards for 1-Click Selection */}
-                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                          {MEMBERSHIP_OPTIONS.map(opt => {
-                            const isSelected = formData.membershipTier === opt.id;
-                            return (
-                              <button
-                                type="button"
-                                key={opt.id}
-                                onClick={() => setFormData({ ...formData, membershipTier: opt.id })}
-                                className={cn(
-                                  'p-3.5 rounded-2xl border text-left transition-all duration-150 select-none flex flex-col justify-between h-24 shadow-xs',
-                                  isSelected 
-                                    ? 'bg-indigo-50 dark:bg-indigo-950/60 border-indigo-600 dark:border-indigo-500 text-indigo-700 dark:text-indigo-300 ring-2 ring-indigo-600/20 font-bold' 
-                                    : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-700 font-medium'
-                                )}
-                              >
-                                <div className="flex items-center justify-between w-full">
-                                  <span className="text-2xl">{opt.icon}</span>
-                                  {isSelected && (
-                                    <span className="w-5 h-5 rounded-full bg-indigo-600 text-white flex items-center justify-center shrink-0">
-                                      <Check className="w-3.5 h-3.5" />
-                                    </span>
-                                  )}
-                                </div>
-                                <div>
-                                  <span className="text-sm sm:text-base font-bold block leading-tight text-slate-900 dark:text-white">
-                                    {opt.label}
-                                  </span>
-                                  <span className="text-xs text-slate-500 dark:text-slate-400 block truncate mt-0.5">
-                                    {opt.desc}
-                                  </span>
-                                </div>
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </div>
-
-                      {/* User Category (Student Pro vs Franchise Hub) */}
-                      <div>
-                        <label className="block text-sm sm:text-base font-semibold text-slate-900 dark:text-slate-100 mb-2.5">
-                          Category <span className="text-red-500">*</span>
-                        </label>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                          {[
-                            { 
-                              id: 'Student Pro' as UserType, 
-                              icon: GraduationCap, 
-                              title: 'Student Pro',
-                              desc: 'Enrolled in Digital Azadi Courses' 
-                            },
-                            { 
-                              id: 'Franchise Hub' as UserType, 
-                              icon: Building2, 
-                              title: 'Franchise Hub',
-                              desc: 'Authorized Franchise Partner' 
-                            },
-                          ].map(item => {
-                            const isSelected = formData.userType === item.id;
-                            const Icon = item.icon;
-                            return (
-                              <button
-                                type="button"
-                                key={item.id}
-                                onClick={() => setFormData({ ...formData, userType: item.id })}
-                                className={cn(
-                                  'p-4 rounded-2xl border text-left transition-all duration-150 select-none flex items-center justify-between shadow-xs',
-                                  isSelected 
-                                    ? 'bg-indigo-50 dark:bg-indigo-950/60 border-indigo-600 dark:border-indigo-500 text-indigo-700 dark:text-indigo-300 ring-2 ring-indigo-600/20 font-bold' 
-                                    : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-700 font-medium'
-                                )}
-                              >
-                                <div className="flex items-center gap-3.5">
-                                  <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800 flex items-center justify-center text-indigo-600 dark:text-indigo-400 shrink-0">
-                                    <Icon className="w-5 h-5" />
-                                  </div>
-                                  <div>
-                                    <span className="text-base font-bold block text-slate-900 dark:text-white">{item.title}</span>
-                                    <span className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 block">{item.desc}</span>
-                                  </div>
-                                </div>
-                                {isSelected && (
-                                  <span className="w-6 h-6 rounded-full bg-indigo-600 text-white flex items-center justify-center shrink-0">
-                                    <Check className="w-4 h-4" />
-                                  </span>
-                                )}
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </div>
-
-                      {/* Specialist Routing / Support Engineer Selection */}
-                      <div>
-                        <div className="flex items-center justify-between mb-2.5">
-                          <label className="text-sm sm:text-base font-semibold text-slate-900 dark:text-slate-100">
-                            Assign Support Specialist <span className="text-xs text-slate-500 font-normal">(किसे असाइन करनी है यह टिकट?)</span>
-                          </label>
-                          <span className="text-xs text-indigo-600 dark:text-indigo-400 font-bold">
-                            Selected: {formData.assignedSpecialist}
-                          </span>
-                        </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                          {[
-                            {
-                              id: 'Sachin Sir' as SupportSpecialist,
-                              name: 'Sachin Sir',
-                              role: 'Primary Technical Lead (All Technical Ops)',
-                              desc: 'WordPress, Hosting, cPanel, DNS, Digital Azadi LMS, Chakravyuh CRM & all other technical issues',
-                              badge: 'All Other Operations',
-                              badgeColor: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/70 dark:text-emerald-300',
-                              avatarBg: 'bg-emerald-600 text-white',
-                              initials: 'SS',
-                            },
-                            {
-                              id: 'Onkar Kulkarni' as SupportSpecialist,
-                              name: 'Onkar Kulkarni',
-                              role: 'Meta Related Specialist (Meta Only)',
-                              desc: 'Exclusively for Meta Ads, Facebook & Instagram Campaigns, Meta Pixel, Ad Accounts & Meta Webhooks',
-                              badge: 'Only Meta Related',
-                              badgeColor: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-950/70 dark:text-indigo-300',
-                              avatarBg: 'bg-indigo-600 text-white',
-                              initials: 'OK',
-                            },
-                          ].map(spec => {
-                            const isSelected = formData.assignedSpecialist === spec.id;
-                            return (
-                              <button
-                                type="button"
-                                key={spec.id}
-                                onClick={() => setFormData({ ...formData, assignedSpecialist: spec.id })}
-                                className={cn(
-                                  'p-4 rounded-2xl border text-left transition-all duration-150 select-none flex flex-col justify-between shadow-xs',
-                                  isSelected
-                                    ? 'bg-indigo-50 dark:bg-indigo-950/60 border-indigo-600 dark:border-indigo-500 text-indigo-700 dark:text-indigo-300 ring-2 ring-indigo-600/20 font-bold'
-                                    : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-700 font-medium'
-                                )}
-                              >
-                                <div>
-                                  <div className="flex items-start justify-between w-full mb-2.5">
-                                    <div className="flex items-center gap-3">
-                                      <div className={cn('w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm shadow-xs shrink-0', spec.avatarBg)}>
-                                        {spec.initials}
-                                      </div>
-                                      <div>
-                                        <span className="text-base font-bold text-slate-900 dark:text-white block leading-tight">
-                                          {spec.name}
-                                        </span>
-                                        <span className="text-xs text-slate-500 dark:text-slate-400 block mt-0.5">
-                                          {spec.role}
-                                        </span>
-                                      </div>
-                                    </div>
-                                    {isSelected && (
-                                      <span className="w-6 h-6 rounded-full bg-indigo-600 text-white flex items-center justify-center shrink-0">
-                                        <Check className="w-4 h-4" />
-                                      </span>
-                                    )}
-                                  </div>
-                                  <p className="text-xs text-slate-600 dark:text-slate-400 font-normal leading-relaxed mb-3">
-                                    {spec.desc}
-                                  </p>
-                                </div>
-                                <div>
-                                  <span className={cn('text-[11px] font-bold px-2.5 py-1 rounded-lg inline-block', spec.badgeColor)}>
-                                    {spec.badge}
-                                  </span>
-                                </div>
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </div>
-
-                    </div>
-
-                  </div>
-
-                  {/* ============================================================== */}
-                  {/* SECTION 3: Technical Inquiry Specifications */}
-                  {/* ============================================================== */}
-                  <div className="space-y-6 pt-3">
-                    
-                    <div className="flex items-center gap-3.5 pb-3 border-b border-surface-border">
-                      <div className="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-950/60 border border-amber-200 dark:border-amber-800 flex items-center justify-center text-amber-600 dark:text-amber-400 font-bold shrink-0 shadow-xs">
-                        <FileText className="w-5 h-5" />
-                      </div>
-                      <div>
-                        <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white tracking-tight leading-snug">
-                          3. Issue Details
-                        </h2>
-                        <p className="text-sm text-slate-600 dark:text-slate-400 font-normal">
-                          Provide detailed context regarding your setup, issue, or question.
-                        </p>
+                    {/* Row 3: Membership Tier Dropdown (The 4 Options) */}
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                        Membership Tier <span className="text-pink-400">*</span>
+                      </label>
+                      <div className="relative">
+                        <select
+                          name="membershipTier"
+                          value={formData.membershipTier}
+                          onChange={e => setFormData({ ...formData, membershipTier: e.target.value as MembershipTier })}
+                          className="w-full h-12 rounded-2xl bg-[#262A4D]/80 border border-white/15 text-white px-4 pr-10 text-sm font-semibold appearance-none focus:outline-none focus:ring-2 focus:border-purple-400 focus:ring-purple-500/25 focus:bg-[#2C315B] transition cursor-pointer shadow-inner"
+                        >
+                          <option value="Diamond Member" className="bg-[#1C203E] text-white">💎 Diamond Member (Highest Priority SLA)</option>
+                          <option value="Silver Member" className="bg-[#1C203E] text-white">🥈 Silver Member (Standard Technical)</option>
+                          <option value="Gold Member" className="bg-[#1C203E] text-white">🥇 Gold Member (Priority Technical)</option>
+                          <option value="PMP Member" className="bg-[#1C203E] text-white">⭐ PMP Member (Project Mentorship)</option>
+                        </select>
+                        <ChevronDown className="w-4 h-4 text-slate-400 absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none" />
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-6">
-                      
-                      {/* Platform / Ecosystem */}
+                    {/* Row 4: Specialist Routing Selection */}
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                        Assigned Specialist
+                      </label>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <button
+                          type="button"
+                          onClick={() => setFormData({ ...formData, assignedSpecialist: 'Sachin Sir' })}
+                          className={cn(
+                            'p-3 rounded-2xl border text-left transition-all duration-150 flex items-center justify-between',
+                            formData.assignedSpecialist === 'Sachin Sir'
+                              ? 'bg-purple-600/20 border-purple-400 text-white ring-1 ring-purple-400 font-semibold'
+                              : 'bg-[#262A4D]/60 border-white/10 text-slate-300 hover:border-white/20'
+                          )}
+                        >
+                          <div>
+                            <span className="text-xs font-bold text-white block">Sachin Sir</span>
+                            <span className="text-[10px] text-slate-400">All Other Operations</span>
+                          </div>
+                          {formData.assignedSpecialist === 'Sachin Sir' && (
+                            <span className="w-5 h-5 rounded-full bg-purple-500 text-white flex items-center justify-center shrink-0">
+                              <Check className="w-3 h-3" />
+                            </span>
+                          )}
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => setFormData({ ...formData, assignedSpecialist: 'Onkar Kulkarni' })}
+                          className={cn(
+                            'p-3 rounded-2xl border text-left transition-all duration-150 flex items-center justify-between',
+                            formData.assignedSpecialist === 'Onkar Kulkarni'
+                              ? 'bg-purple-600/20 border-purple-400 text-white ring-1 ring-purple-400 font-semibold'
+                              : 'bg-[#262A4D]/60 border-white/10 text-slate-300 hover:border-white/20'
+                          )}
+                        >
+                          <div>
+                            <span className="text-xs font-bold text-white block">Onkar Kulkarni</span>
+                            <span className="text-[10px] text-purple-300">Meta Only</span>
+                          </div>
+                          {formData.assignedSpecialist === 'Onkar Kulkarni' && (
+                            <span className="w-5 h-5 rounded-full bg-purple-500 text-white flex items-center justify-center shrink-0">
+                              <Check className="w-3 h-3" />
+                            </span>
+                          )}
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Row 5: Platform & Subject */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm sm:text-base font-semibold text-slate-900 dark:text-slate-100 mb-2">
-                          Platform / Ecosystem <span className="text-red-500">*</span>
-                        </label>
                         <select
                           value={formData.ecosystem}
                           onChange={e => setFormData({ ...formData, ecosystem: e.target.value as ProductEcosystem })}
-                          className="w-full h-13 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-xl border border-slate-300 dark:border-slate-700 px-4 text-base font-medium focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/20 focus:outline-none transition cursor-pointer shadow-xs"
+                          className="w-full h-12 rounded-2xl bg-[#262A4D]/80 border border-white/15 text-white px-4 text-sm font-medium focus:outline-none focus:ring-2 focus:border-purple-400 focus:ring-purple-500/25 focus:bg-[#2C315B] transition cursor-pointer shadow-inner"
                         >
-                          <option value="Chakravyuh CRM">Chakravyuh CRM (Meta / WABA / Leads)</option>
-                          <option value="Digital Azadi Hub">Digital Azadi Hub (LMS / Course Portal)</option>
-                          <option value="WordPress & Hosting">WordPress & Hosting (cPanel / SSL / DNS)</option>
-                          <option value="Other">Other Technical Inquiries</option>
+                          <option value="Chakravyuh CRM" className="bg-[#1C203E]">Chakravyuh CRM</option>
+                          <option value="Digital Azadi Hub" className="bg-[#1C203E]">Digital Azadi LMS Hub</option>
+                          <option value="WordPress & Hosting" className="bg-[#1C203E]">WordPress & Hosting</option>
+                          <option value="Other" className="bg-[#1C203E]">Other Technical Inquiries</option>
                         </select>
                       </div>
 
-                      {/* Issue Category */}
                       <div>
-                        <label className="block text-sm sm:text-base font-semibold text-slate-900 dark:text-slate-100 mb-2">
-                          Issue Category <span className="text-red-500">*</span>
-                        </label>
-                        <select
-                          value={formData.category}
-                          onChange={e => setFormData({ ...formData, category: e.target.value })}
-                          className="w-full h-13 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-xl border border-slate-300 dark:border-slate-700 px-4 text-base font-medium focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/20 focus:outline-none transition cursor-pointer shadow-xs"
-                        >
-                          <option value="CRM & Lead Management">CRM & Lead Management</option>
-                          <option value="LMS & Course Access">LMS & Course Access</option>
-                          <option value="Domain & Hosting">Domain, Hosting & DNS</option>
-                          <option value="Membership & Tier">Membership & Tier Upgrades</option>
-                          <option value="Account & Permissions">Account & Permissions</option>
-                          <option value="Billing & Invoicing">Billing & Invoicing</option>
-                          <option value="General Technical Support">General Technical Support</option>
-                        </select>
-                      </div>
-
-                    </div>
-
-                    {/* Inquiry Subject */}
-                    <div>
-                      <label className="block text-sm sm:text-base font-semibold text-slate-900 dark:text-slate-100 mb-2">
-                        Inquiry Subject <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        name="subject"
-                        required
-                        value={formData.subject}
-                        onChange={e => setFormData({ ...formData, subject: e.target.value })}
-                        placeholder="e.g. WhatsApp WABA webhook integration failing on port 443"
-                        className={cn(
-                          'w-full h-13 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-xl border px-4 text-base font-medium',
-                          'transition-all duration-150 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 shadow-xs',
-                          errors.subject 
-                            ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20' 
-                            : 'border-slate-300 dark:border-slate-700 focus:border-indigo-600 focus:ring-indigo-600/20'
+                        <input
+                          type="text"
+                          name="subject"
+                          required
+                          value={formData.subject}
+                          onChange={e => setFormData({ ...formData, subject: e.target.value })}
+                          placeholder="Subject / Summary*"
+                          className={cn(
+                            'w-full h-12 rounded-2xl bg-[#262A4D]/80 border text-white placeholder-slate-400 px-4 text-sm font-medium transition-all shadow-inner',
+                            'focus:outline-none focus:ring-2 focus:border-purple-400 focus:bg-[#2C315B]',
+                            errors.subject 
+                              ? 'border-red-500 focus:ring-red-500/30' 
+                              : 'border-white/15 focus:ring-purple-500/25'
+                          )}
+                        />
+                        {errors.subject && (
+                          <p className="text-[11px] text-red-400 mt-1 font-medium">{errors.subject}</p>
                         )}
-                      />
-                      {errors.subject && (
-                        <p className="text-xs sm:text-sm text-red-600 dark:text-red-400 mt-1.5 font-medium flex items-center gap-1">
-                          <AlertCircle className="w-4 h-4 shrink-0" />
-                          <span>{errors.subject}</span>
-                        </p>
-                      )}
+                      </div>
                     </div>
 
-                    {/* Quick Topic Chips */}
-                    <div className="space-y-2.5">
-                      <div className="flex items-center justify-between">
-                        <label className="text-sm sm:text-base font-semibold text-slate-900 dark:text-slate-100">
-                          Detailed Description <span className="text-red-500">*</span>
-                        </label>
-                        <span className="text-xs text-indigo-600 dark:text-indigo-400 flex items-center gap-1 font-bold">
-                          <Tag className="w-3.5 h-3.5" />
-                          <span>Click chip to auto-insert prefix:</span>
-                        </span>
+                    {/* Row 6: Detailed Message / Description */}
+                    <div>
+                      <div className="relative">
+                        <textarea
+                          rows={4}
+                          name="description"
+                          required
+                          value={formData.description}
+                          onChange={e => setFormData({ ...formData, description: e.target.value })}
+                          placeholder="Write your message / query details..."
+                          className={cn(
+                            'w-full p-4 rounded-2xl bg-[#262A4D]/80 border text-white placeholder-slate-400 text-sm font-medium leading-relaxed resize-none transition-all shadow-inner',
+                            'focus:outline-none focus:ring-2 focus:border-purple-400 focus:bg-[#2C315B]',
+                            errors.description 
+                              ? 'border-red-500 focus:ring-red-500/30' 
+                              : 'border-white/15 focus:ring-purple-500/25'
+                          )}
+                        />
                       </div>
+                      {errors.description && (
+                        <p className="text-[11px] text-red-400 mt-1 font-medium">{errors.description}</p>
+                      )}
 
-                      <div className="flex flex-wrap gap-2 pb-1">
+                      {/* Quick Issue Tags */}
+                      <div className="flex flex-wrap gap-1.5 mt-2">
                         {ISSUE_TAGS.map(item => (
                           <button
                             type="button"
                             key={item.tag}
                             onClick={() => handleAppendIssueTag(item.append)}
-                            className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-750 border border-slate-300 dark:border-slate-700 text-xs sm:text-sm text-slate-700 dark:text-slate-200 font-semibold transition active:scale-95 shadow-xs"
+                            className="px-2.5 py-1 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] border border-white/10 text-[11px] text-slate-300 font-medium transition active:scale-95"
                           >
                             {item.tag}
                           </button>
                         ))}
                       </div>
-
-                      {/* Textarea */}
-                      <textarea
-                        rows={5}
-                        name="description"
-                        required
-                        value={formData.description}
-                        onChange={e => setFormData({ ...formData, description: e.target.value })}
-                        placeholder="Please explain the details of your issue, what happened, and any steps to reproduce so our engineers can resolve it quickly..."
-                        className={cn(
-                          'w-full p-4 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-2xl border text-base font-medium leading-relaxed resize-none',
-                          'transition-all duration-150 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 shadow-xs',
-                          errors.description 
-                            ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20' 
-                            : 'border-slate-300 dark:border-slate-700 focus:border-indigo-600 focus:ring-indigo-600/20'
-                        )}
-                      />
-                      {errors.description && (
-                        <p className="text-xs sm:text-sm text-red-600 dark:text-red-400 mt-1.5 font-medium flex items-center gap-1">
-                          <AlertCircle className="w-4 h-4 shrink-0" />
-                          <span>{errors.description}</span>
-                        </p>
-                      )}
                     </div>
 
-                    {/* Target Website URL (Optional) */}
+                    {/* Optional Website */}
                     <div>
-                      <label className="block text-sm sm:text-base font-semibold text-slate-900 dark:text-slate-100 mb-2">
-                        Target Website URL <span className="text-slate-500 dark:text-slate-400 text-xs font-normal">(Optional)</span>
-                      </label>
-                      <div className="relative">
-                        <Globe className="w-5 h-5 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none" />
-                        <input
-                          type="url"
-                          value={formData.websiteUrl}
-                          onChange={e => setFormData({ ...formData, websiteUrl: e.target.value })}
-                          placeholder="https://yourwebsite.com"
-                          className="w-full h-13 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-xl border border-slate-300 dark:border-slate-700 pl-12 pr-4 text-base font-medium focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/20 focus:outline-none transition placeholder:text-slate-400 dark:placeholder:text-slate-500 shadow-xs"
-                        />
-                      </div>
+                      <input
+                        type="url"
+                        value={formData.websiteUrl}
+                        onChange={e => setFormData({ ...formData, websiteUrl: e.target.value })}
+                        placeholder="Your Website (Optional)"
+                        className="w-full h-11 rounded-2xl bg-[#262A4D]/60 border border-white/10 text-white placeholder-slate-400 px-4 text-xs font-medium focus:outline-none focus:ring-2 focus:border-purple-400 focus:bg-[#2C315B] transition shadow-inner"
+                      />
                     </div>
 
                   </div>
 
-                  {/* Submission Action Bar */}
-                  <div className="pt-6 border-t border-surface-border flex flex-col sm:flex-row items-center justify-between gap-4">
-                    <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 text-center sm:text-left font-medium">
-                      🔒 Your query is logged directly into the Digital Azadi operations database.
-                    </p>
-
+                  {/* Send Message Button (Exact Gradient Pill Button from Screenshot) */}
+                  <div className="relative z-10 pt-5 mt-4 border-t border-white/10 flex items-center justify-end">
                     <button
                       type="submit"
                       disabled={isSubmitting}
                       className={cn(
-                        'w-full sm:w-auto h-14 px-10 py-3.5 rounded-2xl text-base font-bold text-white shadow-lg transition-all',
-                        'bg-indigo-600 hover:bg-indigo-700 active:scale-[0.99] disabled:opacity-50 disabled:pointer-events-none',
-                        'flex items-center justify-center gap-2.5 shadow-indigo-600/25'
+                        'w-full sm:w-auto px-10 py-3.5 rounded-full text-base font-bold text-white shadow-xl transition-all duration-200',
+                        'bg-gradient-to-r from-[#5B4DF6] via-[#943FEF] to-[#EF3899] hover:from-[#6D5DFB] hover:to-[#F54B9F]',
+                        'shadow-[0_10px_30px_rgba(239,56,153,0.38)] hover:shadow-[0_14px_40px_rgba(239,56,153,0.55)]',
+                        'active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center gap-2.5 cursor-pointer'
                       )}
                     >
                       {isSubmitting ? (
                         <>
                           <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                          <span>Submitting Support Query...</span>
+                          <span>Submitting Query...</span>
                         </>
                       ) : (
                         <>
-                          <Send className="w-5 h-5" />
-                          <span>Submit Support Query</span>
+                          <span>Send Message</span>
+                          <Send className="w-4 h-4 ml-1" />
                         </>
                       )}
                     </button>
@@ -976,408 +811,361 @@ export const PublicGateway: React.FC = () => {
 
                 </form>
 
-                {/* Trust & Guarantee Cards */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4">
-                  <div className="p-4 rounded-2xl bg-surface border border-surface-border flex items-start gap-3 shadow-xs">
-                    <div className="p-2 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 shrink-0">
-                      <Shield className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <h4 className="text-xs font-bold text-text-pure">Secure & Confidential</h4>
-                      <p className="text-[11px] text-text-muted mt-0.5">Encrypted logging directly into Digital Azadi database.</p>
-                    </div>
-                  </div>
+              </div>
 
-                  <div className="p-4 rounded-2xl bg-surface border border-surface-border flex items-start gap-3 shadow-xs">
-                    <div className="p-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 shrink-0">
-                      <Zap className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <h4 className="text-xs font-bold text-text-pure">Direct to Engineers</h4>
-                      <p className="text-[11px] text-text-muted mt-0.5">No bot loops. Handled by verified technical support staff.</p>
-                    </div>
-                  </div>
+            </div>
+          )}
 
-                  <div className="p-4 rounded-2xl bg-surface border border-surface-border flex items-start gap-3 shadow-xs">
-                    <div className="p-2 rounded-xl bg-purple-50 dark:bg-purple-950/40 text-purple-600 dark:text-purple-400 shrink-0">
-                      <Clock className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <h4 className="text-xs font-bold text-text-pure">Live IST Tracking</h4>
-                      <p className="text-[11px] text-text-muted mt-0.5">Real-time stopwatch sessions and WhatsApp updates.</p>
-                    </div>
+          {/* ============================================================== */}
+          {/* SUCCESS CONFIRMATION RECEIPT CARD */}
+          {/* ============================================================== */}
+          {activeTab === 'submit' && createdTicket && (
+            <div className="max-w-2xl mx-auto space-y-6 py-4 animate-in zoom-in-95 duration-200">
+              <div className="text-center space-y-2">
+                <div className="w-16 h-16 rounded-3xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center mx-auto shadow-lg shadow-emerald-500/20">
+                  <CheckCircle className="w-8 h-8 text-emerald-400" />
+                </div>
+                <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+                  Support Query Submitted!
+                </h2>
+                <p className="text-sm text-slate-300 max-w-md mx-auto">
+                  Your query is safely recorded in the Digital Azadi operations queue. Please save your Ticket ID below.
+                </p>
+              </div>
+
+              {/* Digital Pass Card */}
+              <div className="rounded-3xl bg-white/[0.05] backdrop-blur-xl border border-white/15 p-6 sm:p-8 space-y-5 shadow-2xl">
+                <div className="flex items-center justify-between pb-4 border-b border-white/10">
+                  <div>
+                    <span className="text-xs font-bold text-purple-300 uppercase tracking-wider block">
+                      OFFICIAL TICKET IDENTIFIER
+                    </span>
+                    <span className="text-2xl sm:text-3xl font-mono font-extrabold text-white tracking-wider block mt-1">
+                      {createdTicket.ticketId}
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleCopyTicketId}
+                    className="px-4 py-2 rounded-full bg-white/[0.08] hover:bg-white/[0.15] border border-white/20 text-xs font-bold text-white transition flex items-center gap-1.5"
+                  >
+                    {hasCopiedId ? (
+                      <>
+                        <Check className="w-3.5 h-3.5 text-emerald-400" />
+                        <span className="text-emerald-400">Copied!</span>
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="w-3.5 h-3.5" />
+                        <span>Copy ID</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 text-xs">
+                  <div>
+                    <span className="text-slate-400 block">Requester:</span>
+                    <span className="font-bold text-white text-sm">{createdTicket.requesterName}</span>
+                    <span className="font-mono text-slate-300 block">{createdTicket.requesterPhone}</span>
+                  </div>
+                  <div>
+                    <span className="text-slate-400 block">Assigned Specialist:</span>
+                    <span className="font-bold text-purple-300 text-sm">{createdTicket.assignedSpecialist}</span>
+                    <span className="text-slate-400 block">{createdTicket.membershipTier}</span>
                   </div>
                 </div>
 
-              </div>
-            ) : (
-              /* ============================================================== */
-              /* SUCCESS STATE / DIGITAL TICKET CONFIRMATION RECEIPT */
-              /* ============================================================== */
-              <div className="max-w-2xl mx-auto space-y-6 animate-in zoom-in-95 duration-200">
-                
-                {/* Header Callout */}
-                <div className="text-center space-y-3">
-                  <div className="w-16 h-16 rounded-3xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800 flex items-center justify-center mx-auto shadow-md">
-                    <CheckCircle className="w-8 h-8 text-emerald-600 dark:text-emerald-400" />
-                  </div>
-                  <h2 className="text-2xl sm:text-3xl font-extrabold text-text-pure tracking-tight">
-                    Support Query Submitted Successfully!
-                  </h2>
-                  <p className="text-sm sm:text-base text-text-muted max-w-md mx-auto">
-                    Your inquiry has been registered in the Digital Azadi Operations Queue. Please save your Ticket ID below.
+                <div>
+                  <span className="text-slate-400 text-xs block mb-1">Subject:</span>
+                  <p className="p-3 rounded-xl bg-white/[0.04] border border-white/10 text-white font-medium text-xs sm:text-sm">
+                    {createdTicket.subject}
                   </p>
                 </div>
 
-                {/* Digital Ticket Pass Card */}
-                <div className="bg-surface border border-surface-border rounded-3xl overflow-hidden shadow-xl">
-                  
-                  <div className="h-2 w-full bg-gradient-to-r from-emerald-500 via-indigo-600 to-purple-600" />
-
-                  {/* Ticket Header */}
-                  <div className="p-6 sm:p-8 border-b border-surface-border flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-surface-elevated/40">
-                    <div>
-                      <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider block">
-                        OFFICIAL TICKET IDENTIFIER
-                      </span>
-                      <div className="flex items-center gap-3 mt-1.5">
-                        <span className="text-2xl sm:text-3xl font-mono font-extrabold text-text-pure tracking-wider">
-                          {createdTicket.ticketId}
-                        </span>
-                        <button
-                          type="button"
-                          onClick={handleCopyTicketId}
-                          className="px-3 py-1.5 rounded-xl bg-surface hover:bg-surface-elevated border border-surface-border text-xs font-semibold text-text-pure transition flex items-center gap-1.5"
-                          title="Copy Ticket ID"
-                        >
-                          {hasCopiedId ? (
-                            <>
-                              <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-                              <span className="text-emerald-700 dark:text-emerald-400">Copied!</span>
-                            </>
-                          ) : (
-                            <>
-                              <Copy className="w-3.5 h-3.5" />
-                              <span>Copy ID</span>
-                            </>
-                          )}
-                        </button>
-                      </div>
-                    </div>
-
-                    <div className="sm:text-right">
-                      <span className="px-3 py-1 rounded-full text-xs font-bold bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800 inline-block">
-                        Logged in Queue
-                      </span>
-                      <span className="block text-xs font-semibold text-text-muted mt-1.5">
-                        {createdTicket.membershipTier}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Ticket Body Summary */}
-                  <div className="p-6 sm:p-8 space-y-5 text-sm">
-                    
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pb-4 border-b border-surface-border">
-                      <div>
-                        <span className="text-text-muted text-xs font-medium block">Requester Name</span>
-                        <span className="text-text-pure font-bold text-base">{createdTicket.requesterName}</span>
-                        <span className="text-text-muted font-mono text-xs block mt-0.5">{createdTicket.requesterPhone}</span>
-                      </div>
-                      <div>
-                        <span className="text-text-muted text-xs font-medium block">Location / City</span>
-                        <span className="text-text-pure font-semibold text-base">{createdTicket.city || 'Not specified'}</span>
-                        <span className="text-text-muted text-xs block mt-0.5">{createdTicket.requesterEmail}</span>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pb-4 border-b border-surface-border">
-                      <div>
-                        <span className="text-text-muted text-xs font-medium block">Platform & Category</span>
-                        <span className="text-text-pure font-semibold">{createdTicket.ecosystem}</span>
-                        <span className="text-indigo-600 dark:text-indigo-400 text-xs block font-medium mt-0.5">{createdTicket.category}</span>
-                      </div>
-                      <div>
-                        <span className="text-text-muted text-xs font-medium block">Submission Time (IST)</span>
-                        <span className="text-text-pure font-mono text-xs font-semibold">{formatToISTDateTimeString(createdTicket.createdAt)}</span>
-                        <div className="flex items-center gap-1.5 mt-1">
-                          <span className="text-xs font-semibold text-text-muted">Assigned Specialist:</span>
-                          <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400">
-                            {createdTicket.assignedSpecialist || 'General Support Desk'}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div>
-                      <span className="text-text-muted text-xs font-medium block mb-1.5">Subject</span>
-                      <p className="text-text-pure font-semibold bg-surface-elevated p-3.5 rounded-xl border border-surface-border leading-relaxed">
-                        {createdTicket.subject}
-                      </p>
-                    </div>
-
-                  </div>
-
-                  {/* WhatsApp Follow-up Banner */}
-                  <div className="bg-surface-elevated p-6 border-t border-surface-border flex flex-col sm:flex-row items-center justify-between gap-4">
-                    <div className="text-center sm:text-left">
-                      <span className="text-sm font-bold text-text-pure block">
-                        Need an immediate update or have urgent queries?
-                      </span>
-                      <p className="text-xs text-text-muted mt-0.5">
-                        Connect directly with our support helpdesk on WhatsApp.
-                      </p>
-                    </div>
-
-                    <a
-                      href={`https://wa.me/91${createdTicket.requesterPhone}?text=${encodeURIComponent(`Hello Digital Azadi Support, I have submitted ticket ${createdTicket.ticketId} regarding "${createdTicket.subject}". Please assist.`)}`}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="w-full sm:w-auto px-6 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-md shadow-emerald-600/20 transition-all shrink-0"
-                    >
-                      <MessageCircle className="w-4.5 h-4.5" />
-                      <span>Chat on WhatsApp</span>
-                    </a>
-                  </div>
-
-                </div>
-
-                {/* Bottom Actions */}
-                <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setTrackTicketId(createdTicket.ticketId);
-                      setTrackPhone(createdTicket.requesterPhone);
-                      setActiveTab('track');
-                    }}
-                    className="w-full sm:w-auto px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold transition inline-flex items-center justify-center gap-2 shadow-sm"
-                  >
-                    <Search className="w-4 h-4" />
-                    <span>Track Ticket Status</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={handleResetForm}
-                    className="w-full sm:w-auto px-6 py-3 rounded-xl bg-surface hover:bg-surface-elevated border border-surface-border text-sm font-semibold text-text-pure transition inline-flex items-center justify-center gap-2 shadow-xs"
-                  >
-                    <RotateCcw className="w-4 h-4" />
-                    <span>Raise Another Support Query</span>
-                  </button>
-                </div>
-
+                {/* WhatsApp Chat Link */}
+                <a
+                  href={`https://wa.me/91${createdTicket.requesterPhone}?text=${encodeURIComponent(`Hello Digital Azadi Support, I have submitted ticket ${createdTicket.ticketId} regarding "${createdTicket.subject}". Please assist.`)}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="w-full py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/30 transition-all"
+                >
+                  <MessageCircle className="w-4 h-4" />
+                  <span>Notify Helpdesk on WhatsApp</span>
+                </a>
               </div>
-            )}
-          </>
-        )}
 
-        {/* ============================================================== */}
-        {/* TAB 2: TRACK YOUR TICKET SECTION */}
-        {/* ============================================================== */}
-        {activeTab === 'track' && (
-          <div className="max-w-2xl mx-auto space-y-8 animate-in fade-in duration-200">
-            
-            {/* Header */}
-            <div className="text-center space-y-3">
-              <div className="w-14 h-14 rounded-2xl bg-indigo-50 dark:bg-indigo-950/50 border border-indigo-200 dark:border-indigo-800/60 flex items-center justify-center mx-auto text-indigo-600 dark:text-indigo-400 shadow-sm">
-                <Search className="w-7 h-7" />
+              {/* Action Buttons */}
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setTrackTicketId(createdTicket.ticketId);
+                    setTrackPhone(createdTicket.requesterPhone);
+                    setActiveTab('track');
+                  }}
+                  className="w-full sm:w-auto px-6 py-2.5 rounded-full bg-gradient-to-r from-[#5B4DF6] to-[#A855F7] text-white text-xs font-bold transition flex items-center justify-center gap-2 shadow-md shadow-purple-500/20"
+                >
+                  <Search className="w-3.5 h-3.5" />
+                  <span>Track Status Live</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleResetForm}
+                  className="w-full sm:w-auto px-6 py-2.5 rounded-full bg-white/[0.06] hover:bg-white/[0.12] border border-white/15 text-white text-xs font-semibold transition flex items-center justify-center gap-2"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  <span>Raise Another Query</span>
+                </button>
               </div>
-              <h1 className="text-3xl font-extrabold text-text-pure tracking-tight">
-                Track Your Ticket Status
-              </h1>
-              <p className="text-sm sm:text-base text-text-muted max-w-md mx-auto leading-relaxed">
-                Enter your Ticket ID and your registered 10-digit mobile number to check real-time progress and updates.
-              </p>
+
             </div>
+          )}
 
-            {/* Tracking Search Card */}
-            <form onSubmit={handleTrackSearch} className="bg-surface border border-surface-border rounded-3xl p-6 sm:p-8 space-y-5 shadow-xl">
-              
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                <div>
-                  <label className="block text-sm font-semibold text-text-pure mb-2">
-                    Ticket ID <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={trackTicketId}
-                    onChange={e => setTrackTicketId(e.target.value.toUpperCase())}
-                    placeholder="e.g. DA-2026-8941"
-                    className="w-full h-12 bg-surface-elevated text-text-pure font-mono font-semibold rounded-xl border border-surface-border px-4 text-sm sm:text-base focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/15 focus:outline-none uppercase placeholder:normal-case placeholder:text-text-faint transition"
-                  />
+          {/* ============================================================== */}
+          {/* TAB 2: TRACK YOUR TICKET SECTION */}
+          {/* ============================================================== */}
+          {activeTab === 'track' && (
+            <div className="max-w-2xl mx-auto space-y-6 py-4 animate-in fade-in duration-200">
+              <div className="text-center space-y-2">
+                <div className="w-14 h-14 rounded-2xl bg-purple-500/20 border border-purple-500/30 flex items-center justify-center mx-auto text-purple-300 shadow-md">
+                  <Search className="w-6 h-6" />
                 </div>
+                <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+                  Track Your Ticket Status
+                </h2>
+                <p className="text-xs sm:text-sm text-slate-300 max-w-md mx-auto">
+                  Enter your Ticket ID and registered WhatsApp number to verify and check real-time progress.
+                </p>
+              </div>
 
-                <div>
-                  <label className="block text-sm font-semibold text-text-pure mb-2">
-                    Registered WhatsApp Number <span className="text-red-500">*</span>
-                  </label>
-                  <div className="relative">
-                    <span className="text-sm text-text-muted absolute left-3.5 top-1/2 -translate-y-1/2 font-mono font-semibold pointer-events-none select-none">
-                      🇮🇳 +91
-                    </span>
+              {/* Search Form */}
+              <form onSubmit={handleTrackSearch} className="rounded-3xl bg-white/[0.05] backdrop-blur-xl border border-white/15 p-6 sm:p-8 space-y-4 shadow-2xl">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                      Ticket ID <span className="text-pink-400">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={trackTicketId}
+                      onChange={e => setTrackTicketId(e.target.value.toUpperCase())}
+                      placeholder="e.g. DA-2026-8941"
+                      className="w-full h-12 rounded-2xl bg-[#262A4D]/80 border border-white/15 text-white font-mono uppercase px-4 text-sm font-semibold focus:outline-none focus:ring-2 focus:border-purple-400 focus:ring-purple-500/25 transition shadow-inner"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                      Registered WhatsApp Number <span className="text-pink-400">*</span>
+                    </label>
                     <input
                       type="tel"
                       required
                       maxLength={10}
                       value={trackPhone}
                       onChange={e => setTrackPhone(e.target.value.replace(/\D/g, ''))}
-                      placeholder="9823012345"
-                      className="w-full h-12 bg-surface-elevated text-text-pure font-mono font-semibold rounded-xl border border-surface-border pl-19 pr-4 text-sm sm:text-base focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/15 focus:outline-none placeholder:text-text-faint transition"
+                      placeholder="10-Digit Mobile Number"
+                      className="w-full h-12 rounded-2xl bg-[#262A4D]/80 border border-white/15 text-white font-mono px-4 text-sm font-medium focus:outline-none focus:ring-2 focus:border-purple-400 focus:ring-purple-500/25 transition shadow-inner"
                     />
                   </div>
                 </div>
-              </div>
 
-              {trackError && (
-                <div className="p-4 rounded-xl bg-red-50 dark:bg-red-950/25 border border-red-200 dark:border-red-800 text-xs sm:text-sm text-red-700 dark:text-red-400 flex items-start gap-2.5">
-                  <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
-                  <span className="font-medium">{trackError}</span>
+                {trackError && (
+                  <div className="p-3.5 rounded-2xl bg-red-500/15 border border-red-500/30 text-xs text-red-300 flex items-start gap-2">
+                    <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                    <span>{trackError}</span>
+                  </div>
+                )}
+
+                <div className="flex justify-end pt-2">
+                  <button
+                    type="submit"
+                    disabled={isSearchingTrack}
+                    className="w-full sm:w-auto px-8 py-3 rounded-full bg-gradient-to-r from-[#5B4DF6] via-[#943FEF] to-[#EF3899] text-white text-sm font-bold shadow-lg shadow-purple-500/25 transition-all flex items-center justify-center gap-2"
+                  >
+                    <Search className="w-4 h-4" />
+                    <span>{isSearchingTrack ? 'Verifying...' : 'Check Status'}</span>
+                  </button>
                 </div>
-              )}
+              </form>
 
-              <div className="flex justify-end pt-2">
-                <button
-                  type="submit"
-                  disabled={isSearchingTrack}
-                  className="w-full sm:w-auto h-12 px-8 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white text-sm font-bold flex items-center justify-center gap-2 shadow-md shadow-indigo-600/20 transition-all"
-                >
-                  <Search className="w-4 h-4" />
-                  <span>{isSearchingTrack ? 'Verifying Records...' : 'Check Status'}</span>
-                </button>
-              </div>
-
-            </form>
-
-            {/* TRACKED TICKET RESULT CARD */}
-            {trackedTicket && (
-              <div className="bg-surface border border-surface-border rounded-3xl overflow-hidden shadow-xl animate-in fade-in duration-200">
-                <div className="h-2 w-full bg-indigo-600" />
-
-                {/* Header */}
-                <div className="p-6 sm:p-8 border-b border-surface-border flex items-start justify-between gap-4 bg-surface-elevated/40">
-                  <div>
-                    <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider block">
-                      TICKET DOSSIER
-                    </span>
-                    <div className="text-2xl font-mono font-extrabold text-text-pure mt-1">
-                      {trackedTicket.ticketId}
-                    </div>
-                  </div>
-
-                  <div className="text-right">
-                    <Badge variant="status" value={trackedTicket.status} size="md" />
-                    <span className="block text-xs font-semibold text-text-muted mt-1.5">
-                      {trackedTicket.membershipTier}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Status Guidance Banner */}
-                <div className="p-4 sm:p-5 border-b border-surface-border bg-indigo-50/50 dark:bg-indigo-950/20 text-xs sm:text-sm">
-                  <div className="flex items-center gap-2.5 font-semibold text-indigo-900 dark:text-indigo-200">
-                    <Clock className="w-4.5 h-4.5 text-indigo-600 dark:text-indigo-400 shrink-0" />
-                    <span>
-                      {trackedTicket.status === 'Resolved'
-                        ? '✅ This support inquiry has been resolved.'
-                        : trackedTicket.status === 'In Progress'
-                        ? '⚡ An engineer is actively resolving this support session.'
-                        : trackedTicket.status === 'Waiting for User'
-                        ? '💬 Action required: Our support team has requested information from you.'
-                        : '📋 Ticket is safely logged in queue and awaiting specialist assignment.'}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Details */}
-                <div className="p-6 sm:p-8 space-y-5 text-sm">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pb-4 border-b border-surface-border">
+              {/* Track Result Card */}
+              {trackedTicket && (
+                <div className="rounded-3xl bg-white/[0.05] backdrop-blur-xl border border-white/15 p-6 sm:p-8 space-y-4 shadow-2xl animate-in fade-in duration-200">
+                  <div className="flex items-center justify-between pb-3 border-b border-white/10">
                     <div>
-                      <span className="text-text-muted text-xs font-medium block">Requester Name</span>
-                      <span className="text-text-pure font-bold text-base">{trackedTicket.requesterName}</span>
-                      {trackedTicket.city && (
-                        <span className="text-text-muted text-xs block font-medium mt-0.5">City: {trackedTicket.city}</span>
-                      )}
-                    </div>
-                    <div>
-                      <span className="text-text-muted text-xs font-medium block">Platform</span>
-                      <span className="text-text-pure font-semibold text-base">{trackedTicket.ecosystem}</span>
-                      <span className="text-indigo-600 dark:text-indigo-400 text-xs font-semibold block mt-0.5">{trackedTicket.category}</span>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pb-4 border-b border-surface-border">
-                    <div>
-                      <span className="text-text-muted text-xs font-medium block">Submitted Date (IST)</span>
-                      <span className="text-text-pure font-mono text-xs font-semibold">{formatToISTDateTimeString(trackedTicket.createdAt)}</span>
-                    </div>
-                    <div>
-                      <span className="text-text-muted text-xs font-medium block">Assigned Specialist</span>
-                      <span className="text-indigo-600 dark:text-indigo-400 font-bold text-sm block">
-                        {trackedTicket.assignedSpecialist || 'General Support Desk'}
+                      <span className="text-[10px] font-bold text-purple-300 uppercase tracking-wider block">
+                        TICKET STATUS
+                      </span>
+                      <span className="text-2xl font-mono font-bold text-white block mt-0.5">
+                        {trackedTicket.ticketId}
                       </span>
                     </div>
+                    <Badge variant="status" value={trackedTicket.status} size="md" />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4 text-xs">
+                    <div>
+                      <span className="text-slate-400 block">Requester:</span>
+                      <span className="font-bold text-white text-sm">{trackedTicket.requesterName}</span>
+                      <span className="text-slate-400 block">{trackedTicket.city || 'India'}</span>
+                    </div>
+                    <div>
+                      <span className="text-slate-400 block">Assigned Specialist:</span>
+                      <span className="font-bold text-purple-300 text-sm">{trackedTicket.assignedSpecialist}</span>
+                      <span className="text-slate-400 block">{trackedTicket.membershipTier}</span>
+                    </div>
                   </div>
 
                   <div>
-                    <span className="text-text-muted text-xs font-medium block mb-1.5">Subject</span>
-                    <p className="text-text-pure font-semibold bg-surface-elevated p-3.5 rounded-xl border border-surface-border leading-relaxed">
+                    <span className="text-slate-400 text-xs block mb-1">Subject:</span>
+                    <p className="p-3 rounded-xl bg-white/[0.04] border border-white/10 text-white font-medium text-xs sm:text-sm">
                       {trackedTicket.subject}
                     </p>
                   </div>
 
-                  {/* Public Resolution Notes if resolved */}
                   {trackedTicket.resolutionNotes && (
-                    <div className="p-4 sm:p-5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800">
-                      <span className="text-xs font-bold text-emerald-800 dark:text-emerald-300 block mb-1">
-                        Resolution Summary:
-                      </span>
-                      <p className="text-xs sm:text-sm text-text-pure leading-relaxed">
-                        {trackedTicket.resolutionNotes}
-                      </p>
+                    <div className="p-3.5 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 text-xs text-emerald-200">
+                      <span className="font-bold block mb-1">Resolution Summary:</span>
+                      <p>{trackedTicket.resolutionNotes}</p>
                     </div>
                   )}
-                </div>
 
-                {/* Actions */}
-                <div className="p-5 sm:p-6 bg-surface-elevated border-t border-surface-border flex flex-col sm:flex-row items-center justify-between gap-4">
-                  <span className="text-xs sm:text-sm text-text-muted font-medium text-center sm:text-left">
-                    Have additional questions regarding this ticket?
-                  </span>
                   <a
                     href={`https://wa.me/91${trackedTicket.requesterPhone}?text=${encodeURIComponent(`Hello Digital Azadi Support, checking on my ticket ${trackedTicket.ticketId} (${trackedTicket.subject}).`)}`}
                     target="_blank"
                     rel="noreferrer"
-                    className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition shadow-xs"
+                    className="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-2 transition"
                   >
                     <MessageCircle className="w-4 h-4" />
-                    <span>Chat on WhatsApp</span>
+                    <span>WhatsApp Inquiry</span>
                   </a>
                 </div>
+              )}
 
-              </div>
-            )}
+            </div>
+          )}
 
+          {/* ============================================================== */}
+          {/* HORIZONTAL GLOWING LENS FLARE DIVIDER (EXACT FROM SCREENSHOT) */}
+          {/* ============================================================== */}
+          <div className="relative my-10 sm:my-14 flex items-center justify-center">
+            <div className="h-[1.5px] w-full bg-gradient-to-r from-transparent via-purple-400/80 to-transparent shadow-[0_0_15px_#C084FC]" />
+            <div className="absolute w-28 h-1.5 bg-gradient-to-r from-transparent via-white to-transparent blur-[2px]" />
           </div>
-        )}
+
+          {/* ============================================================== */}
+          {/* FOOTER SECTION (5 COLUMNS DESIGN FROM SCREENSHOT) */}
+          {/* ============================================================== */}
+          <footer className="grid grid-cols-2 md:grid-cols-5 gap-8 text-xs text-slate-400">
+            
+            {/* Column 1: Brand & Contact Info */}
+            <div className="col-span-2 md:col-span-1 space-y-2">
+              <span className="font-black text-white text-sm tracking-wider uppercase block">
+                DIGITAL AZADI
+              </span>
+              <p className="text-[11px] leading-tight text-slate-400">
+                support@digitalazadi.com
+              </p>
+              <p className="text-[11px] font-mono text-slate-400">
+                +91 93708 72911
+              </p>
+              <div className="flex items-center gap-2.5 pt-2 text-slate-400">
+                <a href="https://instagram.com" target="_blank" rel="noreferrer" className="hover:text-white transition">
+                  <Instagram className="w-4 h-4" />
+                </a>
+                <a href="https://linkedin.com" target="_blank" rel="noreferrer" className="hover:text-white transition">
+                  <Linkedin className="w-4 h-4" />
+                </a>
+                <a href="https://youtube.com" target="_blank" rel="noreferrer" className="hover:text-white transition">
+                  <Youtube className="w-4 h-4" />
+                </a>
+                <a href="https://facebook.com" target="_blank" rel="noreferrer" className="hover:text-white transition">
+                  <Facebook className="w-4 h-4" />
+                </a>
+                <a href="https://twitter.com" target="_blank" rel="noreferrer" className="hover:text-white transition">
+                  <Twitter className="w-4 h-4" />
+                </a>
+              </div>
+            </div>
+
+            {/* Column 2: Portals */}
+            <div className="space-y-2">
+              <span className="font-bold text-white text-xs block">
+                Portals
+              </span>
+              <ul className="space-y-1.5 text-[11px]">
+                <li><button type="button" onClick={() => setActiveTab('submit')} className="hover:text-white transition">Raise Query</button></li>
+                <li><button type="button" onClick={() => setActiveTab('track')} className="hover:text-white transition">Track Ticket</button></li>
+                <li><a href="/admin" className="hover:text-white transition">Operations Deck</a></li>
+                <li><a href="/admin" className="hover:text-white transition">Admin Portal</a></li>
+              </ul>
+            </div>
+
+            {/* Column 3: Ecosystem */}
+            <div className="space-y-2">
+              <span className="font-bold text-white text-xs block">
+                Ecosystem
+              </span>
+              <ul className="space-y-1.5 text-[11px]">
+                <li>Chakravyuh CRM</li>
+                <li>LMS Platform</li>
+                <li>WordPress & DNS</li>
+                <li>WhatsApp WABA</li>
+              </ul>
+            </div>
+
+            {/* Column 4: Specialists */}
+            <div className="space-y-2">
+              <span className="font-bold text-white text-xs block">
+                Specialists
+              </span>
+              <ul className="space-y-1.5 text-[11px]">
+                <li>Onkar Kulkarni (Meta)</li>
+                <li>Sachin Sir (All Ops)</li>
+                <li>Priority SLA Queue</li>
+                <li>Direct Mentorship</li>
+              </ul>
+            </div>
+
+            {/* Column 5: Support Hours */}
+            <div className="col-span-2 md:col-span-1 space-y-2">
+              <span className="font-bold text-white text-xs block">
+                Support Hours
+              </span>
+              <p className="text-[11px] leading-relaxed text-slate-400">
+                Mon - Sat: 10:00 - 19:00 IST.<br />
+                Dedicated student resolution desk.
+              </p>
+            </div>
+
+          </footer>
+
+        </div>
 
       </main>
 
-      {/* Trust Footer */}
-      <footer className="border-t border-surface-border py-8 px-4 text-center text-xs sm:text-sm text-text-muted bg-surface/50">
-        <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2 font-medium">
-            <BrandLogo size="sm" showBadge={false} />
-            <span>Digital Azadi Support Center</span>
-          </div>
-          <div className="flex items-center gap-4 text-xs font-mono">
-            <span>Timezone: Asia/Kolkata (IST)</span>
-            <span>•</span>
-            <span className="text-emerald-600 dark:text-emerald-400 font-bold">Cloud Synced</span>
-          </div>
-        </div>
-      </footer>
+      {/* Floating Bottom Quick Tracker FAB Button (Matching Search FAB in Screenshot) */}
+      <div className="fixed bottom-6 right-6 z-30">
+        <button
+          type="button"
+          onClick={() => {
+            setActiveTab(activeTab === 'submit' ? 'track' : 'submit');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+          className="w-13 h-13 rounded-full bg-white/[0.12] hover:bg-white/[0.2] border border-white/20 backdrop-blur-xl text-white flex items-center justify-center shadow-2xl shadow-black/60 hover:scale-105 active:scale-95 transition-all"
+          title={activeTab === 'submit' ? 'Track Ticket Status' : 'Raise Support Query'}
+        >
+          {activeTab === 'submit' ? (
+            <Search className="w-5 h-5 text-purple-300" />
+          ) : (
+            <HelpCircle className="w-5 h-5 text-purple-300" />
+          )}
+        </button>
+      </div>
 
     </div>
   );
