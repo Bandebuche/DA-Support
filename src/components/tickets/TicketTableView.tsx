@@ -1,9 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import { Ticket, TicketStatus } from '../../types/ticket';
 import { LiveStopwatch } from '../stopwatch/LiveStopwatch';
-import { Badge } from '../ui/Badge';
 import { formatDurationHuman } from '../../lib/stopwatch';
-import { formatToISTDateString } from '../../lib/timezone';
+import { formatToISTDateString, formatToISTTimeString } from '../../lib/timezone';
 import { 
   Play, 
   CheckCircle, 
@@ -14,9 +13,13 @@ import {
   CheckSquare,
   Square,
   MinusSquare,
-  MoreVertical,
-  User,
-  ArrowUpDown
+  Settings as SettingsIcon,
+  Calendar,
+  ExternalLink,
+  ChevronLeft,
+  ChevronRight as ChevronRightIcon,
+  SlidersHorizontal,
+  User
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
@@ -41,11 +44,34 @@ export const TicketTableView: React.FC<TicketTableViewProps> = ({
   onResetAllTickets,
 }) => {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [activeHighlightId, setActiveHighlightId] = useState<string | null>(() => {
+    return tickets.length > 0 ? tickets[0].ticketId : null;
+  });
+  const [statusTab, setStatusTab] = useState<'all' | 'in-progress' | 'pending' | 'resolved'>('all');
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 8;
 
-  // Check selection states
+  // Filter by local status tab
+  const displayedTickets = useMemo(() => {
+    return tickets.filter(t => {
+      if (statusTab === 'in-progress') return t.status === 'In Progress';
+      if (statusTab === 'pending') return t.status === 'New' || t.status === 'Waiting for User';
+      if (statusTab === 'resolved') return t.status === 'Resolved';
+      return true;
+    });
+  }, [tickets, statusTab]);
+
+  // Pagination
+  const totalPages = Math.max(1, Math.ceil(displayedTickets.length / pageSize));
+  const paginatedTickets = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return displayedTickets.slice(start, start + pageSize);
+  }, [displayedTickets, currentPage, pageSize]);
+
+  // Selection states
   const allSelected = useMemo(() => {
-    return tickets.length > 0 && tickets.every(t => selectedIds.has(t.ticketId));
-  }, [tickets, selectedIds]);
+    return paginatedTickets.length > 0 && paginatedTickets.every(t => selectedIds.has(t.ticketId));
+  }, [paginatedTickets, selectedIds]);
 
   const someSelected = useMemo(() => {
     return selectedIds.size > 0 && !allSelected;
@@ -55,7 +81,7 @@ export const TicketTableView: React.FC<TicketTableViewProps> = ({
     if (allSelected) {
       setSelectedIds(new Set());
     } else {
-      setSelectedIds(new Set(tickets.map(t => t.ticketId)));
+      setSelectedIds(new Set(paginatedTickets.map(t => t.ticketId)));
     }
   };
 
@@ -96,7 +122,7 @@ export const TicketTableView: React.FC<TicketTableViewProps> = ({
     }
   };
 
-  // Helper for requester avatar initials
+  // Avatar Initials
   const getInitials = (name: string) => {
     return name
       .split(' ')
@@ -107,21 +133,49 @@ export const TicketTableView: React.FC<TicketTableViewProps> = ({
   };
 
   return (
-    <div className="space-y-4">
+    <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 shadow-sm border border-slate-100 dark:border-slate-800 space-y-6">
       
-      {/* Section Header: All Support Tickets */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
-        <div>
-          <h2 className="text-xl sm:text-2xl font-extrabold text-text-pure tracking-tight">
-            All Support Tickets
-          </h2>
-          <p className="text-xs sm:text-sm text-text-muted mt-0.5">
-            List of tickets opened by Customer
-          </p>
+      {/* ============================================================== */}
+      {/* Top Filter Tabs Bar (Directly Matching Reference Screenshot) */}
+      {/* ============================================================== */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-100 dark:border-slate-800/80">
+        
+        {/* Horizontal Text Tabs */}
+        <div className="flex items-center gap-6 sm:gap-8 overflow-x-auto select-none">
+          {[
+            { id: 'all', label: 'All orders', count: tickets.length },
+            { id: 'in-progress', label: 'Dispatch', count: tickets.filter(t => t.status === 'In Progress').length },
+            { id: 'pending', label: 'Pending', count: tickets.filter(t => t.status === 'New' || t.status === 'Waiting for User').length },
+            { id: 'resolved', label: 'Completed', count: tickets.filter(t => t.status === 'Resolved').length },
+          ].map(tab => {
+            const isActive = statusTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => {
+                  setStatusTab(tab.id as any);
+                  setCurrentPage(1);
+                }}
+                className={cn(
+                  'text-xs sm:text-sm font-bold pb-2 relative transition-colors whitespace-nowrap',
+                  isActive
+                    ? 'text-slate-900 dark:text-white font-extrabold'
+                    : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 font-semibold'
+                )}
+              >
+                <span>{tab.label}</span>
+                {isActive && (
+                  <span className="absolute bottom-0 inset-x-0 h-0.5 bg-blue-600 rounded-full" />
+                )}
+              </button>
+            );
+          })}
         </div>
 
-        {/* Bulk Action Controls */}
-        <div className="flex items-center gap-2">
+        {/* Right Date Range Pill & Bulk Controls */}
+        <div className="flex items-center gap-3">
+          {/* Selected Count & Delete Action */}
           {selectedIds.size > 0 && (
             <button
               type="button"
@@ -129,321 +183,398 @@ export const TicketTableView: React.FC<TicketTableViewProps> = ({
               className="px-3.5 py-1.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-semibold flex items-center gap-1.5 shadow-sm transition animate-in fade-in"
             >
               <Trash2 className="w-3.5 h-3.5" />
-              <span>Delete Selected ({selectedIds.size})</span>
+              <span>Delete ({selectedIds.size})</span>
             </button>
           )}
 
+          {/* Reset All */}
           {onResetAllTickets && (
             <button
               type="button"
               onClick={handleResetAll}
-              className="px-3 py-1.5 rounded-xl bg-surface hover:bg-red-50 dark:hover:bg-red-950/40 border border-surface-border hover:border-red-200 dark:hover:border-red-800 text-text-soft hover:text-red-600 dark:hover:text-red-400 text-xs font-semibold flex items-center gap-1.5 transition"
-              title="Delete all tickets and reset database"
+              className="px-3 py-1.5 rounded-xl bg-slate-50 hover:bg-red-50 dark:bg-slate-800 dark:hover:bg-red-950/40 border border-slate-200 dark:border-slate-700 hover:border-red-200 text-slate-500 hover:text-red-600 dark:text-slate-400 dark:hover:text-red-400 text-xs font-semibold flex items-center gap-1.5 transition"
+              title="Reset All Tickets"
             >
               <RotateCcw className="w-3.5 h-3.5" />
-              <span>Reset All</span>
+              <span className="hidden sm:inline">Reset All</span>
             </button>
           )}
+
+          {/* Date Range Badge (from screenshot: 31 Jul 2026 to 03 Aug 2026) */}
+          <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-600 dark:text-slate-300 font-mono shadow-2xs">
+            <Calendar className="w-3.5 h-3.5 text-slate-400" />
+            <span>Live Records</span>
+            <span className="text-slate-400 font-normal">to</span>
+            <span>IST Today</span>
+          </div>
         </div>
+
       </div>
 
-      {/* Toolbar Sub-bar: Latest Tickets Selector */}
-      <div className="bg-surface border border-surface-border rounded-2xl px-5 py-3.5 flex flex-wrap items-center justify-between gap-3 shadow-xs">
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={toggleSelectAll}
-            className="flex items-center gap-2.5 text-xs sm:text-sm font-bold text-text-pure hover:text-indigo-600 dark:hover:text-indigo-400 transition select-none"
-          >
-            {allSelected ? (
-              <CheckSquare className="w-4.5 h-4.5 text-emerald-600 dark:text-emerald-400" />
-            ) : someSelected ? (
-              <MinusSquare className="w-4.5 h-4.5 text-indigo-600 dark:text-indigo-400" />
-            ) : (
-              <Square className="w-4.5 h-4.5 text-text-muted" />
-            )}
-            <span>
-              Latest Tickets (Showing {tickets.length > 0 ? `01 to ${tickets.length.toString().padStart(2, '0')}` : '0'} of {tickets.length} Tickets)
-            </span>
-          </button>
-
-          {selectedIds.size > 0 && (
-            <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 text-xs font-bold animate-in fade-in">
-              {selectedIds.size} Selected
-            </span>
-          )}
-        </div>
-      </div>
-
-      {/* Tickets List Container */}
-      {tickets.length === 0 ? (
-        <div className="bg-surface border border-surface-border rounded-2xl p-12 text-center shadow-sm space-y-4">
-          <p className="text-sm font-medium text-text-muted">No tickets match the selected filters</p>
-          {onResetAllTickets && (
-            <button
-              onClick={handleResetAll}
-              className="px-3.5 py-2 rounded-xl bg-red-50 hover:bg-red-100 dark:bg-red-950/40 dark:hover:bg-red-900/40 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 text-xs font-semibold inline-flex items-center gap-1.5 transition"
-            >
-              <RotateCcw className="w-3.5 h-3.5" />
-              <span>Reset Ticket Store</span>
-            </button>
-          )}
+      {/* ============================================================== */}
+      {/* Table Rows (Matching Reference Screenshot with Active Glow Row) */}
+      {/* ============================================================== */}
+      {displayedTickets.length === 0 ? (
+        <div className="p-12 text-center space-y-3 bg-slate-50/50 dark:bg-slate-800/30 rounded-2xl border border-dashed border-slate-200 dark:border-slate-700">
+          <p className="text-sm font-semibold text-slate-500 dark:text-slate-400">
+            No tickets found in this tab.
+          </p>
         </div>
       ) : (
-        <div className="bg-surface border border-surface-border rounded-2xl overflow-hidden shadow-sm">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="border-b border-surface-border bg-surface-elevated/70 text-xs font-semibold text-text-muted select-none">
-                  <th className="py-3.5 px-3 w-10 text-center">
-                    <input
-                      type="checkbox"
-                      checked={allSelected}
-                      ref={input => {
-                        if (input) {
-                          input.indeterminate = someSelected;
-                        }
-                      }}
-                      onChange={toggleSelectAll}
-                      className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
-                    />
-                  </th>
-                  <th className="py-3.5 px-3">ID</th>
-                  <th className="py-3.5 px-4">Requester Name</th>
-                  <th className="py-3.5 px-4">Subjects</th>
-                  <th className="py-3.5 px-4">Status</th>
-                  <th className="py-3.5 px-4">Priority</th>
-                  <th className="py-3.5 px-4">Assignee</th>
-                  <th className="py-3.5 px-4">Create Date</th>
-                  <th className="py-3.5 px-4 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-surface-border text-xs">
-                {tickets.map(ticket => {
-                  const isSelected = selectedIds.has(ticket.ticketId);
-                  const isDiamond = ticket.membershipTier.includes('Diamond');
-                  const isGold = ticket.membershipTier.includes('Gold');
-                  const isPmp = ticket.membershipTier.includes('PMP');
-                  const isLive = ticket.status === 'In Progress' && !!ticket.supportStartedAt;
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-separate border-spacing-y-2">
+            <thead>
+              <tr className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider select-none px-4">
+                <th className="py-2.5 px-3 w-10 text-center">
+                  <input
+                    type="checkbox"
+                    checked={allSelected}
+                    ref={input => {
+                      if (input) {
+                        input.indeterminate = someSelected;
+                      }
+                    }}
+                    onChange={toggleSelectAll}
+                    className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                  />
+                </th>
+                <th className="py-2.5 px-4 font-semibold">Id</th>
+                <th className="py-2.5 px-4 font-semibold">Name</th>
+                <th className="py-2.5 px-4 font-semibold">Subject & Ecosystem</th>
+                <th className="py-2.5 px-4 font-semibold">Date (IST)</th>
+                <th className="py-2.5 px-4 font-semibold">Specialist</th>
+                <th className="py-2.5 px-4 font-semibold">Status</th>
+                <th className="py-2.5 px-4 text-right font-semibold">Action</th>
+              </tr>
+            </thead>
+            <tbody className="text-xs">
+              {paginatedTickets.map(ticket => {
+                const isSelected = selectedIds.has(ticket.ticketId);
+                const isActiveRow = activeHighlightId === ticket.ticketId;
+                const isDiamond = ticket.membershipTier.includes('Diamond');
+                const isGold = ticket.membershipTier.includes('Gold');
+                const isPmp = ticket.membershipTier.includes('PMP');
 
-                  const specialist = ticket.assignedSpecialist || 'General Support Desk';
-                  const isSachin = specialist === 'Sachin Sir';
-                  const isOnkar = specialist === 'Onkar Kulkarni';
+                const specialist = ticket.assignedSpecialist || 'General Support Desk';
+                const isSachin = specialist === 'Sachin Sir';
+                const isOnkar = specialist === 'Onkar Kulkarni';
 
-                  return (
-                    <tr
-                      key={ticket.id}
-                      onClick={() => onSelectTicket(ticket)}
+                return (
+                  <tr
+                    key={ticket.id}
+                    onClick={() => {
+                      setActiveHighlightId(ticket.ticketId);
+                    }}
+                    onDoubleClick={() => onSelectTicket(ticket)}
+                    className={cn(
+                      'group transition-all duration-200 cursor-pointer select-none',
+                      isActiveRow
+                        ? 'bg-blue-600 text-white shadow-xl shadow-blue-500/35 rounded-2xl scale-[1.008]'
+                        : 'bg-white dark:bg-slate-800/80 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-100 dark:border-slate-800/90 rounded-2xl shadow-xs'
+                    )}
+                  >
+                    {/* Checkbox Column */}
+                    <td 
                       className={cn(
-                        'transition-colors cursor-pointer group',
-                        isSelected 
-                          ? 'bg-indigo-50/60 dark:bg-indigo-950/30 hover:bg-indigo-50/80 dark:hover:bg-indigo-950/40' 
-                          : 'hover:bg-surface-elevated/60'
+                        'py-4 px-3 text-center transition-colors',
+                        isActiveRow ? 'rounded-l-2xl' : 'rounded-l-2xl'
                       )}
+                      onClick={e => e.stopPropagation()}
                     >
-                      {/* Row Checkbox */}
-                      <td className="py-4 px-3 text-center" onClick={e => e.stopPropagation()}>
-                        <input
-                          type="checkbox"
-                          checked={isSelected}
-                          onChange={e => toggleSelectRow(ticket.ticketId, e as any)}
-                          className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
-                        />
-                      </td>
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={e => toggleSelectRow(ticket.ticketId, e as any)}
+                        className={cn(
+                          'w-4 h-4 rounded cursor-pointer transition',
+                          isActiveRow 
+                            ? 'accent-white text-blue-600' 
+                            : 'border-slate-300 text-blue-600 focus:ring-blue-500'
+                        )}
+                      />
+                    </td>
 
-                      {/* ID */}
-                      <td className="py-4 px-3 whitespace-nowrap">
-                        <span className="font-mono font-bold text-xs text-indigo-600 dark:text-indigo-400 group-hover:underline">
-                          #{ticket.ticketId}
-                        </span>
-                      </td>
+                    {/* ID */}
+                    <td className="py-4 px-4 whitespace-nowrap font-mono font-bold text-xs">
+                      <span className={isActiveRow ? 'text-white' : 'text-slate-900 dark:text-white'}>
+                        #{ticket.ticketId}
+                      </span>
+                    </td>
 
-                      {/* Requester Name with Avatar Thumbnail */}
-                      <td className="py-4 px-4 whitespace-nowrap">
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs flex items-center justify-center shrink-0 border border-surface-border">
-                            {getInitials(ticket.requesterName) || 'U'}
-                          </div>
-                          <div>
-                            <div className="font-bold text-text-pure flex items-center gap-1.5">
-                              <span>{ticket.requesterName}</span>
-                              {isDiamond && (
-                                <span className="text-[9px] px-1.5 py-0.2 rounded bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 font-semibold border border-indigo-200 dark:border-indigo-800">
-                                  DIAMOND
-                                </span>
-                              )}
-                              {isGold && (
-                                <span className="text-[9px] px-1.5 py-0.2 rounded bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 font-semibold border border-amber-200 dark:border-amber-800">
-                                  GOLD
-                                </span>
-                              )}
-                              {isPmp && (
-                                <span className="text-[9px] px-1.5 py-0.2 rounded bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 font-semibold border border-purple-200 dark:border-purple-800">
-                                  PMP
-                                </span>
-                              )}
-                            </div>
-                            <span className="text-[11px] text-text-muted font-mono block">
-                              {ticket.requesterPhone}
-                            </span>
-                          </div>
+                    {/* Name + Avatar */}
+                    <td className="py-4 px-4 whitespace-nowrap">
+                      <div className="flex items-center gap-3">
+                        <div className={cn(
+                          'w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs shrink-0 transition shadow-xs',
+                          isActiveRow
+                            ? 'bg-white text-blue-600 ring-2 ring-white/40'
+                            : 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200'
+                        )}>
+                          {getInitials(ticket.requesterName) || 'U'}
                         </div>
-                      </td>
-
-                      {/* Subjects & Ecosystem */}
-                      <td className="py-4 px-4 max-w-xs">
-                        <div className="space-y-0.5">
-                          <div className="font-medium text-text-pure truncate group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
-                            {ticket.subject}
+                        <div>
+                          <div className={cn(
+                            'font-bold flex items-center gap-1.5 leading-tight',
+                            isActiveRow ? 'text-white' : 'text-slate-900 dark:text-white'
+                          )}>
+                            <span>{ticket.requesterName}</span>
+                            {isDiamond && (
+                              <span className={cn(
+                                'text-[9px] px-1.5 py-0.2 rounded font-bold border',
+                                isActiveRow 
+                                  ? 'bg-blue-500/80 text-white border-blue-400' 
+                                  : 'bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300 border-blue-200 dark:border-blue-800'
+                              )}>
+                                DIAMOND
+                              </span>
+                            )}
                           </div>
-                          <div className="text-[11px] text-text-muted truncate">
-                            {ticket.ecosystem} • {ticket.category}
-                          </div>
-                        </div>
-                      </td>
-
-                      {/* Status */}
-                      <td className="py-4 px-4 whitespace-nowrap">
-                        <div className="flex items-center gap-2">
                           <span className={cn(
-                            'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold border',
+                            'text-[11px] font-mono block mt-0.5',
+                            isActiveRow ? 'text-blue-100' : 'text-slate-400'
+                          )}>
+                            {ticket.requesterPhone}
+                          </span>
+                        </div>
+                      </div>
+                    </td>
+
+                    {/* Subject & Ecosystem */}
+                    <td className="py-4 px-4 max-w-xs">
+                      <div className="space-y-0.5">
+                        <div className={cn(
+                          'font-semibold truncate leading-tight',
+                          isActiveRow ? 'text-white' : 'text-slate-800 dark:text-slate-200'
+                        )}>
+                          {ticket.subject}
+                        </div>
+                        <div className={cn(
+                          'text-[11px] truncate',
+                          isActiveRow ? 'text-blue-100' : 'text-slate-400'
+                        )}>
+                          {ticket.ecosystem} • {ticket.category}
+                        </div>
+                      </div>
+                    </td>
+
+                    {/* Date (IST) */}
+                    <td className="py-4 px-4 whitespace-nowrap">
+                      <span className={cn(
+                        'font-medium text-xs',
+                        isActiveRow ? 'text-blue-100 font-semibold' : 'text-slate-500 dark:text-slate-400'
+                      )}>
+                        {formatToISTDateString(ticket.createdAt)}
+                      </span>
+                    </td>
+
+                    {/* Specialist (Assignee) */}
+                    <td className="py-4 px-4 whitespace-nowrap">
+                      <div className="flex items-center gap-1.5">
+                        <span className={cn(
+                          'text-xs font-bold px-2.5 py-1 rounded-xl inline-block border',
+                          isActiveRow
+                            ? 'bg-white/20 text-white border-white/30'
+                            : isSachin
+                            ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800'
+                            : isOnkar
+                            ? 'bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800'
+                            : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700'
+                        )}>
+                          {specialist}
+                        </span>
+                      </div>
+                    </td>
+
+                    {/* Status */}
+                    <td className="py-4 px-4 whitespace-nowrap">
+                      <div className="flex items-center gap-2">
+                        {isActiveRow ? (
+                          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-white text-blue-600 shadow-xs">
+                            <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse" />
+                            <span>{ticket.status}</span>
+                          </span>
+                        ) : (
+                          <span className={cn(
+                            'inline-flex items-center gap-1.5 text-xs font-bold',
                             ticket.status === 'Resolved'
-                              ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800'
+                              ? 'text-emerald-600 dark:text-emerald-400'
                               : ticket.status === 'In Progress'
-                              ? 'bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800'
+                              ? 'text-blue-600 dark:text-blue-400'
                               : ticket.status === 'Waiting for User'
-                              ? 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800'
-                              : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700'
+                              ? 'text-amber-500'
+                              : 'text-rose-500'
                           )}>
                             <span className={cn(
                               'w-2 h-2 rounded-full',
                               ticket.status === 'Resolved' ? 'bg-emerald-500' :
                               ticket.status === 'In Progress' ? 'bg-blue-500 animate-pulse' :
-                              ticket.status === 'Waiting for User' ? 'bg-amber-500' : 'bg-slate-400'
+                              ticket.status === 'Waiting for User' ? 'bg-amber-500' : 'bg-rose-500'
                             )} />
                             <span>{ticket.status}</span>
                           </span>
-                          {isLive && (
-                            <LiveStopwatch 
-                              startedAtUtc={ticket.supportStartedAt!} 
-                              size="sm" 
-                              variant="compact" 
-                            />
-                          )}
-                        </div>
-                      </td>
+                        )}
 
-                      {/* Priority */}
-                      <td className="py-4 px-4 whitespace-nowrap">
-                        <span className={cn(
-                          'px-2.5 py-1 rounded-full text-[11px] font-semibold border',
-                          ticket.priority === 'Urgent'
-                            ? 'bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800'
-                            : ticket.priority === 'High'
-                            ? 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800'
-                            : ticket.priority === 'Normal'
-                            ? 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700'
-                            : 'bg-slate-50 dark:bg-slate-900 text-slate-500 border-slate-200 dark:border-slate-800'
-                        )}>
-                          {ticket.priority}
-                        </span>
-                      </td>
-
-                      {/* Assignee (Sachin Sir / Onkar Kulkarni) */}
-                      <td className="py-4 px-4 whitespace-nowrap">
-                        <div className="flex items-center gap-2">
-                          <div className={cn(
-                            'w-6 h-6 rounded-lg flex items-center justify-center font-bold text-[10px] shrink-0 text-white',
-                            isSachin ? 'bg-emerald-600' : isOnkar ? 'bg-indigo-600' : 'bg-slate-600'
-                          )}>
-                            {isSachin ? 'SS' : isOnkar ? 'OK' : 'GD'}
+                        {ticket.status === 'In Progress' && ticket.supportStartedAt && (
+                          <div className={isActiveRow ? 'text-white' : ''}>
+                            <LiveStopwatch startedAtUtc={ticket.supportStartedAt} size="sm" variant="compact" />
                           </div>
-                          <div>
-                            <span className="font-bold text-xs text-text-pure block leading-tight">
-                              {specialist}
-                            </span>
-                            <span className={cn(
-                              'text-[10px] font-semibold block',
-                              isSachin 
-                                ? 'text-emerald-600 dark:text-emerald-400' 
-                                : isOnkar 
-                                ? 'text-indigo-600 dark:text-indigo-400' 
-                                : 'text-text-muted'
-                            )}>
-                              {isSachin ? 'All Other Ops' : isOnkar ? 'Meta Related' : 'Triage Desk'}
-                            </span>
-                          </div>
-                        </div>
-                      </td>
+                        )}
+                      </div>
+                    </td>
 
-                      {/* Create Date */}
-                      <td className="py-4 px-4 whitespace-nowrap text-text-muted">
-                        <span className="font-medium">{formatToISTDateString(ticket.createdAt)}</span>
-                      </td>
-
-                      {/* Actions */}
-                      <td className="py-4 px-4 text-right whitespace-nowrap" onClick={e => e.stopPropagation()}>
-                        <div className="flex items-center justify-end gap-1.5">
-                          {/* WhatsApp */}
-                          <a
-                            href={`https://wa.me/91${ticket.requesterPhone}?text=${encodeURIComponent(`Hello ${ticket.requesterName}, regarding your ticket ${ticket.ticketId}: `)}`}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="p-1.5 rounded-lg bg-surface-elevated hover:bg-emerald-50 dark:hover:bg-emerald-950/30 border border-surface-border text-emerald-600 dark:text-emerald-400 transition"
-                            title="Chat on WhatsApp"
-                          >
-                            <MessageCircle className="w-3.5 h-3.5" />
-                          </a>
-
-                          {ticket.status === 'New' && (
-                            <button
-                              onClick={() => onStartSupport(ticket.ticketId)}
-                              className="px-2.5 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold flex items-center gap-1 shadow-sm transition"
-                            >
-                              <Play className="w-3 h-3 fill-current" />
-                              Start
-                            </button>
+                    {/* Actions (Settings Gear & Quick Action) */}
+                    <td 
+                      className={cn(
+                        'py-4 px-4 text-right whitespace-nowrap',
+                        isActiveRow ? 'rounded-r-2xl' : 'rounded-r-2xl'
+                      )} 
+                      onClick={e => e.stopPropagation()}
+                    >
+                      <div className="flex items-center justify-end gap-1.5">
+                        {/* WhatsApp Button */}
+                        <a
+                          href={`https://wa.me/91${ticket.requesterPhone}?text=${encodeURIComponent(`Hello ${ticket.requesterName}, regarding your ticket ${ticket.ticketId}: `)}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className={cn(
+                            'p-1.5 rounded-xl transition',
+                            isActiveRow
+                              ? 'bg-white/20 hover:bg-white/30 text-white'
+                              : 'bg-slate-100 hover:bg-emerald-50 dark:bg-slate-800 dark:hover:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400'
                           )}
+                          title="Chat on WhatsApp"
+                        >
+                          <MessageCircle className="w-3.5 h-3.5" />
+                        </a>
 
-                          {ticket.status === 'In Progress' && (
-                            <button
-                              onClick={() => onResolveTicket(ticket)}
-                              className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold flex items-center gap-1 shadow-sm transition"
-                            >
-                              <CheckCircle className="w-3 h-3" />
-                              Resolve
-                            </button>
-                          )}
-
-                          {onDeleteTicket && (
-                            <button
-                              type="button"
-                              onClick={e => handleSingleDelete(ticket.ticketId, e)}
-                              className="p-1.5 rounded-lg bg-surface-elevated hover:bg-red-50 dark:hover:bg-red-950/30 border border-surface-border text-text-muted hover:text-red-600 dark:hover:text-red-400 transition"
-                              title="Delete this ticket"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
-                          )}
-
+                        {/* Start Support Button */}
+                        {ticket.status === 'New' && (
                           <button
-                            onClick={() => onSelectTicket(ticket)}
-                            className="p-1.5 rounded-lg bg-surface-elevated hover:bg-surface-hover border border-surface-border text-text-muted hover:text-text-pure transition"
-                            title="View Details"
+                            type="button"
+                            onClick={() => onStartSupport(ticket.ticketId)}
+                            className={cn(
+                              'px-2.5 py-1 rounded-xl text-xs font-bold flex items-center gap-1 shadow-xs transition',
+                              isActiveRow
+                                ? 'bg-white text-blue-600 hover:bg-blue-50'
+                                : 'bg-blue-600 text-white hover:bg-blue-700'
+                            )}
                           >
-                            <ChevronRight className="w-3.5 h-3.5" />
+                            <Play className="w-3 h-3 fill-current" />
+                            Start
                           </button>
-                        </div>
-                      </td>
+                        )}
 
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+                        {/* Resolve Button */}
+                        {ticket.status === 'In Progress' && (
+                          <button
+                            type="button"
+                            onClick={() => onResolveTicket(ticket)}
+                            className={cn(
+                              'px-2.5 py-1 rounded-xl text-xs font-bold flex items-center gap-1 shadow-xs transition',
+                              isActiveRow
+                                ? 'bg-white text-emerald-700 hover:bg-emerald-50'
+                                : 'bg-emerald-600 text-white hover:bg-emerald-700'
+                            )}
+                          >
+                            <CheckCircle className="w-3 h-3" />
+                            Resolve
+                          </button>
+                        )}
+
+                        {/* Delete Single */}
+                        {onDeleteTicket && (
+                          <button
+                            type="button"
+                            onClick={e => handleSingleDelete(ticket.ticketId, e)}
+                            className={cn(
+                              'p-1.5 rounded-xl transition',
+                              isActiveRow
+                                ? 'bg-white/20 hover:bg-white/30 text-white'
+                                : 'bg-slate-100 hover:bg-red-50 dark:bg-slate-800 dark:hover:bg-red-950/40 text-slate-400 hover:text-red-600'
+                            )}
+                            title="Delete Ticket"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        )}
+
+                        {/* View Details Gear / Drawer trigger (Matching Screenshot Gear Icon) */}
+                        <button
+                          type="button"
+                          onClick={() => onSelectTicket(ticket)}
+                          className={cn(
+                            'p-1.5 rounded-xl transition',
+                            isActiveRow
+                              ? 'bg-white text-blue-600 shadow-sm'
+                              : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-500 hover:text-slate-800 dark:hover:text-white'
+                          )}
+                          title="Open Ticket Details"
+                        >
+                          <SettingsIcon className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </td>
+
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
       )}
+
+      {/* ============================================================== */}
+      {/* Footer: Pagination (Matching Reference Screenshot) */}
+      {/* ============================================================== */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-4 border-t border-slate-100 dark:border-slate-800 text-xs text-slate-500 dark:text-slate-400 select-none">
+        
+        {/* Count Label */}
+        <div>
+          Showing {displayedTickets.length > 0 ? (currentPage - 1) * pageSize + 1 : 0} - {Math.min(currentPage * pageSize, displayedTickets.length)} of {displayedTickets.length}
+        </div>
+
+        {/* Page numbers < 1 2 3 > */}
+        <div className="flex items-center gap-1.5">
+          <button
+            type="button"
+            disabled={currentPage <= 1}
+            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+            className="p-1.5 rounded-xl bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 disabled:opacity-30 transition"
+          >
+            <ChevronLeft className="w-3.5 h-3.5" />
+          </button>
+
+          {Array.from({ length: totalPages }).map((_, i) => {
+            const pageNum = i + 1;
+            const isCurrent = pageNum === currentPage;
+            return (
+              <button
+                key={pageNum}
+                type="button"
+                onClick={() => setCurrentPage(pageNum)}
+                className={cn(
+                  'w-7 h-7 rounded-xl text-xs font-bold transition flex items-center justify-center',
+                  isCurrent
+                    ? 'bg-blue-600 text-white shadow-sm'
+                    : 'bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700'
+                )}
+              >
+                {pageNum}
+              </button>
+            );
+          })}
+
+          <button
+            type="button"
+            disabled={currentPage >= totalPages}
+            onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+            className="p-1.5 rounded-xl bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 disabled:opacity-30 transition"
+          >
+            <ChevronRightIcon className="w-3.5 h-3.5" />
+          </button>
+        </div>
+
+      </div>
 
     </div>
   );

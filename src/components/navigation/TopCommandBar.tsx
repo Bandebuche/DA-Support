@@ -7,7 +7,10 @@ import {
   Table, 
   Clock, 
   SlidersHorizontal,
-  Menu
+  Menu,
+  Bell,
+  User,
+  ShieldCheck
 } from 'lucide-react';
 import { getCurrentISTClockString } from '../../lib/timezone';
 import { cn } from '../../lib/utils';
@@ -25,6 +28,7 @@ interface TopCommandBarProps {
   isRefreshing: boolean;
   onOpenSettings: () => void;
   title: string;
+  ticketCount?: number;
   onOpenMobileNav?: () => void;
 }
 
@@ -37,6 +41,7 @@ export const TopCommandBar: React.FC<TopCommandBarProps> = ({
   isRefreshing,
   onOpenSettings,
   title,
+  ticketCount,
   onOpenMobileNav,
 }) => {
   const [istTime, setIstTime] = useState(getCurrentISTClockString());
@@ -64,136 +69,156 @@ export const TopCommandBar: React.FC<TopCommandBarProps> = ({
   }, []);
 
   return (
-    <header className="sticky top-0 z-30 bg-surface/95 backdrop-blur-md border-b border-surface-border px-3 sm:px-6 py-2.5 sm:py-3 transition-colors select-none">
-      <div className="flex flex-col gap-2.5 max-w-7xl mx-auto">
+    <header className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-100 dark:border-slate-800/80 px-6 sm:px-8 py-4 select-none transition-colors">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         
-        {/* Top Row: Hamburger / Brand (mobile), Section Title & Action Buttons */}
-        <div className="flex items-center justify-between gap-2">
-          
-          {/* Left: Mobile Hamburger & Title */}
-          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-            {/* Hamburger Button for Mobile (< md) */}
-            {onOpenMobileNav && (
-              <button
-                onClick={onOpenMobileNav}
-                className="p-2 -ml-1 rounded-xl text-text-soft hover:text-text-pure hover:bg-surface-elevated border border-transparent hover:border-surface-border md:hidden transition shrink-0"
-                aria-label="Open navigation menu"
-              >
-                <Menu className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
-              </button>
-            )}
-
-            {/* Mobile Logo (< sm) */}
-            <div className="sm:hidden shrink-0">
-              <BrandLogo size="sm" showBadge={false} />
-            </div>
-
-            <div className="min-w-0">
-              <h1 className="text-sm sm:text-base font-bold text-text-pure tracking-tight truncate">
-                {title}
-              </h1>
-              <div className="flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs text-text-muted">
-                <span className="flex items-center gap-1 font-mono">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                  <span className="text-emerald-700 dark:text-emerald-400 font-semibold">{istTime}</span>
-                </span>
-                <span className="hidden xs:inline">•</span>
-                <span className="hidden xs:inline text-text-muted">IST Cloud</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Right Actions: View Switcher, Sync, Settings, Theme Toggle */}
-          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-            
-            {/* View Mode Switcher */}
-            <div className="flex items-center p-0.5 sm:p-1 rounded-xl bg-surface-elevated border border-surface-border">
-              <button
-                onClick={() => onViewModeChange('kanban')}
-                className={cn(
-                  'p-1.5 sm:px-2.5 sm:py-1 rounded-lg text-xs transition flex items-center gap-1.5 font-medium',
-                  viewMode === 'kanban'
-                    ? 'bg-indigo-600 text-white shadow-sm'
-                    : 'text-text-soft hover:text-text-pure hover:bg-surface'
-                )}
-                title="Board Pipeline View"
-              >
-                <Kanban className="w-3.5 h-3.5" />
-                <span className="text-xs hidden md:inline font-semibold">Board View</span>
-              </button>
-              <button
-                onClick={() => onViewModeChange('cards')}
-                className={cn(
-                  'p-1.5 sm:px-2.5 sm:py-1 rounded-lg text-xs transition flex items-center gap-1.5 font-medium',
-                  viewMode === 'cards'
-                    ? 'bg-indigo-600 text-white shadow-sm'
-                    : 'text-text-soft hover:text-text-pure hover:bg-surface'
-                )}
-                title="Cards Grid View"
-              >
-                <LayoutGrid className="w-3.5 h-3.5" />
-                <span className="text-xs hidden md:inline font-semibold">Cards View</span>
-              </button>
-              <button
-                onClick={() => onViewModeChange('table')}
-                className={cn(
-                  'p-1.5 sm:px-2.5 sm:py-1 rounded-lg text-xs transition flex items-center gap-1.5 font-medium',
-                  viewMode === 'table'
-                    ? 'bg-indigo-600 text-white shadow-sm'
-                    : 'text-text-soft hover:text-text-pure hover:bg-surface'
-                )}
-                title="Data Table View"
-              >
-                <Table className="w-3.5 h-3.5" />
-                <span className="text-xs hidden md:inline font-semibold">Table View</span>
-              </button>
-            </div>
-
-            {/* Sync Button */}
+        {/* Left: Section Title & Count Subtitle (Matching Reference Screenshot) */}
+        <div className="flex items-center gap-3">
+          {/* Hamburger for Mobile (< md) */}
+          {onOpenMobileNav && (
             <button
-              onClick={onRefresh}
-              disabled={isRefreshing}
-              className="p-1.5 sm:p-2 rounded-xl bg-surface-elevated hover:bg-surface-hover border border-surface-border text-text-soft hover:text-text-pure transition disabled:opacity-50"
-              title="Sync with Database & Sheets"
+              onClick={onOpenMobileNav}
+              className="p-2 -ml-2 rounded-xl text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white md:hidden transition shrink-0"
+              aria-label="Open navigation menu"
             >
-              <RotateCw className={cn('w-4 h-4', isRefreshing && 'animate-spin text-indigo-600 dark:text-indigo-400')} />
+              <Menu className="w-5 h-5 text-blue-600" />
             </button>
+          )}
 
-            {/* Settings */}
-            <button
-              onClick={onOpenSettings}
-              className="p-1.5 sm:p-2 rounded-xl bg-surface-elevated hover:bg-surface-hover border border-surface-border text-text-soft hover:text-text-pure transition"
-              title="Cloud Backend Settings"
-            >
-              <SlidersHorizontal className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-            </button>
-
-            {/* Theme Switcher */}
-            <ThemeToggle />
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight">
+              {title}
+            </h1>
+            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">
+              {ticketCount !== undefined ? `${ticketCount} tickets found` : 'Live Operations Queue'}
+            </p>
           </div>
-
         </div>
 
-        {/* Bottom Row / Full-width Search Input */}
-        <div className="relative w-full">
-          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
-          <input
-            ref={searchInputRef}
-            type="text"
-            value={searchQuery}
-            onChange={e => onSearchChange(e.target.value)}
-            placeholder="Search Ticket ID (DA-2026-XXXX), Phone, Name, Subject..."
-            className={cn(
-              'w-full pl-9 pr-20 py-2 rounded-xl text-xs bg-surface-elevated text-text-pure',
-              'border border-surface-border placeholder:text-text-faint',
-              'focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none transition'
-            )}
-          />
-          <div className="absolute right-2.5 top-1/2 -translate-y-1/2 hidden sm:flex items-center gap-1 pointer-events-none">
-            <kbd className="px-1.5 py-0.5 text-[10px] font-mono font-medium bg-surface border border-surface-border rounded text-text-muted shadow-sm">
-              ⌘K or /
-            </kbd>
+        {/* Right Controls: Search, View Switcher, Notification, Theme, User Chip */}
+        <div className="flex flex-wrap items-center gap-3">
+          
+          {/* Search Input Bar (Sleek rounded input) */}
+          <div className="relative min-w-[220px] sm:min-w-[280px]">
+            <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+            <input
+              ref={searchInputRef}
+              type="text"
+              value={searchQuery}
+              onChange={e => onSearchChange(e.target.value)}
+              placeholder="Search ticket, name, phone..."
+              className={cn(
+                'w-full pl-10 pr-16 py-2 rounded-2xl text-xs sm:text-sm font-medium',
+                'bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white',
+                'border border-slate-200 dark:border-slate-700 placeholder:text-slate-400',
+                'focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition'
+              )}
+            />
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 hidden sm:flex items-center gap-1 pointer-events-none">
+              <kbd className="px-1.5 py-0.5 text-[10px] font-mono font-semibold bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded text-slate-400 shadow-2xs">
+                ⌘K
+              </kbd>
+            </div>
           </div>
+
+          {/* View Mode Switcher */}
+          <div className="flex items-center p-1 rounded-2xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+            <button
+              onClick={() => onViewModeChange('table')}
+              className={cn(
+                'px-2.5 py-1.5 rounded-xl text-xs transition flex items-center gap-1.5 font-bold',
+                viewMode === 'table'
+                  ? 'bg-blue-600 text-white shadow-sm'
+                  : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
+              )}
+              title="Table View (Reference Layout)"
+            >
+              <Table className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Table</span>
+            </button>
+            <button
+              onClick={() => onViewModeChange('cards')}
+              className={cn(
+                'px-2.5 py-1.5 rounded-xl text-xs transition flex items-center gap-1.5 font-bold',
+                viewMode === 'cards'
+                  ? 'bg-blue-600 text-white shadow-sm'
+                  : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
+              )}
+              title="Cards Grid View"
+            >
+              <LayoutGrid className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Cards</span>
+            </button>
+            <button
+              onClick={() => onViewModeChange('kanban')}
+              className={cn(
+                'px-2.5 py-1.5 rounded-xl text-xs transition flex items-center gap-1.5 font-bold',
+                viewMode === 'kanban'
+                  ? 'bg-blue-600 text-white shadow-sm'
+                  : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
+              )}
+              title="Board Pipeline View"
+            >
+              <Kanban className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Board</span>
+            </button>
+          </div>
+
+          {/* IST Clock Pill */}
+          <div className="hidden xl:flex items-center gap-2 px-3 py-1.5 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-300 font-mono shadow-2xs">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span>{istTime}</span>
+            <span className="text-[10px] text-slate-400 font-normal">IST</span>
+          </div>
+
+          {/* Sync Button */}
+          <button
+            onClick={onRefresh}
+            disabled={isRefreshing}
+            className="p-2 rounded-2xl bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 transition disabled:opacity-50"
+            title="Sync with Sheets & Database"
+          >
+            <RotateCw className={cn('w-4 h-4', isRefreshing && 'animate-spin text-blue-600')} />
+          </button>
+
+          {/* Cloud Settings */}
+          <button
+            onClick={onOpenSettings}
+            className="p-2 rounded-2xl bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 transition"
+            title="Google Sheets / Cloud Config"
+          >
+            <SlidersHorizontal className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+          </button>
+
+          {/* Theme Toggle */}
+          <ThemeToggle />
+
+          {/* Notification Bell (from screenshot) */}
+          <div className="relative">
+            <button
+              className="p-2 rounded-2xl bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 transition relative"
+              title="Notifications"
+            >
+              <Bell className="w-4 h-4" />
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-red-500" />
+            </button>
+          </div>
+
+          {/* Admin User Profile Avatar Chip (from screenshot) */}
+          <div className="flex items-center gap-2 pl-1 sm:pl-2 border-l border-slate-200 dark:border-slate-700">
+            <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 text-white font-bold text-xs flex items-center justify-center shadow-md ring-2 ring-blue-500/20">
+              AD
+            </div>
+            <div className="hidden sm:block text-left">
+              <span className="text-xs font-bold text-slate-900 dark:text-white block leading-tight">
+                Admin Lead
+              </span>
+              <span className="text-[10px] text-emerald-600 font-semibold block leading-tight">
+                Super Admin
+              </span>
+            </div>
+          </div>
+
         </div>
 
       </div>

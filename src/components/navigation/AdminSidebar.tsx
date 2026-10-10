@@ -11,11 +11,12 @@ import {
   ChevronLeft,
   ChevronRight,
   LogOut,
-  X
+  X,
+  Headphones,
+  LifeBuoy
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { BrandLogo } from '../common/BrandLogo';
-import { ThemeToggle } from '../common/ThemeToggle';
 
 export type NavItemKey = 
   | 'overview' 
@@ -56,12 +57,12 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
   onMobileClose,
 }) => {
   const navItems = [
-    { key: 'overview', label: 'Overview', icon: LayoutDashboard },
-    { key: 'all', label: 'All Tickets', icon: Layers, count: ticketCounts.all },
-    { key: 'active', label: 'Active Support', icon: Timer, count: ticketCounts.active, highlight: true },
-    { key: 'pending', label: 'Pending', icon: Clock4, count: ticketCounts.pending },
+    { key: 'overview', label: 'Dashboard', icon: LayoutDashboard },
+    { key: 'all', label: 'Tickets', icon: Layers, count: ticketCounts.all },
+    { key: 'active', label: 'Active Sessions', icon: Timer, count: ticketCounts.active },
+    { key: 'pending', label: 'Pending Queue', icon: Clock4, count: ticketCounts.pending },
     { key: 'resolved', label: 'Resolved', icon: CheckCircle2, count: ticketCounts.resolved },
-    { key: 'analytics', label: 'Analytics & SLA', icon: BarChart3 },
+    { key: 'analytics', label: 'Statistics', icon: BarChart3 },
     { key: 'settings', label: 'Settings', icon: Settings },
   ];
 
@@ -89,7 +90,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
   }, [isMobileOpen]);
 
   const renderNavList = (isMobile: boolean = false) => (
-    <nav className="flex-1 py-4 px-3 space-y-1 overflow-y-auto">
+    <nav className="flex-1 py-6 pl-4 pr-0 space-y-1.5 overflow-y-auto">
       {navItems.map(item => {
         const Icon = item.icon;
         const isActive = currentTab === item.key;
@@ -97,24 +98,25 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
         return (
           <button
             key={item.key}
+            type="button"
             onClick={() => {
               onSelectTab(item.key as NavItemKey);
               if (isMobile && onMobileClose) onMobileClose();
             }}
             className={cn(
-              'w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition-colors duration-150 group relative',
+              'w-full flex items-center gap-3.5 py-3 transition-all duration-200 group relative text-xs sm:text-sm font-semibold select-none',
               isActive
-                ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-300 font-bold'
-                : 'text-text-soft hover:text-text-pure hover:bg-surface-elevated',
-              collapsed && !isMobile && 'justify-center px-2'
+                ? 'bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 font-bold rounded-l-full shadow-lg shadow-blue-900/10 pl-5 pr-4 -mr-px z-10'
+                : 'text-white/80 hover:text-white hover:bg-white/10 px-4 rounded-2xl mr-4',
+              collapsed && !isMobile && 'justify-center px-2 mr-2'
             )}
             title={item.label}
           >
             <Icon
               className={cn(
-                'w-4.5 h-4.5 shrink-0 transition-colors',
-                isActive ? 'text-indigo-600 dark:text-indigo-400' : 'text-text-muted group-hover:text-text-pure',
-                item.highlight && !isActive && 'text-amber-600 dark:text-amber-400'
+                'w-5 h-5 shrink-0 transition-transform duration-200',
+                isActive ? 'text-blue-600 dark:text-blue-400 scale-105' : 'text-white/80 group-hover:text-white',
+                isActive ? '' : 'group-hover:scale-105'
               )}
             />
 
@@ -124,10 +126,10 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
                 {item.count !== undefined && (
                   <span
                     className={cn(
-                      'px-2 py-0.5 rounded-full text-[10px] font-mono font-medium',
+                      'px-2 py-0.5 rounded-full text-[10px] font-mono font-bold shrink-0',
                       isActive
-                        ? 'bg-indigo-600 text-white dark:bg-indigo-500 dark:text-white'
-                        : 'bg-surface-elevated text-text-muted border border-surface-border'
+                        ? 'bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300'
+                        : 'bg-white/20 text-white'
                     )}
                   >
                     {item.count}
@@ -139,13 +141,13 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
             {!isMobile && collapsed && (
               <>
                 {item.count !== undefined && item.count > 0 && (
-                  <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-indigo-600 dark:bg-indigo-400" />
+                  <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-amber-400" />
                 )}
                 {/* Floating Tooltip on Hover */}
-                <div className="absolute left-full ml-3 px-3 py-1.5 rounded-xl bg-slate-900 text-white dark:bg-white dark:text-slate-900 text-xs font-bold whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none shadow-2xl z-50 flex items-center gap-2 border border-slate-700 dark:border-slate-200">
+                <div className="absolute left-full ml-3 px-3 py-1.5 rounded-xl bg-slate-900 text-white text-xs font-bold whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none shadow-2xl z-50 flex items-center gap-2 border border-slate-700">
                   <span>{item.label}</span>
                   {item.count !== undefined && (
-                    <span className="px-1.5 py-0.5 rounded-full bg-indigo-600 text-white text-[10px] font-mono font-bold">
+                    <span className="px-1.5 py-0.5 rounded-full bg-blue-600 text-white text-[10px] font-mono font-bold">
                       {item.count}
                     </span>
                   )}
@@ -159,29 +161,25 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
   );
 
   const renderBottomActions = (isMobile: boolean = false) => (
-    <div className="p-3 border-t border-surface-border space-y-2">
-      {/* Public Portal Link (Full width, no duplicate theme toggle) */}
+    <div className="p-4 border-t border-white/15 space-y-2">
+      {/* Public Portal Link */}
       <button
         onClick={() => {
           onSwitchToPublic();
           if (isMobile && onMobileClose) onMobileClose();
         }}
         className={cn(
-          'w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold text-text-soft hover:text-text-pure',
-          'bg-surface-elevated hover:bg-surface-hover border border-surface-border transition group relative',
+          'w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-white/90 hover:text-white',
+          'bg-white/10 hover:bg-white/20 transition group relative border border-white/10',
           collapsed && !isMobile && 'justify-center px-2'
         )}
         title="Open Public Support Portal"
       >
-        <ExternalLink className="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0" />
+        <ExternalLink className="w-4 h-4 text-white shrink-0" />
         {(!collapsed || isMobile) && <span className="truncate">Public Portal</span>}
-        {collapsed && !isMobile && (
-          <div className="absolute left-full ml-3 px-3 py-1.5 rounded-xl bg-slate-900 text-white dark:bg-white dark:text-slate-900 text-xs font-bold whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none shadow-2xl z-50 border border-slate-700 dark:border-slate-200">
-            Open Public Portal
-          </div>
-        )}
       </button>
 
+      {/* Sign Out */}
       {onLogout && (
         <button
           onClick={() => {
@@ -189,29 +187,21 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
             if (isMobile && onMobileClose) onMobileClose();
           }}
           className={cn(
-            'w-full flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs font-semibold text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300',
-            'bg-red-50 hover:bg-red-100 dark:bg-red-950/20 dark:hover:bg-red-950/40 border border-red-200 dark:border-red-900/40 transition group relative',
+            'w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-white/90 hover:text-white',
+            'bg-red-500/20 hover:bg-red-500/30 transition group relative border border-red-300/20',
             collapsed && !isMobile && 'justify-center px-2'
           )}
           title="Sign Out of Admin Deck"
         >
-          <LogOut className="w-4 h-4 text-red-600 dark:text-red-400 shrink-0" />
+          <LogOut className="w-4 h-4 text-white shrink-0" />
           {(!collapsed || isMobile) && <span className="truncate">Sign Out</span>}
-          {collapsed && !isMobile && (
-            <div className="absolute left-full ml-3 px-3 py-1.5 rounded-xl bg-slate-900 text-white dark:bg-white dark:text-slate-900 text-xs font-bold whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none shadow-2xl z-50 border border-slate-700 dark:border-slate-200">
-              Sign Out
-            </div>
-          )}
         </button>
       )}
 
+      {/* Footer Branding Note (matching reference screenshot) */}
       {(!collapsed || isMobile) && (
-        <div className="px-3 py-1.5 rounded-xl bg-surface-elevated border border-surface-border text-[10px] text-text-muted flex items-center justify-between">
-          <span className="flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-            IST Sync Engine
-          </span>
-          <span className="font-mono">Asia/Kolkata</span>
+        <div className="pt-2 text-[10px] text-white/60 text-center font-medium select-none">
+          Digital Azadi Operations
         </div>
       )}
     </div>
@@ -219,69 +209,92 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
 
   return (
     <>
-      {/* 1. Desktop Persistent Sidebar (md and up) */}
+      {/* Desktop Royal Blue Sidebar */}
       <aside
         className={cn(
-          'h-screen sticky top-0 z-40 bg-surface hidden md:flex flex-col border-r border-surface-border transition-all duration-200 select-none shrink-0',
+          'hidden md:flex flex-col shrink-0 transition-all duration-300 z-30 select-none relative',
+          'bg-gradient-to-b from-[#1877F2] via-[#1E6BFF] to-[#1456CC] text-white shadow-xl',
           collapsed ? 'w-20' : 'w-64'
         )}
       >
         {/* Brand Header */}
-        <div className="h-16 flex items-center justify-between px-3.5 border-b border-surface-border">
-          <div className="flex items-center gap-2.5 overflow-hidden">
-            {!collapsed ? (
-              <BrandLogo size="sm" showBadge={false} />
-            ) : (
-              <div className="flex items-center justify-center p-1">
-                <BrandLogo size="sm" showBadge={false} />
+        <div className="h-20 flex items-center justify-between px-5 border-b border-white/15">
+          <div className="flex items-center gap-3 overflow-hidden">
+            <div className="w-9 h-9 rounded-xl bg-white text-blue-600 flex items-center justify-center font-black text-base shadow-md shrink-0">
+              DA
+            </div>
+            {!collapsed && (
+              <div className="min-w-0">
+                <span className="font-extrabold text-base tracking-tight text-white block leading-tight truncate">
+                  Digital Azadi
+                </span>
+                <span className="text-[11px] font-medium text-white/70 block leading-tight truncate">
+                  Support Portal
+                </span>
               </div>
             )}
           </div>
 
+          {/* Collapse rail toggle */}
           <button
             onClick={onToggleCollapse}
-            className="p-1.5 rounded-lg text-text-muted hover:text-text-pure hover:bg-surface-elevated transition"
+            className="p-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white transition shrink-0"
             title={collapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
           >
-            {collapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
+            {collapsed ? (
+              <ChevronRight className="w-4 h-4" />
+            ) : (
+              <ChevronLeft className="w-4 h-4" />
+            )}
           </button>
         </div>
 
-        {/* Navigation List */}
+        {/* Navigation Item List */}
         {renderNavList(false)}
 
         {/* Bottom Actions */}
         {renderBottomActions(false)}
       </aside>
 
-      {/* 2. Mobile Drawer Navigation (< md) */}
+      {/* Mobile Drawer (Slide over) */}
       {isMobileOpen && (
         <div className="fixed inset-0 z-50 md:hidden flex">
           {/* Backdrop */}
           <div
-            className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm transition-opacity"
+            className="fixed inset-0 bg-slate-950/70 backdrop-blur-xs transition-opacity"
             onClick={onMobileClose}
-            aria-hidden="true"
           />
 
-          {/* Slide-over Drawer Pane */}
-          <div className="relative w-72 max-w-[85vw] bg-surface h-full flex flex-col border-r border-surface-border shadow-2xl z-10 animate-in slide-in-from-left duration-200">
-            {/* Drawer Header */}
-            <div className="h-16 flex items-center justify-between px-4 border-b border-surface-border">
-              <BrandLogo size="sm" showBadge={false} />
+          {/* Drawer Canvas */}
+          <div className="relative flex-1 flex flex-col max-w-xs w-full bg-gradient-to-b from-[#1877F2] via-[#1E6BFF] to-[#1456CC] text-white shadow-2xl z-10">
+            {/* Mobile Header */}
+            <div className="h-18 flex items-center justify-between px-5 border-b border-white/15">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-white text-blue-600 flex items-center justify-center font-black text-base shadow-md">
+                  DA
+                </div>
+                <div>
+                  <span className="font-extrabold text-base tracking-tight text-white block leading-tight">
+                    Digital Azadi
+                  </span>
+                  <span className="text-[11px] font-medium text-white/70 block leading-tight">
+                    Support Operations
+                  </span>
+                </div>
+              </div>
+
               <button
                 onClick={onMobileClose}
-                className="p-2 rounded-xl text-text-muted hover:text-text-pure hover:bg-surface-elevated transition"
-                aria-label="Close mobile navigation"
+                className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white transition"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            {/* Navigation List */}
+            {/* Nav list */}
             {renderNavList(true)}
 
-            {/* Bottom Actions */}
+            {/* Bottom actions */}
             {renderBottomActions(true)}
           </div>
         </div>

@@ -474,57 +474,59 @@ function AppContent() {
 
   // 3. Admin Operations Deck (Authenticated)
   return (
-    <div className="min-h-screen bg-void text-text-pure flex flex-row selection:bg-indigo-600 selection:text-white">
-      
-      {/* Left Collapsible Sidebar */}
-      <AdminSidebar
-        currentTab={currentTab}
-        onSelectTab={tab => {
-          if (tab === 'settings') {
-            setIsCloudConfigOpen(true);
-          } else {
-            setCurrentTab(tab);
-            navigateTo('admin', tab);
-          }
-        }}
-        collapsed={railCollapsed}
-        onToggleCollapse={() => setRailCollapsed(!railCollapsed)}
-        onSwitchToPublic={() => navigateTo('public')}
-        onLogout={() => {
-          setUserAuthenticated(false);
-          setIsAuthenticated(false);
-          navigateTo('public');
-        }}
-        ticketCounts={ticketCounts}
-        isMobileOpen={isMobileNavOpen}
-        onMobileClose={() => setIsMobileNavOpen(false)}
-      />
-
-      {/* Main Command Center Deck */}
-      <div className="flex-1 flex flex-col min-w-0 h-screen overflow-y-auto">
+    <div className="min-h-screen bg-[#F0F4FA] dark:bg-slate-950 text-slate-800 dark:text-slate-100 flex p-0 lg:p-4 justify-center items-stretch antialiased selection:bg-blue-600 selection:text-white">
+      <div className="w-full max-w-[1750px] bg-white dark:bg-slate-900 rounded-none lg:rounded-[32px] shadow-2xl shadow-blue-900/10 border-0 lg:border border-slate-200/80 dark:border-slate-800 flex flex-row overflow-hidden relative">
         
-        {/* Top Command Bar */}
-        <TopCommandBar
-          title={
-            currentTab === 'overview'
-              ? 'Operations Dashboard'
-              : currentTab === 'analytics'
-              ? 'SLA Analytics Deck'
-              : currentTab === 'active'
-              ? 'Active Support Sessions'
-              : currentTab === 'resolved'
-              ? 'Resolved Archive'
-              : 'Support Ticket Queue'
-          }
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          viewMode={viewMode}
-          onViewModeChange={setViewMode}
-          onRefresh={refreshTickets}
-          isRefreshing={isRefreshing}
-          onOpenSettings={() => setIsCloudConfigOpen(true)}
-          onOpenMobileNav={() => setIsMobileNavOpen(true)}
+        {/* Left Collapsible Sidebar */}
+        <AdminSidebar
+          currentTab={currentTab}
+          onSelectTab={tab => {
+            if (tab === 'settings') {
+              setIsCloudConfigOpen(true);
+            } else {
+              setCurrentTab(tab);
+              navigateTo('admin', tab);
+            }
+          }}
+          collapsed={railCollapsed}
+          onToggleCollapse={() => setRailCollapsed(!railCollapsed)}
+          onSwitchToPublic={() => navigateTo('public')}
+          onLogout={() => {
+            setUserAuthenticated(false);
+            setIsAuthenticated(false);
+            navigateTo('public');
+          }}
+          ticketCounts={ticketCounts}
+          isMobileOpen={isMobileNavOpen}
+          onMobileClose={() => setIsMobileNavOpen(false)}
         />
+
+        {/* Main Command Center Deck */}
+        <div className="flex-1 flex flex-col min-w-0 h-[100dvh] lg:h-[calc(100vh-2rem)] overflow-y-auto bg-white dark:bg-slate-900">
+          
+          {/* Top Command Bar */}
+          <TopCommandBar
+            title={
+              currentTab === 'overview'
+                ? 'Operations Dashboard'
+                : currentTab === 'analytics'
+                ? 'SLA Analytics Deck'
+                : currentTab === 'active'
+                ? 'Active Support Sessions'
+                : currentTab === 'resolved'
+                ? 'Resolved Archive'
+                : 'Support Ticket Queue'
+            }
+            ticketCount={filteredTickets.length}
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            viewMode={viewMode}
+            onViewModeChange={setViewMode}
+            onRefresh={refreshTickets}
+            isRefreshing={isRefreshing}
+            onOpenSettings={() => setIsCloudConfigOpen(true)}
+            onOpenMobileNav={() => setIsMobileNavOpen(true)}
+          />
 
         {/* Global Page Directory Trigger */}
         <div className="px-6 pt-3 flex items-center justify-between">
@@ -666,6 +668,7 @@ function AppContent() {
         onNavigate={navigateTo}
       />
 
+      </div>
     </div>
   );
 }
