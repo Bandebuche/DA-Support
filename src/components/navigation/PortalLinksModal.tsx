@@ -17,7 +17,7 @@ import { getSavedSpreadsheetUrl } from '../../lib/storage';
 interface PortalLinksModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onNavigate: (route: 'public' | 'admin' | 'track' | 'analytics') => void;
+  onNavigate: (route: 'public' | 'admin' | 'track' | 'analytics' | 'onkar') => void;
 }
 
 export const PortalLinksModal: React.FC<PortalLinksModalProps> = ({
@@ -47,13 +47,24 @@ export const PortalLinksModal: React.FC<PortalLinksModalProps> = ({
     },
     {
       id: 'admin',
-      title: 'Portal 2: Operations Command & SLA Deck (Admin)',
-      badge: 'Support Agents & Admins • Secure Login',
-      description: 'Secured administrative operations deck with live stopwatches, Kanban boards, dense data table, SLA tracking, and Google Sheets cloud sync.',
+      title: 'Portal 2A: Sachin Sir (Super Admin Operations)',
+      badge: 'Sachin Sir • Super Admin Access',
+      description: 'Super Admin operations deck for Sachin Sir: view all general operations, CRM, WordPress, and hosting queries with live stopwatch.',
       path: '/admin',
       fullUrl: `${baseRoot}/admin`,
       altUrl: `${baseRoot}/?portal=admin`,
       action: () => { onNavigate('admin'); onClose(); },
+      icon: ShieldCheck,
+    },
+    {
+      id: 'onkar',
+      title: 'Portal 2B: Onkar Kulkarni (Meta Specialist Desk)',
+      badge: 'Onkar Kulkarni • Meta Ads Lead',
+      description: 'Dedicated isolated portal for Onkar Sir: displays strictly Meta ads and marketing inquiries. Sachin Sir queries are excluded.',
+      path: '/onkar',
+      fullUrl: `${baseRoot}/onkar`,
+      altUrl: `${baseRoot}/?portal=onkar`,
+      action: () => { onNavigate('onkar'); onClose(); },
       icon: ShieldCheck,
     },
     {

@@ -64,6 +64,10 @@ export function upsertStoredTicket(ticket: Ticket): Ticket[] {
     };
   } else {
     current.unshift(ticket);
+    // Dispatch real-time event for immediate notification and sound chime
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('DA_NEW_TICKET', { detail: ticket }));
+    }
   }
 
   saveStoredTickets(current);
@@ -138,6 +142,37 @@ export function saveSpreadsheetUrl(url: string): void {
 }
 
 /**
+ * Role-Based Admin Session Types
+ */
+export type AdminRole = 'super_admin' | 'meta_lead';
+
+export interface AdminUserSession {
+  username: string;
+  name: string;
+  role: AdminRole;
+  title: string;
+  avatar: string;
+}
+
+const STORAGE_KEY_AUTH_USER = 'DA_SUPPORT_AUTH_USER_V2';
+
+export const DEFAULT_SACHIN_USER: AdminUserSession = {
+  username: 'sachin',
+  name: 'Sachin Sir',
+  role: 'super_admin',
+  title: 'Super Admin',
+  avatar: 'SS',
+};
+
+export const DEFAULT_ONKAR_USER: AdminUserSession = {
+  username: 'onkar',
+  name: 'Onkar Kulkarni',
+  role: 'meta_lead',
+  title: 'Meta Specialist Lead',
+  avatar: 'OK',
+};
+
+/**
  * Session auth helpers
  */
 export function isUserAuthenticated(): boolean {
@@ -147,7 +182,32 @@ export function isUserAuthenticated(): boolean {
 export function setUserAuthenticated(auth: boolean): void {
   if (auth) {
     sessionStorage.setItem(STORAGE_KEY_AUTH, 'true');
+    if (!sessionStorage.getItem(STORAGE_KEY_AUTH_USER)) {
+      sessionStorage.setItem(STORAGE_KEY_AUTH_USER, JSON.stringify(DEFAULT_SACHIN_USER));
+    }
   } else {
     sessionStorage.removeItem(STORAGE_KEY_AUTH);
+    sessionStorage.removeItem(STORAGE_KEY_AUTH_USER);
+  }
+}
+
+export function getAuthenticatedUser(): AdminUserSession | null {
+  try {
+    const raw = sessionStorage.getItem(STORAGE_KEY_AUTH_USER);
+    if (raw) return JSON.parse(raw);
+    if (isUserAuthenticated()) return DEFAULT_SACHIN_USER;
+    return null;
+  } catch {
+    return isUserAuthenticated() ? DEFAULT_SACHIN_USER : null;
+  }
+}
+
+export function setAuthenticatedUser(user: AdminUserSession | null): void {
+  if (user) {
+    sessionStorage.setItem(STORAGE_KEY_AUTH, 'true');
+    sessionStorage.setItem(STORAGE_KEY_AUTH_USER, JSON.stringify(user));
+  } else {
+    sessionStorage.removeItem(STORAGE_KEY_AUTH);
+    sessionStorage.removeItem(STORAGE_KEY_AUTH_USER);
   }
 }

@@ -7,7 +7,7 @@ import { ThemeProvider } from './context/ThemeContext';
 
 // Layout & Navigation
 import { AdminSidebar, NavItemKey } from './components/navigation/AdminSidebar';
-import { TopCommandBar, ViewMode } from './components/navigation/TopCommandBar';
+import { TopCommandBar, ViewMode, TicketAlertItem } from './components/navigation/TopCommandBar';
 import { KPICards } from './components/dashboard/KPICards';
 import { FilterTray, FilterState } from './components/dashboard/FilterTray';
 import { AnalyticsView } from './components/dashboard/AnalyticsView';
@@ -27,10 +27,17 @@ import { CloudConfigModal } from './components/modals/CloudConfigModal';
 // Public Portal & Admin Login
 import { PublicGateway } from './components/public/PublicGateway';
 import { AdminLogin } from './components/admin/AdminLogin';
-import { isUserAuthenticated, setUserAuthenticated } from './lib/storage';
+import { 
+  isUserAuthenticated, 
+  setUserAuthenticated, 
+  getAuthenticatedUser, 
+  setAuthenticatedUser, 
+  AdminUserSession 
+} from './lib/storage';
+import { audioNotification } from './lib/audioNotification';
 import { Globe, Link2 } from 'lucide-react';
 
-export type RouteType = 'public' | 'admin' | 'track' | 'analytics';
+export type RouteType = 'public' | 'admin' | 'track' | 'analytics' | 'onkar';
 
 function parseCurrentRoute(): { route: RouteType; tab: NavItemKey } {
   if (typeof window === 'undefined') return { route: 'public', tab: 'overview' };
@@ -39,31 +46,43 @@ function parseCurrentRoute(): { route: RouteType; tab: NavItemKey } {
   const search = new URLSearchParams(window.location.search);
   const hash = window.location.hash.toLowerCase();
 
-  // 1. Admin Command Deck route (e.g. /admin, ?portal=admin, ?page=admin, #admin)
+  // 1. Onkar Meta Desk direct route (e.g. /onkar, ?portal=onkar, ?role=onkar, #onkar)
+  if (path.includes('onkar') || search.get('portal') === 'onkar' || search.get('role') === 'onkar' || hash === '#onkar') {
+    return { route: 'onkar', tab: 'overview' };
+  }
+
+  // 2. Admin Command Deck route (e.g. /admin, ?portal=admin, ?page=admin, #admin)
   if (path.includes('admin') || search.get('portal') === 'admin' || search.get('page') === 'admin' || hash === '#admin') {
     const tabParam = (search.get('tab') || 'overview') as NavItemKey;
     return { route: 'admin', tab: tabParam };
   }
 
-  // 2. Analytics direct route (part of Admin)
+  // 3. Analytics direct route (part of Admin)
   if (path.includes('analytics') || search.get('page') === 'analytics' || search.get('tab') === 'analytics' || hash === '#analytics') {
     return { route: 'admin', tab: 'analytics' };
   }
 
-  // 3. Default: Public Submission Gateway (/submit or /)
+  // 4. Default: Public Submission Gateway (/submit or /)
   return { route: 'public', tab: 'overview' };
 }
 
 function AppContent() {
   const { toast } = useToast();
 
-  // Authentication State
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => isUserAuthenticated());
-
   // Routing State
   const [currentRoute, setCurrentRoute] = useState<RouteType>(() => parseCurrentRoute().route);
   const [currentTab, setCurrentTab] = useState<NavItemKey>(() => parseCurrentRoute().tab);
   const [isLinksModalOpen, setIsLinksModalOpen] = useState(false);
+
+  // Authentication State with User Roles
+  const [currentUser, setCurrentUser] = useState<AdminUserSession | null>(() => getAuthenticatedUser());
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => isUserAuthenticated());
+
+  // Real-time Notifications & Alert Queue
+  const [notifications, setNotifications] = useState<TicketAlertItem[]>([]);
+  const [knownTicketIds, setKnownTicketIds] = useState<Set<string>>(() => {
+    return new Set(ticketService.getAllTickets().map(t => t.ticketId));
+  });
 
   // Sync route on popstate and hashchange
   useEffect(() => {
@@ -99,6 +118,8 @@ function AppContent() {
 
     if (resolvedRoute === 'public') {
       newPath = basePath ? `${basePath}/submit` : '/submit';
+    } else if (resolvedRoute === 'onkar') {
+      newPath = basePath ? `${basePath}/onkar` : '/onkar';
     } else if (resolvedRoute === 'admin') {
       newPath = basePath ? `${basePath}/admin` : '/admin';
       query = targetTab === 'analytics' ? '?tab=analytics' : '';
@@ -121,7 +142,7 @@ function AppContent() {
   // UI View state
   const [railCollapsed, setRailCollapsed] = useState(false);
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
-  const [viewMode, setViewMode] = useState<ViewMode>('kanban');
+  const [viewMode, setViewMode] = useState<ViewMode>('table');
 
   // Search & Filters
   const [searchQuery, setSearchQuery] = useState('');
@@ -159,10 +180,114 @@ function AppContent() {
     }, 400);
   }, [selectedTicket]);
 
+  // Real-time audio alerts & Cross-tab notifications listener
+  useEffect(() => {
+    // Unlock browser audio context on user interaction
+    const handleUserInteraction = () => {
+      audioNotification.unlockAudio();
+      window.removeEventListener('click', handleUserInteraction);
+    };
+    window.addEventListener('click', handleUserInteraction);
+
+    // Listen for custom ticket creation event
+    const handleNewTicketEvent = (e: any) => {
+      const newTicket: Ticket = e.detail;
+      if (!newTicket) return;
+
+      const isMetaTicket = 
+        (newTicket.assignedSpecialist || '').toLowerCase().includes('onkar') ||
+        (newTicket.category || '').toLowerCase().includes('meta') ||
+        (newTicket.subject || '').toLowerCase().includes('meta');
+
+      // If logged in as Onkar Sir, only chime for Meta queries
+      if (currentUser?.role === 'meta_lead' && !isMetaTicket) return;
+
+      // Play chime sound
+      audioNotification.playNewTicketChime();
+
+      // Show toast
+      toast({
+        title: `🔔 New Query: ${newTicket.ticketId}`,
+        description: `From ${newTicket.requesterName} • ${newTicket.subject}`,
+        type: 'info',
+      });
+
+      // Append to alert queue
+      setNotifications(prev => [
+        {
+          id: `notif-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+          ticketId: newTicket.ticketId,
+          title: newTicket.subject,
+          requesterName: newTicket.requesterName,
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        },
+        ...prev,
+      ]);
+
+      refreshTickets();
+    };
+
+    window.addEventListener('DA_NEW_TICKET', handleNewTicketEvent);
+
+    // Cross-tab storage change listener
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === 'DA_SUPPORT_TICKETS_V2') {
+        refreshTickets();
+      }
+    };
+    window.addEventListener('storage', handleStorage);
+
+    // Polling interval (every 4 seconds) to auto-detect incoming tickets from sheets/other tabs
+    const pollTimer = setInterval(() => {
+      const latest = ticketService.getAllTickets();
+      setKnownTicketIds(prevIds => {
+        const newArrivals = latest.filter(t => !prevIds.has(t.ticketId));
+        if (newArrivals.length > 0) {
+          newArrivals.forEach(newTicket => {
+            const isMetaTicket = 
+              (newTicket.assignedSpecialist || '').toLowerCase().includes('onkar') ||
+              (newTicket.category || '').toLowerCase().includes('meta') ||
+              (newTicket.subject || '').toLowerCase().includes('meta');
+
+            if (currentUser?.role === 'meta_lead' && !isMetaTicket) return;
+
+            audioNotification.playNewTicketChime();
+            toast({
+              title: `🔔 New Query: ${newTicket.ticketId}`,
+              description: `From ${newTicket.requesterName} • ${newTicket.subject}`,
+              type: 'info',
+            });
+            setNotifications(prev => [
+              {
+                id: `notif-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+                ticketId: newTicket.ticketId,
+                title: newTicket.subject,
+                requesterName: newTicket.requesterName,
+                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+              },
+              ...prev,
+            ]);
+          });
+          setTickets(latest);
+          return new Set(latest.map(t => t.ticketId));
+        }
+        return prevIds;
+      });
+    }, 4000);
+
+    return () => {
+      window.removeEventListener('click', handleUserInteraction);
+      window.removeEventListener('DA_NEW_TICKET', handleNewTicketEvent);
+      window.removeEventListener('storage', handleStorage);
+      clearInterval(pollTimer);
+    };
+  }, [currentUser, toast, refreshTickets]);
+
   // Ticket Action Handlers
   const handleStartSupport = async (ticketId: string) => {
     try {
-      const updated = await ticketService.startSupport(ticketId, 'Agent Lead');
+      const agentName = currentUser?.name || 'Agent Lead';
+      const updated = await ticketService.startSupport(ticketId, agentName);
       refreshTickets();
       if (selectedTicket?.ticketId === ticketId) {
         setSelectedTicket(updated);
@@ -188,14 +313,17 @@ function AppContent() {
 
   const handleConfirmResolve = async (ticketId: string, resolutionNotes: string) => {
     try {
-      const updated = await ticketService.resolveTicket(ticketId, resolutionNotes, 'Agent Lead');
+      const agentName = currentUser?.name || 'Agent Lead';
+      const updated = await ticketService.resolveTicket(ticketId, resolutionNotes, agentName);
       refreshTickets();
       if (selectedTicket?.ticketId === ticketId) {
         setSelectedTicket(updated);
       }
+      setIsResolveModalOpen(false);
+      setResolvingTicket(null);
       toast({
-        title: 'Ticket Resolved Successfully',
-        description: `Duration committed & logged for ${ticketId}`,
+        title: 'Ticket Resolved',
+        description: `Ticket ${ticketId} resolved with SLA logged`,
         type: 'success',
       });
     } catch (err: any) {
@@ -209,7 +337,8 @@ function AppContent() {
 
   const handleStatusChange = async (ticketId: string, newStatus: TicketStatus) => {
     try {
-      const updated = await ticketService.updateStatus(ticketId, newStatus, 'Agent Lead');
+      const agentName = currentUser?.name || 'Agent Lead';
+      const updated = await ticketService.updateStatus(ticketId, newStatus, agentName);
       refreshTickets();
       if (selectedTicket?.ticketId === ticketId) {
         setSelectedTicket(updated);
@@ -230,7 +359,8 @@ function AppContent() {
 
   const handleAddInternalNote = async (ticketId: string, content: string) => {
     try {
-      const updated = await ticketService.addInternalNote(ticketId, content, 'Support Agent');
+      const agentName = currentUser?.name || 'Support Agent';
+      const updated = await ticketService.addInternalNote(ticketId, content, agentName);
       refreshTickets();
       if (selectedTicket?.ticketId === ticketId) {
         setSelectedTicket(updated);
@@ -293,7 +423,7 @@ function AppContent() {
       }
       toast({
         title: 'Ticket Deleted',
-        description: `Ticket ${ticketId} was successfully removed`,
+        description: `Ticket ${ticketId} was permanently removed`,
         type: 'info',
       });
     } catch (err: any) {
@@ -349,14 +479,15 @@ function AppContent() {
 
   const handleReassignSpecialist = async (ticketId: string, specialist: string) => {
     try {
-      const updated = await ticketService.reassignSpecialist(ticketId, specialist, 'Admin');
+      const agentName = currentUser?.name || 'Admin';
+      const updated = await ticketService.reassignSpecialist(ticketId, specialist, agentName);
       refreshTickets();
       if (selectedTicket?.ticketId === ticketId) {
         setSelectedTicket(updated);
       }
       toast({
         title: 'Specialist Reassigned',
-        description: `Assigned to ${specialist}`,
+        description: `Ticket ${ticketId} handed over to ${specialist}`,
         type: 'success',
       });
     } catch (err: any) {
@@ -368,28 +499,51 @@ function AppContent() {
     }
   };
 
-  // Nav counts
+  // Role-based tickets scoping:
+  // Onkar Sir sees ONLY Meta queries.
+  // Sachin Sir sees all operations queries.
+  const isMetaLead = currentUser?.role === 'meta_lead' || currentRoute === 'onkar';
+
+  const roleScopedTickets = useMemo(() => {
+    if (isMetaLead) {
+      return tickets.filter(t => {
+        const spec = (t.assignedSpecialist || '').toLowerCase();
+        const cat = (t.category || '').toLowerCase();
+        const subj = (t.subject || '').toLowerCase();
+        const desc = (t.description || '').toLowerCase();
+        return (
+          spec.includes('onkar') || 
+          cat.includes('meta') || 
+          subj.includes('meta') || 
+          desc.includes('meta')
+        );
+      });
+    }
+    return tickets;
+  }, [tickets, isMetaLead]);
+
+  // Nav counts based on role-scoped tickets
   const ticketCounts = useMemo(() => {
     return {
-      all: tickets.length,
-      active: tickets.filter(t => t.status === 'In Progress').length,
-      pending: tickets.filter(t => t.status === 'New' || t.status === 'Waiting for User').length,
-      resolved: tickets.filter(t => t.status === 'Resolved').length,
+      all: roleScopedTickets.length,
+      active: roleScopedTickets.filter(t => t.status === 'In Progress').length,
+      pending: roleScopedTickets.filter(t => t.status === 'New' || t.status === 'Waiting for User').length,
+      resolved: roleScopedTickets.filter(t => t.status === 'Resolved').length,
     };
-  }, [tickets]);
+  }, [roleScopedTickets]);
 
   // Unique categories for filter tray
   const availableCategories = useMemo(() => {
     const set = new Set<string>();
-    tickets.forEach(t => {
+    roleScopedTickets.forEach(t => {
       if (t.category) set.add(t.category);
     });
     return Array.from(set);
-  }, [tickets]);
+  }, [roleScopedTickets]);
 
   // Filtering Logic
   const filteredTickets = useMemo(() => {
-    return tickets.filter(t => {
+    return roleScopedTickets.filter(t => {
       // 1. Sidebar tab filter
       if (currentTab === 'active' && t.status !== 'In Progress') return false;
       if (currentTab === 'pending' && !(t.status === 'New' || t.status === 'Waiting for User')) return false;
@@ -445,17 +599,15 @@ function AppContent() {
         return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
       }
       if (filters.sortBy === 'priority') {
-        const score = (p: string) => (p === 'Urgent' ? 4 : p === 'High' ? 3 : p === 'Normal' ? 2 : 1);
-        return score(b.priority) - score(a.priority);
+        const priorityOrder: Record<string, number> = { Critical: 4, High: 3, Normal: 2, Low: 1 };
+        return (priorityOrder[b.priority] || 0) - (priorityOrder[a.priority] || 0);
       }
       if (filters.sortBy === 'duration') {
-        const durA = a.resolutionDurationSeconds || a.activeDurationSeconds || 0;
-        const durB = b.resolutionDurationSeconds || b.activeDurationSeconds || 0;
-        return durB - durA;
+        return (b.activeDurationSeconds || 0) - (a.activeDurationSeconds || 0);
       }
       return 0;
     });
-  }, [tickets, currentTab, searchQuery, filters]);
+  }, [roleScopedTickets, currentTab, searchQuery, filters]);
 
   // 1. Public Support Portal: Strictly the support ticket submission form only
   if (currentRoute === 'public' || currentRoute === 'track') {
@@ -466,7 +618,11 @@ function AppContent() {
   if (!isAuthenticated) {
     return (
       <AdminLogin
-        onLoginSuccess={() => setIsAuthenticated(true)}
+        initialRole={currentRoute === 'onkar' ? 'meta_lead' : 'super_admin'}
+        onLoginSuccess={(user) => {
+          setCurrentUser(user);
+          setIsAuthenticated(true);
+        }}
         onBackToPublic={() => navigateTo('public')}
       />
     );
@@ -475,7 +631,7 @@ function AppContent() {
   // 3. Admin Operations Deck (Authenticated)
   return (
     <div className="min-h-screen bg-[#F0F4FA] dark:bg-slate-950 text-slate-800 dark:text-slate-100 flex p-0 lg:p-4 justify-center items-stretch antialiased selection:bg-blue-600 selection:text-white">
-      <div className="w-full max-w-[1750px] bg-white dark:bg-slate-900 rounded-none lg:rounded-[32px] shadow-2xl shadow-blue-900/10 border-0 lg:border border-slate-200/80 dark:border-slate-800 flex flex-row overflow-hidden relative">
+      <div className="w-full max-w-[1750px] bg-white dark:bg-slate-900 rounded-none lg:rounded-[32px] shadow-2xl shadow-blue-900/10 border-0 lg:border border-slate-200/80 dark:border-slate-800 flex flex-row relative">
         
         {/* Left Collapsible Sidebar */}
         <AdminSidebar
@@ -485,14 +641,16 @@ function AppContent() {
               setIsCloudConfigOpen(true);
             } else {
               setCurrentTab(tab);
-              navigateTo('admin', tab);
+              navigateTo(isMetaLead ? 'onkar' : 'admin', tab);
             }
           }}
           collapsed={railCollapsed}
           onToggleCollapse={() => setRailCollapsed(!railCollapsed)}
           onSwitchToPublic={() => navigateTo('public')}
           onLogout={() => {
+            setAuthenticatedUser(null);
             setUserAuthenticated(false);
+            setCurrentUser(null);
             setIsAuthenticated(false);
             navigateTo('public');
           }}
@@ -507,7 +665,9 @@ function AppContent() {
           {/* Sticky Top Command Bar */}
           <TopCommandBar
             title={
-              currentTab === 'overview'
+              isMetaLead
+                ? 'Meta Operations Deck'
+                : currentTab === 'overview'
                 ? 'Operations Dashboard'
                 : currentTab === 'analytics'
                 ? 'SLA Analytics Deck'
@@ -526,6 +686,13 @@ function AppContent() {
             isRefreshing={isRefreshing}
             onOpenSettings={() => setIsCloudConfigOpen(true)}
             onOpenMobileNav={() => setIsMobileNavOpen(true)}
+            currentUser={currentUser}
+            notifications={notifications}
+            onClearNotifications={() => setNotifications([])}
+            onSelectAlertTicket={ticketId => {
+              const target = tickets.find(t => t.ticketId === ticketId);
+              if (target) handleSelectTicket(target);
+            }}
           />
 
           {/* Scrollable Content Container (Below Sticky Header) */}
@@ -533,85 +700,87 @@ function AppContent() {
 
             {/* Global Page Directory Trigger */}
             <div className="px-4 sm:px-6 pt-3 flex items-center justify-between shrink-0">
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setIsLinksModalOpen(true)}
-              className="px-3 py-1.5 rounded-xl bg-surface hover:bg-surface-elevated border border-surface-border text-indigo-600 dark:text-indigo-400 text-xs flex items-center gap-1.5 transition font-medium"
-              title="View all separate page links"
-            >
-              <Link2 className="w-3.5 h-3.5" />
-              <span>All Page Links</span>
-            </button>
-            <span className="text-xs text-text-muted hidden sm:inline">
-              Click to view direct URLs for Students, Franchisees, or Support Agents
-            </span>
-          </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setIsLinksModalOpen(true)}
+                  className="px-3 py-1.5 rounded-xl bg-surface hover:bg-surface-elevated border border-surface-border text-indigo-600 dark:text-indigo-400 text-xs flex items-center gap-1.5 transition font-medium cursor-pointer"
+                  title="View all separate page links"
+                >
+                  <Link2 className="w-3.5 h-3.5" />
+                  <span>All Page Links</span>
+                </button>
+                <span className="text-xs text-text-muted hidden sm:inline">
+                  {isMetaLead 
+                    ? 'Logged in as Onkar Kulkarni (Meta Ads Support Desk)' 
+                    : 'Logged in as Sachin Sir (Super Admin Operations)'}
+                </span>
+              </div>
 
-          <div className="text-[11px] font-mono text-text-faint hidden md:block">
-            <span>Route: </span>
-            <code className="text-text-pure">/{currentTab === 'analytics' ? 'analytics' : 'admin'}</code>
-          </div>
-        </div>
+              <div className="text-[11px] font-mono text-text-faint hidden md:block">
+                <span>Route: </span>
+                <code className="text-text-pure">/{isMetaLead ? 'onkar' : currentTab === 'analytics' ? 'analytics' : 'admin'}</code>
+              </div>
+            </div>
 
-        {/* Deck Content Canvas */}
-        <main className="flex-1 p-3.5 sm:p-6 space-y-6 max-w-7xl w-full mx-auto pb-12">
-          
-          {/* Top 4 KPI Summary Modules (Overview or All) */}
-          {currentTab !== 'analytics' && (
-            <KPICards tickets={tickets} />
-          )}
-
-          {/* SLA & Analytics View */}
-          {currentTab === 'analytics' ? (
-            <AnalyticsView tickets={tickets} />
-          ) : (
-            <>
-              {/* Filter Tray */}
-              <FilterTray
-                filters={filters}
-                onFilterChange={setFilters}
-                availableCategories={availableCategories}
-                totalCount={tickets.length}
-                filteredCount={filteredTickets.length}
-              />
-
-              {/* View Renderers (Kanban, Modular Cards, Dense Table) */}
-              {viewMode === 'kanban' && (
-                <KanbanBoard
-                  tickets={filteredTickets}
-                  onSelectTicket={handleSelectTicket}
-                  onStartSupport={handleStartSupport}
-                  onResolveTicket={handleOpenResolveModal}
-                  onStatusChange={handleStatusChange}
-                />
+            {/* Deck Content Canvas */}
+            <main className="flex-1 p-3.5 sm:p-6 space-y-6 max-w-7xl w-full mx-auto pb-12">
+              
+              {/* Top 4 KPI Summary Modules & Dynamic Daily Histogram */}
+              {currentTab !== 'analytics' && (
+                <KPICards tickets={roleScopedTickets} />
               )}
 
-              {viewMode === 'cards' && (
-                <TicketCardGrid
-                  tickets={filteredTickets}
-                  onSelectTicket={handleSelectTicket}
-                  onStartSupport={handleStartSupport}
-                  onResolveTicket={handleOpenResolveModal}
-                  onStatusChange={handleStatusChange}
-                />
+              {/* SLA & Analytics View */}
+              {currentTab === 'analytics' ? (
+                <AnalyticsView tickets={roleScopedTickets} />
+              ) : (
+                <>
+                  {/* Filter Tray */}
+                  <FilterTray
+                    filters={filters}
+                    onFilterChange={setFilters}
+                    availableCategories={availableCategories}
+                    totalCount={roleScopedTickets.length}
+                    filteredCount={filteredTickets.length}
+                  />
+
+                  {/* View Renderers (Dense Table, Modular Cards, Kanban) */}
+                  {viewMode === 'table' && (
+                    <TicketTableView
+                      tickets={filteredTickets}
+                      onSelectTicket={handleSelectTicket}
+                      onStartSupport={handleStartSupport}
+                      onResolveTicket={handleOpenResolveModal}
+                      onStatusChange={handleStatusChange}
+                      onDeleteTicket={handleDeleteTicket}
+                      onDeleteTickets={handleDeleteTickets}
+                      onResetAllTickets={handleResetAllTickets}
+                    />
+                  )}
+
+                  {viewMode === 'cards' && (
+                    <TicketCardGrid
+                      tickets={filteredTickets}
+                      onSelectTicket={handleSelectTicket}
+                      onStartSupport={handleStartSupport}
+                      onResolveTicket={handleOpenResolveModal}
+                      onStatusChange={handleStatusChange}
+                    />
+                  )}
+
+                  {viewMode === 'kanban' && (
+                    <KanbanBoard
+                      tickets={filteredTickets}
+                      onSelectTicket={handleSelectTicket}
+                      onStartSupport={handleStartSupport}
+                      onResolveTicket={handleOpenResolveModal}
+                      onStatusChange={handleStatusChange}
+                    />
+                  )}
+                </>
               )}
 
-              {viewMode === 'table' && (
-                <TicketTableView
-                  tickets={filteredTickets}
-                  onSelectTicket={handleSelectTicket}
-                  onStartSupport={handleStartSupport}
-                  onResolveTicket={handleOpenResolveModal}
-                  onStatusChange={handleStatusChange}
-                  onDeleteTicket={handleDeleteTicket}
-                  onDeleteTickets={handleDeleteTickets}
-                  onResetAllTickets={handleResetAllTickets}
-                />
-              )}
-            </>
-          )}
-
-        </main>
+            </main>
           </div>
         </div>
 
