@@ -15,10 +15,25 @@ import {
   syncResolveToSheets 
 } from './sheetsSync';
 
+// Live cloud endpoint fallback for Hostinger and static domain hosting
+const CLOUD_FALLBACK_BASE = 'https://digital-azadi-support.vercel.app';
+
+function getApiEndpoint(endpoint: string): string {
+  if (typeof window !== 'undefined') {
+    const host = window.location.hostname.toLowerCase();
+    // If running on Vercel or local dev server, use relative endpoint
+    if (host.includes('vercel.app') || host === 'localhost' || host === '127.0.0.1') {
+      return endpoint;
+    }
+  }
+  // If deployed to Hostinger (or other static hosting without Node.js backend), connect to live Vercel Cloud API
+  return `${CLOUD_FALLBACK_BASE}${endpoint}`;
+}
+
 // Helper to push cloud operations asynchronously without blocking UI
 async function pushToCloudApi(body: any): Promise<any> {
   try {
-    const res = await fetch('/api/tickets', {
+    const res = await fetch(getApiEndpoint('/api/tickets'), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -51,7 +66,7 @@ export const ticketService = {
    */
   async fetchCloudTickets(): Promise<Ticket[]> {
     try {
-      const res = await fetch(`/api/tickets?_t=${Date.now()}`, {
+      const res = await fetch(getApiEndpoint(`/api/tickets?_t=${Date.now()}`), {
         method: 'GET',
         cache: 'no-store',
         headers: {
@@ -110,7 +125,7 @@ export const ticketService = {
     const local = this.getTicketById(clean);
 
     try {
-      const res = await fetch(`/api/tickets?ticketId=${encodeURIComponent(clean)}&_t=${Date.now()}`, {
+      const res = await fetch(getApiEndpoint(`/api/tickets?ticketId=${encodeURIComponent(clean)}&_t=${Date.now()}`), {
         cache: 'no-store',
       });
       if (res.ok) {

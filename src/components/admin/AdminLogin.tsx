@@ -51,7 +51,7 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({
   initialRole = 'super_admin',
 }) => {
   const [activePortalTab, setActivePortalTab] = useState<'super_admin' | 'meta_lead'>(initialRole);
-  const [username, setUsername] = useState(initialRole === 'meta_lead' ? 'onkar' : 'sachin');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -61,7 +61,7 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({
     setActivePortalTab(tab);
     setError(null);
     setPassword('');
-    setUsername(tab === 'meta_lead' ? 'onkar' : 'sachin');
+    setUsername('');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -208,7 +208,7 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({
                   autoFocus
                   value={username}
                   onChange={e => setUsername(e.target.value)}
-                  placeholder={activePortalTab === 'meta_lead' ? 'onkar' : 'sachin'}
+                  placeholder="Enter Username / ID"
                   className="w-full bg-surface-elevated text-text-pure rounded-xl border border-surface-border pl-10 pr-4 py-2.5 text-xs focus:border-indigo-500 focus:outline-none placeholder:text-text-faint transition"
                 />
               </div>
@@ -254,23 +254,13 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({
                 <span>Verifying Access...</span>
               ) : (
                 <>
-                  <span>Sign In as {activePortalTab === 'meta_lead' ? 'Onkar Kulkarni' : 'Sachin Sir'}</span>
+                  <span>Sign In to Dashboard</span>
                   <ArrowRight className="w-4 h-4" />
                 </>
               )}
             </button>
 
           </form>
-
-          {/* Quick Helper Credentials */}
-          <div className="pt-2 border-t border-surface-border text-[11px] text-text-muted space-y-1">
-            <div className="flex items-center justify-between">
-              <span>{activePortalTab === 'meta_lead' ? 'Onkar ID: onkar' : 'Sachin ID: sachin'}</span>
-              <span className="font-mono text-[10px] bg-surface-elevated px-1.5 py-0.5 rounded border border-surface-border">
-                {activePortalTab === 'meta_lead' ? 'Pass: onkar@2026' : 'Pass: sachin@2026'}
-              </span>
-            </div>
-          </div>
 
         </div>
 
