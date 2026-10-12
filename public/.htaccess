@@ -2,6 +2,12 @@ DirectoryIndex index.html index.php
 
 <IfModule mod_rewrite.c>
   RewriteEngine On
+
+  # Rewrite any nested /assets/ request to local assets folder directly
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteRule (^|.*/)assets/(.*)$ assets/$2 [L]
+
+  # SPA Routing: Fallback non-file, non-directory requests to index.html
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d
   RewriteRule ^ index.html [L]
