@@ -11,6 +11,15 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        entryFileNames: 'assets/da-app-[hash].js',
+        chunkFileNames: 'assets/da-chunk-[hash].js',
+        assetFileNames: 'assets/da-[name]-[hash].[ext]',
+      },
+    },
+  },
   server: {
     port: 5173,
     host: true,

@@ -7,6 +7,10 @@ DirectoryIndex index.html index.php
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteRule (^|.*/)assets/(.*)$ assets/$2 [L]
 
+  # If asset not found in assets/ folder, fallback to root folder
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteRule ^assets/(.*)$ $1 [L]
+
   # SPA Routing: Fallback non-file, non-directory requests to index.html
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d
