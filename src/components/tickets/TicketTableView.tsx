@@ -30,9 +30,9 @@ interface TicketTableViewProps {
   onStartSupport: (ticketId: string) => void;
   onResolveTicket: (ticket: Ticket) => void;
   onStatusChange: (ticketId: string, newStatus: TicketStatus) => void;
-  onDeleteTicket?: (ticketId: string) => void;
-  onDeleteTickets?: (ticketIds: string[]) => void;
-  onResetAllTickets?: () => void;
+  onDeleteTicket?: (ticketId: string) => void | Promise<void>;
+  onDeleteTickets?: (ticketIds: string[]) => void | Promise<void>;
+  onResetAllTickets?: () => void | Promise<void>;
 }
 
 export const TicketTableView: React.FC<TicketTableViewProps> = ({
@@ -103,7 +103,7 @@ export const TicketTableView: React.FC<TicketTableViewProps> = ({
     description: string;
     confirmLabel?: string;
     cancelLabel?: string;
-    onConfirm: () => void;
+    onConfirm: () => void | Promise<void>;
   }>({
     isOpen: false,
     title: '',
@@ -120,8 +120,10 @@ export const TicketTableView: React.FC<TicketTableViewProps> = ({
       description: `Do you want to permanently delete ${count} ticket(s) from the operations dashboard and storage? Or keep them saved in your records?`,
       confirmLabel: `Delete ${count} Ticket${count > 1 ? 's' : ''}`,
       cancelLabel: 'Keep Saved / Cancel',
-      onConfirm: () => {
-        onDeleteTickets?.(Array.from(selectedIds));
+      onConfirm: async () => {
+        if (onDeleteTickets) {
+          await onDeleteTickets(Array.from(selectedIds));
+        }
         setSelectedIds(new Set());
       },
     });
@@ -134,8 +136,10 @@ export const TicketTableView: React.FC<TicketTableViewProps> = ({
       description: '⚠️ Are you sure you want to permanently erase and delete ALL tickets from the operations dashboard and storage? All ticket history, stopwatch sessions, and notes will be permanently cleared.',
       confirmLabel: 'Permanently Erase All',
       cancelLabel: 'Keep All / Cancel',
-      onConfirm: () => {
-        onResetAllTickets?.();
+      onConfirm: async () => {
+        if (onResetAllTickets) {
+          await onResetAllTickets();
+        }
         setSelectedIds(new Set());
       },
     });
@@ -149,8 +153,10 @@ export const TicketTableView: React.FC<TicketTableViewProps> = ({
       description: `Do you want to permanently delete ticket ${ticketId}? All active logs and stopwatch timers for this ticket will be removed from your dashboard and local cloud records.`,
       confirmLabel: 'Permanently Delete',
       cancelLabel: 'Keep Ticket / Cancel',
-      onConfirm: () => {
-        onDeleteTicket?.(ticketId);
+      onConfirm: async () => {
+        if (onDeleteTicket) {
+          await onDeleteTicket(ticketId);
+        }
         const next = new Set(selectedIds);
         next.delete(ticketId);
         setSelectedIds(next);

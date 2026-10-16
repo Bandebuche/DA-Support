@@ -68,6 +68,18 @@ export function setLastClearedAllAt(isoString: string | null): void {
 }
 
 /**
+ * Parse date string to milliseconds safely, returning 0 on failure or missing date
+ */
+export function parseSafeTimestamp(dateStr?: string | null): number {
+  if (!dateStr || typeof dateStr !== 'string') return 0;
+  const t = new Date(dateStr).getTime();
+  if (!isNaN(t)) return t;
+  const clean = dateStr.replace(/(\d+)(st|nd|rd|th)/gi, '$1');
+  const t2 = new Date(clean).getTime();
+  return isNaN(t2) ? 0 : t2;
+}
+
+/**
  * Load Deleted Tickets (Recycle Bin / Tombstone Registry)
  */
 export function loadDeletedTickets(): StoredDeletedTicket[] {
@@ -157,7 +169,7 @@ export function loadStoredTickets(): Ticket[] {
     }
 
     const lastCleared = getLastClearedAllAt();
-    const clearCutoff = lastCleared ? new Date(lastCleared).getTime() : 0;
+    const clearCutoff = lastCleared ? parseSafeTimestamp(lastCleared) : 0;
 
     // Filter out any tickets that were deleted or created before clearAll
     const valid = parsed.filter(t => {
@@ -166,7 +178,10 @@ export function loadStoredTickets(): Ticket[] {
       const idKey = (t.id || '').toUpperCase();
       if (tKey && deletedSet.has(tKey)) return false;
       if (idKey && deletedSet.has(idKey)) return false;
-      if (clearCutoff && t.createdAt && new Date(t.createdAt).getTime() <= clearCutoff) return false;
+      if (clearCutoff) {
+        const ticketCreated = parseSafeTimestamp(t.createdAt);
+        if (ticketCreated <= clearCutoff) return false;
+      }
       return true;
     });
 
@@ -338,6 +353,9 @@ export function clearAllStoredTickets(clearedBy: string = 'Admin', reason: strin
   const nowIso = new Date().toISOString();
   setLastClearedAllAt(nowIso);
   saveStoredTickets([]);
+  try {
+    localStorage.setItem(STORAGE_KEY_TICKETS, '[]');
+  } catch {}
   addDeletionAuditEntry('CLEAR_ALL', `Cleared all active tickets (${current.length} archived to Recycle Bin)`, clearedBy, current.length);
   return [];
 }

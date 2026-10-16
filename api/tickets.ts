@@ -414,6 +414,8 @@ export default async function handler(req: any, res: any) {
           message: 'All tickets cleared from cloud and archived to Recycle Bin',
           count: 0,
           tickets: [],
+          deletedTickets: db.deletedTickets,
+          deletedTicketIds: db.deletedTickets.map(d => d.ticketId.toUpperCase()),
           lastClearedAllAt: db.lastClearedAllAt,
         });
       }

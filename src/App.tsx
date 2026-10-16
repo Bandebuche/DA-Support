@@ -515,12 +515,16 @@ function AppContent() {
   const handleDeleteTicket = async (ticketId: string) => {
     try {
       const adminName = currentUser?.name || 'Super Admin';
-      await ticketService.deleteTicket(ticketId, adminName, 'Manual single ticket deletion');
-      refreshTickets();
-      if (selectedTicket?.ticketId === ticketId) {
+      const clean = ticketId.toUpperCase();
+      // Instant optimistic UI update
+      setTickets(prev => prev.filter(t => t.ticketId.toUpperCase() !== clean));
+      if (selectedTicket && selectedTicket.ticketId.toUpperCase() === clean) {
         setSelectedTicket(null);
         setIsDrawerOpen(false);
       }
+
+      await ticketService.deleteTicket(ticketId, adminName, 'Manual single ticket deletion');
+      refreshTickets();
       toast({
         title: 'Ticket Deleted',
         description: `Ticket ${ticketId} moved to Recycle Bin & cloud synced`,
@@ -538,12 +542,16 @@ function AppContent() {
   const handleDeleteTickets = async (ticketIds: string[]) => {
     try {
       const adminName = currentUser?.name || 'Super Admin';
-      await ticketService.deleteTickets(ticketIds, adminName, 'Bulk selection deletion');
-      refreshTickets();
-      if (selectedTicket && ticketIds.includes(selectedTicket.ticketId)) {
+      const idSet = new Set(ticketIds.map(id => id.toUpperCase()));
+      // Instant optimistic UI update
+      setTickets(prev => prev.filter(t => !idSet.has(t.ticketId.toUpperCase())));
+      if (selectedTicket && idSet.has(selectedTicket.ticketId.toUpperCase())) {
         setSelectedTicket(null);
         setIsDrawerOpen(false);
       }
+
+      await ticketService.deleteTickets(ticketIds, adminName, 'Bulk selection deletion');
+      refreshTickets();
       toast({
         title: 'Tickets Deleted',
         description: `Successfully removed ${ticketIds.length} ticket(s)`,
@@ -561,10 +569,13 @@ function AppContent() {
   const handleResetAllTickets = async () => {
     try {
       const adminName = currentUser?.name || 'Super Admin';
-      await ticketService.clearAllTickets(adminName, 'Full database wipe by admin');
-      refreshTickets();
+      // Instant optimistic UI clear
+      setTickets([]);
       setSelectedTicket(null);
       setIsDrawerOpen(false);
+
+      await ticketService.clearAllTickets(adminName, 'Full database wipe by admin');
+      refreshTickets();
       toast({
         title: 'All Tickets Cleared',
         description: 'Operations database was reset and synchronized to cloud',

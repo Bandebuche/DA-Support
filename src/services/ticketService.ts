@@ -14,6 +14,7 @@ import {
   purgeAllStoredDeletedTickets,
   getLastClearedAllAt,
   setLastClearedAllAt,
+  parseSafeTimestamp,
   loadDeletionAuditLog,
   StoredDeletionAudit,
   generateDATicketId 
@@ -172,7 +173,7 @@ export const ticketService = {
           // 2. Sync lastClearedAllAt timestamp
           if (data.lastClearedAllAt) {
             const localCleared = getLastClearedAllAt();
-            if (!localCleared || new Date(data.lastClearedAllAt).getTime() > new Date(localCleared).getTime()) {
+            if (!localCleared || parseSafeTimestamp(data.lastClearedAllAt) > parseSafeTimestamp(localCleared)) {
               setLastClearedAllAt(data.lastClearedAllAt);
             }
           }
@@ -189,7 +190,7 @@ export const ticketService = {
           }
 
           const clearCutoffIso = getLastClearedAllAt();
-          const clearCutoff = clearCutoffIso ? new Date(clearCutoffIso).getTime() : 0;
+          const clearCutoff = clearCutoffIso ? parseSafeTimestamp(clearCutoffIso) : 0;
 
           // 4. Load local tickets, actively pruning any deleted / pre-clear records
           const localList = loadStoredTickets();
@@ -197,7 +198,7 @@ export const ticketService = {
           for (const lt of localList) {
             const key = (lt.ticketId || lt.id || '').toUpperCase();
             if (deletedSet.has(key)) continue;
-            if (clearCutoff && lt.createdAt && new Date(lt.createdAt).getTime() <= clearCutoff) continue;
+            if (clearCutoff && parseSafeTimestamp(lt.createdAt) <= clearCutoff) continue;
             if (lt.ticketId) localMap.set(lt.ticketId.toUpperCase(), lt);
             if (lt.id) localMap.set(lt.id.toUpperCase(), lt);
           }
@@ -212,14 +213,14 @@ export const ticketService = {
 
             // Anti-resurrection check on incoming cloud ticket
             if (deletedSet.has(key)) continue;
-            if (clearCutoff && ct.createdAt && new Date(ct.createdAt).getTime() <= clearCutoff) continue;
+            if (clearCutoff && parseSafeTimestamp(ct.createdAt) <= clearCutoff) continue;
 
             const lt = localMap.get(key);
             if (!lt) {
               mergedMap.set(key, ct);
             } else {
-              const cloudTime = new Date(ct.updatedAt || ct.createdAt || 0).getTime();
-              const localTime = new Date(lt.updatedAt || lt.createdAt || 0).getTime();
+              const cloudTime = parseSafeTimestamp(ct.updatedAt || ct.createdAt);
+              const localTime = parseSafeTimestamp(lt.updatedAt || lt.createdAt);
 
               // If local copy is newer than cloud by > 500ms, prioritize local and push it to cloud
               if (localTime > cloudTime + 500) {
@@ -236,7 +237,7 @@ export const ticketService = {
             const key = (lt.ticketId || lt.id || '').toUpperCase();
             if (!key) continue;
             if (deletedSet.has(key)) continue;
-            if (clearCutoff && lt.createdAt && new Date(lt.createdAt).getTime() <= clearCutoff) continue;
+            if (clearCutoff && parseSafeTimestamp(lt.createdAt) <= clearCutoff) continue;
 
             if (!mergedMap.has(key)) {
               mergedMap.set(key, lt);
@@ -566,11 +567,14 @@ export const ticketService = {
   async clearAllTickets(adminName: string = 'Admin', reason: string = 'Clear All Tickets operation'): Promise<void> {
     clearAllStoredTickets(adminName, reason);
     notifyTicketSync('clearAll', null);
-    await pushToCloudApi({ 
+    const res = await pushToCloudApi({ 
       action: 'clearAll', 
       clearedBy: adminName,
       reason 
     });
+    if (res?.lastClearedAllAt) {
+      setLastClearedAllAt(res.lastClearedAllAt);
+    }
   },
 
   /**
