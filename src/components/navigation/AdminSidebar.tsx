@@ -13,7 +13,8 @@ import {
   LogOut,
   X,
   Headphones,
-  LifeBuoy
+  LifeBuoy,
+  Database
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { BrandLogo } from '../common/BrandLogo';
@@ -26,6 +27,7 @@ export type NavItemKey =
   | 'pending' 
   | 'resolved' 
   | 'analytics' 
+  | 'data-management'
   | 'settings';
 
 export interface AdminSidebarProps {
@@ -63,6 +65,7 @@ export const AdminSidebar: React.FC<AdminSidebarProps> = ({
     { key: 'pending', label: 'Pending Queue', icon: Clock4, count: ticketCounts.pending },
     { key: 'resolved', label: 'Resolved', icon: CheckCircle2, count: ticketCounts.resolved },
     { key: 'analytics', label: 'Statistics', icon: BarChart3 },
+    { key: 'data-management', label: 'Data Management', icon: Database },
     { key: 'settings', label: 'Settings', icon: Settings },
   ];
 

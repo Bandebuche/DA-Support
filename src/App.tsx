@@ -11,6 +11,7 @@ import { TopCommandBar, ViewMode, TicketAlertItem } from './components/navigatio
 import { KPICards } from './components/dashboard/KPICards';
 import { FilterTray, FilterState } from './components/dashboard/FilterTray';
 import { AnalyticsView } from './components/dashboard/AnalyticsView';
+import { DataManagementView } from './components/dashboard/DataManagementView';
 import { PortalLinksModal } from './components/navigation/PortalLinksModal';
 
 // Ticket Views
@@ -60,6 +61,11 @@ function parseCurrentRoute(): { route: RouteType; tab: NavItemKey } {
   // 3. Analytics direct route (part of Admin)
   if (path.includes('analytics') || search.get('page') === 'analytics' || search.get('tab') === 'analytics' || hash === '#analytics') {
     return { route: 'admin', tab: 'analytics' };
+  }
+
+  // 3b. Data Management direct route (part of Admin)
+  if (path.includes('data-management') || search.get('page') === 'data' || search.get('tab') === 'data-management' || hash === '#data-management') {
+    return { route: 'admin', tab: 'data-management' };
   }
 
   // 4. Default: Public Submission Gateway (/submit or /)
@@ -122,7 +128,7 @@ function AppContent() {
       newPath = basePath ? `${basePath}/onkar` : '/onkar';
     } else if (resolvedRoute === 'admin') {
       newPath = basePath ? `${basePath}/admin` : '/admin';
-      query = targetTab === 'analytics' ? '?tab=analytics' : '';
+      query = targetTab && targetTab !== 'overview' ? `?tab=${targetTab}` : '';
     }
 
     try {
@@ -506,9 +512,10 @@ function AppContent() {
     setIsDrawerOpen(true);
   };
 
-  const handleDeleteTicket = (ticketId: string) => {
+  const handleDeleteTicket = async (ticketId: string) => {
     try {
-      ticketService.deleteTicket(ticketId);
+      const adminName = currentUser?.name || 'Super Admin';
+      await ticketService.deleteTicket(ticketId, adminName, 'Manual single ticket deletion');
       refreshTickets();
       if (selectedTicket?.ticketId === ticketId) {
         setSelectedTicket(null);
@@ -516,7 +523,7 @@ function AppContent() {
       }
       toast({
         title: 'Ticket Deleted',
-        description: `Ticket ${ticketId} was permanently removed`,
+        description: `Ticket ${ticketId} moved to Recycle Bin & cloud synced`,
         type: 'info',
       });
     } catch (err: any) {
@@ -528,9 +535,10 @@ function AppContent() {
     }
   };
 
-  const handleDeleteTickets = (ticketIds: string[]) => {
+  const handleDeleteTickets = async (ticketIds: string[]) => {
     try {
-      ticketService.deleteTickets(ticketIds);
+      const adminName = currentUser?.name || 'Super Admin';
+      await ticketService.deleteTickets(ticketIds, adminName, 'Bulk selection deletion');
       refreshTickets();
       if (selectedTicket && ticketIds.includes(selectedTicket.ticketId)) {
         setSelectedTicket(null);
@@ -550,15 +558,16 @@ function AppContent() {
     }
   };
 
-  const handleResetAllTickets = () => {
+  const handleResetAllTickets = async () => {
     try {
-      ticketService.clearAllTickets();
+      const adminName = currentUser?.name || 'Super Admin';
+      await ticketService.clearAllTickets(adminName, 'Full database wipe by admin');
       refreshTickets();
       setSelectedTicket(null);
       setIsDrawerOpen(false);
       toast({
         title: 'All Tickets Cleared',
-        description: 'Operations database was reset successfully',
+        description: 'Operations database was reset and synchronized to cloud',
         type: 'success',
       });
     } catch (err: any) {
@@ -764,6 +773,8 @@ function AppContent() {
                 ? 'Operations Dashboard'
                 : currentTab === 'analytics'
                 ? 'SLA Analytics Deck'
+                : currentTab === 'data-management'
+                ? 'Cloud Sync & Data Management'
                 : currentTab === 'active'
                 ? 'Active Support Sessions'
                 : currentTab === 'resolved'
@@ -811,7 +822,7 @@ function AppContent() {
 
               <div className="text-[11px] font-mono text-text-faint hidden md:block">
                 <span>Route: </span>
-                <code className="text-text-pure">/{isMetaLead ? 'onkar' : currentTab === 'analytics' ? 'analytics' : 'admin'}</code>
+                <code className="text-text-pure">/{isMetaLead ? 'onkar' : currentTab === 'analytics' ? 'analytics' : currentTab === 'data-management' ? 'data-management' : 'admin'}</code>
               </div>
             </div>
 
@@ -819,13 +830,19 @@ function AppContent() {
             <main className="flex-1 p-3.5 sm:p-6 space-y-6 max-w-7xl w-full mx-auto pb-12">
               
               {/* Top 4 KPI Summary Modules & Dynamic Daily Histogram */}
-              {currentTab !== 'analytics' && (
+              {currentTab !== 'analytics' && currentTab !== 'data-management' && (
                 <KPICards tickets={roleScopedTickets} />
               )}
 
-              {/* SLA & Analytics View */}
+              {/* SLA & Analytics View / Data Management View / Operations Queue */}
               {currentTab === 'analytics' ? (
                 <AnalyticsView tickets={roleScopedTickets} />
+              ) : currentTab === 'data-management' ? (
+                <DataManagementView
+                  tickets={tickets}
+                  onRefresh={refreshTickets}
+                  currentUser={currentUser}
+                />
               ) : (
                 <>
                   {/* Filter Tray */}

@@ -90,6 +90,23 @@ export const PortalLinksModal: React.FC<PortalLinksModalProps> = ({
       icon: BarChart3,
     },
     {
+      id: 'data-management',
+      title: 'Portal 5: Cloud Sync & Data Management',
+      badge: 'Admin Only • Anti-Resurrection Cloud DB',
+      description: 'Control cloud sync, wipe or purge old tickets, restore from Recycle Bin, and view permanent deletion audit trails.',
+      path: '/admin?tab=data-management',
+      fullUrl: `${baseRoot}/admin?tab=data-management`,
+      altUrl: `${baseRoot}/?tab=data-management`,
+      action: () => { 
+        if (typeof window !== 'undefined') {
+          window.history.pushState({}, '', isSubdir ? '/support/admin?tab=data-management' : '/admin?tab=data-management');
+          window.dispatchEvent(new PopStateEvent('popstate'));
+        }
+        onClose(); 
+      },
+      icon: Database,
+    },
+    {
       id: 'sheets',
       title: 'Central Database: Google Spreadsheet',
       badge: 'Centralized Master DB',
